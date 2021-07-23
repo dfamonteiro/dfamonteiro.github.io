@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="color-scheme" content="light dark">
+
+    
+
+    <meta name="author" content="Daniel Monteiro">
+    <meta name="description" content="If you think that optimizing Brainfuck is a waste of time, you are definitely correct! Nevertheless, it is a very useful programming exercise to leverage the type system of a language.">
+    <meta name="keywords" content="blog,developer,personal,engineering">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Developing an intermediate representation of Brainfuck using Rust"/>
+<meta name="twitter:description" content="If you think that optimizing Brainfuck is a waste of time, you are definitely correct! Nevertheless, it is a very useful programming exercise to leverage the type system of a language."/>
+
+    <meta property="og:title" content="Developing an intermediate representation of Brainfuck using Rust" />
+<meta property="og:description" content="If you think that optimizing Brainfuck is a waste of time, you are definitely correct! Nevertheless, it is a very useful programming exercise to leverage the type system of a language." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dfamonteiro.github.io/posts/brainfuck-ir/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-07-21T23:11:53+01:00" />
+<meta property="article:modified_time" content="2021-07-21T23:11:53+01:00" />
+
+
+
+    <title>
+  Developing an intermediate representation of Brainfuck using Rust · Daniel&#39;s blog
+</title>
+
+    
+      <link rel="canonical" href="https://dfamonteiro.github.io/posts/brainfuck-ir/">
+    
+
+    <link rel="preload" href="https://dfamonteiro.github.io/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+    
+      
+      
+      <link rel="stylesheet" href="https://dfamonteiro.github.io/css/coder.min.708686f8ab8176e91d44fcbe488a0fe0333b94f405cf18a52383d67ba22f0ccb.css" integrity="sha256-cIaG&#43;KuBdukdRPy&#43;SIoP4DM7lPQFzxilI4PWe6IvDMs=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="https://dfamonteiro.github.io/css/coder-dark.min.aa883b9ce35a8ff4a2a5008619005175e842bb18a8a9f9cc2bbcf44dab2d91fa.css" integrity="sha256-qog7nONaj/SipQCGGQBRdehCuxioqfnMK7z0Tastkfo=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="https://dfamonteiro.github.io/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://dfamonteiro.github.io/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="https://dfamonteiro.github.io/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.github.io/images/apple-touch-icon.png">
+
+    
+
+    <meta name="generator" content="Hugo 0.86.0" />
+  </head>
+
+  
+  
+    
+  
+  <body class="preload-transitions colorscheme-auto"
+        onload=""
+  >
+    
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://dfamonteiro.github.io/">
+      Daniel&#39;s blog
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://dfamonteiro.github.io/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://dfamonteiro.github.io/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://dfamonteiro.github.io/FEUP-exams-website/">Exams</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.github.io/posts/brainfuck-ir/">
+              Developing an intermediate representation of Brainfuck using Rust
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2021-07-21T23:11:53&#43;01:00'>
+                July 21, 2021
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              7-minute read
+            </span>
+          </div>
+          <div class="authors">
+    <i class="fa fa-user" aria-hidden="true"></i>
+      <a href="https://dfamonteiro.github.io/authors/daniel-monteiro/">Daniel Monteiro</a></div>
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.github.io/tags/rust/">Rust</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.github.io/tags/compilers/">compilers</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.github.io/tags/brainfuck/">Brainfuck</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.github.io/tags/intermediate-representation/">intermediate representation</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div>
+        
+        <p>Brainfuck is an interesting programming language, to say the least. As the most prominent <a href="https://en.wikipedia.org/wiki/Esoteric_programming_language" title="Esoteric programming language Wikipedia page">Esoteric programming language</a> out there, it provides a truly cursed programming experience. It is quite minimalistic as well, featuring only 8 distinct instructions and a programming model that can be best described as a glorified <a href="https://en.wikipedia.org/wiki/Turing_machine" title="Turing machine Wikipedia page">Turing machine</a>, making writing a Brainfuck compiler an interesting programming exercise. However, we might as well go a step further and develop an intermediate representation for it, because, well, why not?<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<h2 id="the-brainfuck-programming-model-a-refresher">
+  The Brainfuck programming model: a refresher
+  <a class="heading-link" href="#the-brainfuck-programming-model-a-refresher">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>In order to execute a Brainfuck program, four crucial elements are needed:</p>
+<ol>
+<li>The program source code (the only element that is immutable)</li>
+<li>The program counter</li>
+<li>The memory (an infinite<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> array of byte-sized cells)</li>
+<li>The memory pointer</li>
+</ol>
+<p>Here is a Rust example of what a Brainfuck &ldquo;VM&rdquo; might look like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#e6db74">/// The Brainfuck Virtual Machine holds all the data
+</span><span style="color:#e6db74">/// necessary to compile and run a Brainfuck program
+</span><span style="color:#e6db74"></span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">BFVM</span> {
+    memory: [<span style="color:#66d9ef">u8</span>; <span style="color:#ae81ff">300000</span>],
+    mem_pointer: <span style="color:#66d9ef">usize</span>,
+
+    code: Vec<span style="color:#f92672">&lt;</span>OpCode<span style="color:#f92672">&gt;</span>,
+    code_pointer: <span style="color:#66d9ef">usize</span>,
+}
+</code></pre></div><h3 id="the-brainfuck-instruction-set">
+  The Brainfuck instruction set
+  <a class="heading-link" href="#the-brainfuck-instruction-set">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>Brainfuck puts the <em>Reduced</em> in RISC, featuring a grand total of 8 instructions:</p>
+<ul>
+<li><code>&gt;</code> - Moves the memory pointer one cell to the right</li>
+<li><code>&lt;</code> - Moves the memory pointer one cell to the left</li>
+<li><code>+</code> - Adds 1 to the value of the cell</li>
+<li><code>-</code> - Subtracts 1 to the value of the cell</li>
+<li><code>.</code> - Outputs the value from the cell to the command line</li>
+<li><code>,</code> - Reads a character from the command line</li>
+<li><code>[</code> - jumps to the matching <code>]</code>, if the value of the cell is 0</li>
+<li><code>]</code> - jumps to the matching <code>[</code>, if the value of the cell is <strong>not</strong> 0</li>
+</ul>
+<p>If you are looking to better understand some of Brainfuck&rsquo;s nuances, I very much recommend this <a href="https://github.com/brain-lang/brainfuck/blob/master/brainfuck.md" title="An informal Brainfuck specification">informal specification</a>, from which the instruction set subchapter is mostly based on.</p>
+<h2 id="potential-for-improvement">
+  Potential for improvement
+  <a class="heading-link" href="#potential-for-improvement">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>For what Brainfuck makes up in simplicity, it loses out in expressiveness and efficiency (or a lack thereof). Please take a look at the code excerpt below:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-brainfuck" data-lang="brainfuck">+++++++++++++<span style="color:#66d9ef">[</span>-&gt;++&gt;&gt;&gt;+++++&gt;++&gt;+&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">]</span>&gt;&gt;&gt;&gt;&gt;++++++&gt;---&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;+++++++++++++++<span style="color:#66d9ef">[[</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>&gt;&gt;<span style="color:#66d9ef">[</span>-&lt;&lt;&lt;&lt;&lt;&lt;+&gt;&gt;&gt;&gt;&gt;&gt;<span style="color:#66d9ef">]</span>&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">[</span>-&gt;&gt;&gt;&gt;&gt;&gt;+&lt;&lt;+&lt;&lt;&lt;+&lt;<span style="color:#66d9ef">]</span>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<span style="color:#66d9ef">]</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">[</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">]</span>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<span style="color:#75715e">
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">[</span>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<span style="color:#66d9ef">[</span>-&lt;&lt;&lt;&lt;&lt;&lt;&lt;+&gt;&gt;&gt;&gt;&gt;&gt;&gt;<span style="color:#66d9ef">]</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">[</span>-&gt;&gt;&gt;&gt;&gt;&gt;&gt;+&lt;&lt;+&lt;&lt;&lt;+&lt;&lt;<span style="color:#66d9ef">]</span>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<span style="color:#66d9ef">]</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">[</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#75715e">
+</span><span style="color:#75715e"></span>&lt;&lt;<span style="color:#66d9ef">]</span>&gt;&gt;&gt;&gt;&gt;&gt;&gt;<span style="color:#66d9ef">[</span>-&lt;&lt;&lt;&lt;&lt;&lt;&lt;+&gt;&gt;&gt;&gt;&gt;&gt;&gt;<span style="color:#66d9ef">]</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">[</span>-&gt;&gt;&gt;&gt;&gt;&gt;&gt;+&lt;&lt;+&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">]</span>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;+++++++++++++++<span style="color:#66d9ef">[[</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<span style="color:#66d9ef">]</span>+&gt;<span style="color:#66d9ef">[</span>-<span style="color:#66d9ef">]</span>&gt;<span style="color:#66d9ef">[</span>-<span style="color:#66d9ef">]</span>&gt;<span style="color:#66d9ef">[</span>-<span style="color:#66d9ef">]</span>&gt;<span style="color:#66d9ef">[</span>-<span style="color:#66d9ef">]</span>&gt;<span style="color:#66d9ef">[</span>-<span style="color:#66d9ef">]</span>&gt;<span style="color:#66d9ef">[</span>-<span style="color:#66d9ef">]</span>&gt;<span style="color:#66d9ef">[</span>-<span style="color:#66d9ef">]</span>&gt;<span style="color:#66d9ef">[</span>-<span style="color:#66d9ef">]</span>&gt;<span style="color:#66d9ef">[</span>-<span style="color:#66d9ef">]</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">[</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<span style="color:#66d9ef">]</span>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;-<span style="color:#66d9ef">]</span>+<span style="color:#66d9ef">[</span><span style="color:#75715e">
+</span></code></pre></div><p>When I look at Brainfuck code, the thing that strikes me most is how repetitive it looks. For example, the first line starts with 13 <code>+</code> instructions in a row. I could just as easily find examples for the other three memory-manipulating instructions (<code>-</code> <code>&lt;</code> <code>&gt;</code>).</p>
+<p>Another pattern that comes up often is this one: <code>[-]</code>. This loop decrements the value of the cell until it reaches 0.</p>
+<p>Lastly, finding the matching <code>]</code> for the respective <code>[</code> (or vice-versa) can be very time-consuming, depending on how much of your program is enclosed by this bracket pair.</p>
+<h3 id="an-improved-intermediate-representation">
+  An improved intermediate representation
+  <a class="heading-link" href="#an-improved-intermediate-representation">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>Taking these inefficiencies into account, we can develop a higher-level and more performant abstraction:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#e6db74">/// Brainfuck source code gets compiled
+</span><span style="color:#e6db74">/// to an intermediate representation made up of `OpCode`s
+</span><span style="color:#e6db74"></span><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">OpCode</span> {
+    <span style="color:#e6db74">/// Increments the value in the cell by x (can overflow)
+</span><span style="color:#e6db74"></span>    Increment(<span style="color:#66d9ef">u8</span>),
+    <span style="color:#e6db74">/// Decrements the value in the cell by x (can underflow)
+</span><span style="color:#e6db74"></span>    Decrement(<span style="color:#66d9ef">u8</span>),
+    <span style="color:#e6db74">/// Moves the pointer x values to the left
+</span><span style="color:#e6db74"></span>    MoveLeft(<span style="color:#66d9ef">usize</span>),
+    <span style="color:#e6db74">/// Moves the pointer x values to the right
+</span><span style="color:#e6db74"></span>    MoveRight(<span style="color:#66d9ef">usize</span>),
+    <span style="color:#e6db74">/// Sets the value in cell to 0
+</span><span style="color:#e6db74"></span>    Zero,
+    <span style="color:#e6db74">/// Reads a value into the cell
+</span><span style="color:#e6db74"></span>    Read,
+    <span style="color:#e6db74">/// Prints the value from the cell as an ASCII character
+</span><span style="color:#e6db74"></span>    Write,
+    <span style="color:#e6db74">/// Jump to destination if:
+</span><span style="color:#e6db74"></span>    <span style="color:#e6db74">/// - The value from the cell is 0 and the direction is [Direction::Forward]
+</span><span style="color:#e6db74"></span>    <span style="color:#e6db74">/// - The value from the cell is not 0 and the direction is [Direction::Backward]
+</span><span style="color:#e6db74"></span>    Jump {
+        destination: <span style="color:#66d9ef">usize</span>,
+        direction: <span style="color:#a6e22e">Direction</span>,
+    },
+}
+
+<span style="color:#75715e">#[derive(Eq, PartialEq)]</span>
+<span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Direction</span> {
+    Forward,
+    Backward,
+}
+</code></pre></div><p>As you can see, not only did we mitigated the repetitiveness of the memory-manipulating instructions but we also turned the <code>[</code> <code>]</code> jump instructions into a O(1) operation by precalculating the destination instruction index. An instruction that zeroes out the cell was also introduced, in order to replace the <code>[-]</code> pattern.</p>
+<h2 id="compiling-brainfuck-code">
+  Compiling Brainfuck code
+  <a class="heading-link" href="#compiling-brainfuck-code">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>Now that we designed our IR, we need to write a function that compiles the source code. We start by dealing with the repetitive memory-manipulating instructions (<code>+</code> <code>-</code> <code>&lt;</code> <code>&gt;</code>):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">impl</span> BFVM {
+    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">new</span>(code: <span style="color:#66d9ef">&amp;</span><span style="color:#66d9ef">str</span>) -&gt; <span style="color:#a6e22e">Self</span> {
+        ...
+    }
+
+    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">compile</span>(code: <span style="color:#66d9ef">&amp;</span>Vec<span style="color:#f92672">&lt;</span>char<span style="color:#f92672">&gt;</span>) -&gt; Vec<span style="color:#f92672">&lt;</span>OpCode<span style="color:#f92672">&gt;</span> {
+        <span style="color:#e6db74">//! Compiles the `code` into IR i.e. a vector of [OpCode]s
+</span><span style="color:#e6db74"></span>        <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> res: Vec<span style="color:#f92672">&lt;</span>OpCode<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> Vec::new();
+        <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> index <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+        <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> jumps: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">usize</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> Vec::new();
+    
+        <span style="color:#66d9ef">while</span> index <span style="color:#f92672">&lt;</span> code.len() {
+            <span style="color:#66d9ef">match</span> code[index] {
+                <span style="color:#e6db74">&#39;&lt;&#39;</span> <span style="color:#f92672">|</span> <span style="color:#e6db74">&#39;&gt;&#39;</span> <span style="color:#f92672">|</span> <span style="color:#e6db74">&#39;+&#39;</span> <span style="color:#f92672">|</span> <span style="color:#e6db74">&#39;-&#39;</span> <span style="color:#f92672">=&gt;</span> {
+                    <span style="color:#75715e">// These 4 operators can be be treated the same way:
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// For example, if a sequence of &#34;&lt;&lt;&lt;&lt;&lt;&#34; appears,
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// they get condensed to a MoveLeft(5) opcode
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">let</span> hit <span style="color:#f92672">=</span> code[index];
+                    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> len <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+                    <span style="color:#66d9ef">while</span> index <span style="color:#f92672">+</span> len <span style="color:#f92672">&lt;</span> code.len() <span style="color:#f92672">&amp;&amp;</span> code[index <span style="color:#f92672">+</span> len] <span style="color:#f92672">==</span> hit {
+                        len <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+                    }
+    
+                    <span style="color:#66d9ef">let</span> opcode <span style="color:#f92672">=</span> <span style="color:#66d9ef">match</span> code[index] {
+                        <span style="color:#e6db74">&#39;&lt;&#39;</span> <span style="color:#f92672">=&gt;</span> OpCode::MoveLeft(len),
+                        <span style="color:#e6db74">&#39;&gt;&#39;</span> <span style="color:#f92672">=&gt;</span> OpCode::MoveRight(len),
+                        <span style="color:#e6db74">&#39;+&#39;</span> <span style="color:#f92672">=&gt;</span> OpCode::Increment(len <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>),
+                        <span style="color:#e6db74">&#39;-&#39;</span> <span style="color:#f92672">=&gt;</span> OpCode::Decrement(len <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>),
+                        _ <span style="color:#f92672">=&gt;</span> panic<span style="color:#f92672">!</span>(),
+                    };
+    
+                    res.push(opcode);
+                    index <span style="color:#f92672">+=</span> len;
+                }
+</code></pre></div><p>The <code>Read</code> and <code>Write</code> opcodes are quite straightforward to compile:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">                <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">=&gt;</span> {
+                    res.push(OpCode::Write);
+                    index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+                }
+                <span style="color:#e6db74">&#39;,&#39;</span> <span style="color:#f92672">=&gt;</span> {
+                    res.push(OpCode::Read);
+                    index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+                }
+</code></pre></div><p>Whenever a <code>[</code> instruction is found, we are dealing with one of two cases:</p>
+<ul>
+<li>If we&rsquo;re dealing with the <code>[-]</code>, emit a <code>Zero</code> opcode</li>
+<li>Otherwise, it&rsquo;s just a <code>Jump</code> opcode. We keep track of this forward jump by pushing its index in <code>jumps</code> stack, so that when we find the corresponding <code>]</code> we can fill in the <code>destination</code> field.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">                <span style="color:#e6db74">&#39;[&#39;</span> <span style="color:#f92672">=&gt;</span> {
+                    <span style="color:#66d9ef">if</span> index <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">&lt;</span> code.len() <span style="color:#f92672">&amp;&amp;</span> code[index <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;-&#39;</span> <span style="color:#f92672">&amp;&amp;</span> code[index <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;]&#39;</span> {
+                        <span style="color:#75715e">// If this pattern &#34;[-]&#34; appears, it means it is just zeroing out a value
+</span><span style="color:#75715e"></span>                        res.push(OpCode::Zero);
+                        index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">3</span>;
+                    } <span style="color:#66d9ef">else</span> {
+                        res.push(OpCode::Jump {
+                            direction: <span style="color:#a6e22e">Direction</span>::Forward,
+                            destination: <span style="color:#ae81ff">0</span>,
+                        });
+                        index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+    
+                        jumps.push(res.len() <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>); <span style="color:#75715e">// Updating the jumps stack so that
+</span><span style="color:#75715e"></span>                                                   <span style="color:#75715e">// we keep track of the index of this &#39;[&#39;
+</span><span style="color:#75715e"></span>                    }
+                }
+</code></pre></div><p>When we deal with a <code>]</code> instruction, we need to make sure we have both jumps pointing at each other:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">                <span style="color:#e6db74">&#39;]&#39;</span> <span style="color:#f92672">=&gt;</span> {
+                    <span style="color:#66d9ef">let</span> dest <span style="color:#f92672">=</span> jumps.pop().unwrap();
+    
+                    res[dest] <span style="color:#f92672">=</span> OpCode::Jump {
+                        direction: <span style="color:#a6e22e">Direction</span>::Forward,
+                        destination: <span style="color:#a6e22e">res</span>.len(),
+                    };
+    
+                    res.push(OpCode::Jump {
+                        direction: <span style="color:#a6e22e">Direction</span>::Backward,
+                        destination: <span style="color:#a6e22e">dest</span>,
+                    });
+                    index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+                }
+                _ <span style="color:#f92672">=&gt;</span> index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>, <span style="color:#75715e">// A comment char, moving on
+</span><span style="color:#75715e"></span>            }
+        }
+        res
+    }
+}
+</code></pre></div><h2 id="running-our-intermediate-representation">
+  Running our intermediate representation
+  <a class="heading-link" href="#running-our-intermediate-representation">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>Now that we compiled our source code, we need to run it. Luckily for us, Rust&rsquo;s <code>match</code> statement excels at dealing with the various values of a <code>enum</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">impl</span> BFVM {
+    ...
+    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">run</span>(<span style="color:#f92672">&amp;</span><span style="color:#66d9ef">mut</span> self) {
+        <span style="color:#e6db74">//! Runs the VM
+</span><span style="color:#e6db74"></span>        <span style="color:#66d9ef">while</span> self.code_pointer <span style="color:#f92672">&lt;</span> self.code.len() {
+            <span style="color:#66d9ef">match</span> <span style="color:#f92672">&amp;</span>self.code[self.code_pointer] {
+                <span style="color:#75715e">// Memory values can and do overflow and underflow,
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">// hence the use of overflowing_add and overflowing_sub
+</span><span style="color:#75715e"></span>                OpCode::Increment(i) <span style="color:#f92672">=&gt;</span> {
+                    self.memory[self.mem_pointer] <span style="color:#f92672">=</span>
+                        self.memory[self.mem_pointer].overflowing_add(<span style="color:#f92672">*</span>i).<span style="color:#ae81ff">0</span>
+                }
+                OpCode::Decrement(i) <span style="color:#f92672">=&gt;</span> {
+                    self.memory[self.mem_pointer] <span style="color:#f92672">=</span>
+                        self.memory[self.mem_pointer].overflowing_sub(<span style="color:#f92672">*</span>i).<span style="color:#ae81ff">0</span>
+                }
+                OpCode::MoveLeft(i) <span style="color:#f92672">=&gt;</span> self.mem_pointer <span style="color:#f92672">-=</span> i,
+                OpCode::MoveRight(i) <span style="color:#f92672">=&gt;</span> self.mem_pointer <span style="color:#f92672">+=</span> i,
+                OpCode::Zero <span style="color:#f92672">=&gt;</span> self.memory[self.mem_pointer] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
+                OpCode::Read <span style="color:#f92672">=&gt;</span> self.read_input(),
+                OpCode::Write <span style="color:#f92672">=&gt;</span> print<span style="color:#f92672">!</span>(<span style="color:#e6db74">&#34;{}&#34;</span>, self.memory[self.mem_pointer] <span style="color:#66d9ef">as</span> char),
+                _ <span style="color:#f92672">=&gt;</span> (),
+            }
+</code></pre></div><p>The code pointer manipulation logic is handled separately to ensure that it is done correctly:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">            <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> OpCode::Jump {destination, direction} <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>self.code[self.code_pointer] {
+                <span style="color:#66d9ef">let</span> zero <span style="color:#f92672">=</span> self.memory[self.mem_pointer] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>;
+                <span style="color:#66d9ef">if</span> (direction <span style="color:#f92672">==</span> <span style="color:#f92672">&amp;</span>Direction::Forward <span style="color:#f92672">&amp;&amp;</span> zero)
+                    <span style="color:#f92672">||</span> (direction <span style="color:#f92672">==</span> <span style="color:#f92672">&amp;</span>Direction::Backward <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>zero)
+                {
+                    self.code_pointer <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>destination;
+                } <span style="color:#66d9ef">else</span> {
+                    self.code_pointer <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+                }
+            } <span style="color:#66d9ef">else</span> {
+                self.code_pointer <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+            }
+        }
+    }
+    ...
+}
+</code></pre></div><h2 id="final-remarks-and-a-mandelbrot-set">
+  Final remarks and a Mandelbrot set
+  <a class="heading-link" href="#final-remarks-and-a-mandelbrot-set">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>Sometimes, the most useless projects are the ones that are the most fun to work on. Well, I certainly enjoyed working on this compiler and I hope you enjoyed reading about it. Finally, you can find <a href="https://github.com/dfamonteiro/blog/blob/main/brainfuck/src/main.rs" title="Github page with the source code">here</a> the source code used for this blog post. I&rsquo;ll leave you with an ASCII representation of the Mandelbrot set, generated by the compiler.</p>
+<p><img src="https://dfamonteiro.github.io/images/mandelbrot.png" alt="ASCII representation of the Mandelbrot set"></p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>I stand in the shoulders of <a href="https://esolangs.org/wiki/Brainfuck_implementations" title="Brainfuck implementations">giants</a> that have done a much better job than I have of optimizing Brainfuck.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>300000 cells is infinite enough.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+      </footer>
+    </article>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [
+          ['$', '$'], ['\\(', '\\)']
+        ],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      }
+    };
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2021
+         Daniel Monteiro 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+    </section>
+  </footer>
+
+
+    </main>
+
+    
+      
+      <script src="https://dfamonteiro.github.io/js/coder.min.03b17769f4f91ae35667e1f2a1ca8c16f50562576cf90ff32b3179926914daa5.js" integrity="sha256-A7F3afT5GuNWZ&#43;HyocqMFvUFYlds&#43;Q/zKzF5kmkU2qU="></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
