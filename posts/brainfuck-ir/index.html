@@ -263,7 +263,7 @@
     Forward,
     Backward,
 }
-</code></pre></div><p>As you can see, not only did we mitigated the repetitiveness of the memory-manipulating instructions but we also turned the <code>[</code> <code>]</code> jump instructions into a O(1) operation by precalculating the destination instruction index. An instruction that zeroes out the cell was also introduced, in order to replace the <code>[-]</code> pattern.</p>
+</code></pre></div><p>As you can see, not only did we mitigated the repetitiveness of the memory-manipulating instructions but we also turned the <code>[</code> <code>]</code> jump instructions into a O(1) operation by precomputing the destination instruction index. An instruction that zeroes out the cell was also introduced, in order to replace the <code>[-]</code> pattern.</p>
 <h2 id="compiling-brainfuck-code">
   Compiling Brainfuck code
   <a class="heading-link" href="#compiling-brainfuck-code">
@@ -317,7 +317,7 @@
 </code></pre></div><p>Whenever a <code>[</code> instruction is found, we are dealing with one of two cases:</p>
 <ul>
 <li>If we&rsquo;re dealing with the <code>[-]</code>, emit a <code>Zero</code> opcode</li>
-<li>Otherwise, it&rsquo;s just a <code>Jump</code> opcode. We keep track of this forward jump by pushing its index in <code>jumps</code> stack, so that when we find the corresponding <code>]</code> we can fill in the <code>destination</code> field.</li>
+<li>Otherwise, it&rsquo;s just a <code>Jump</code> opcode. We keep track of this forward jump by pushing its index to the <code>jumps</code> stack, so that when we find the corresponding <code>]</code> we can fill in the <code>destination</code> field.</li>
 </ul>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">                <span style="color:#e6db74">&#39;[&#39;</span> <span style="color:#f92672">=&gt;</span> {
                     <span style="color:#66d9ef">if</span> index <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">&lt;</span> code.len() <span style="color:#f92672">&amp;&amp;</span> code[index <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;-&#39;</span> <span style="color:#f92672">&amp;&amp;</span> code[index <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;]&#39;</span> {
