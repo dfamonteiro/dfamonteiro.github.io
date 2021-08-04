@@ -2,13 +2,28 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://dfamonteiro.com/</loc>
+    <lastmod>2021-07-23T21:40:37+01:00</lastmod>
+  </url><url>
+    <loc>https://dfamonteiro.com/posts/championship-title-math/</loc>
+    <lastmod>2021-07-23T21:40:37+01:00</lastmod>
+  </url><url>
+    <loc>https://dfamonteiro.com/tags/maths/</loc>
+    <lastmod>2021-07-23T21:40:37+01:00</lastmod>
+  </url><url>
+    <loc>https://dfamonteiro.com/tags/motorsport/</loc>
+    <lastmod>2021-07-23T21:40:37+01:00</lastmod>
+  </url><url>
+    <loc>https://dfamonteiro.com/posts/</loc>
+    <lastmod>2021-07-23T21:40:37+01:00</lastmod>
+  </url><url>
+    <loc>https://dfamonteiro.com/tags/</loc>
+    <lastmod>2021-07-23T21:40:37+01:00</lastmod>
+  </url><url>
     <loc>https://dfamonteiro.com/tags/brainfuck/</loc>
     <lastmod>2021-07-21T23:11:53+01:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/tags/compilers/</loc>
-    <lastmod>2021-07-21T23:11:53+01:00</lastmod>
-  </url><url>
-    <loc>https://dfamonteiro.com/</loc>
     <lastmod>2021-07-21T23:11:53+01:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/posts/brainfuck-ir/</loc>
@@ -17,13 +32,7 @@
     <loc>https://dfamonteiro.com/tags/intermediate-representation/</loc>
     <lastmod>2021-07-21T23:11:53+01:00</lastmod>
   </url><url>
-    <loc>https://dfamonteiro.com/posts/</loc>
-    <lastmod>2021-07-21T23:11:53+01:00</lastmod>
-  </url><url>
     <loc>https://dfamonteiro.com/tags/rust/</loc>
-    <lastmod>2021-07-21T23:11:53+01:00</lastmod>
-  </url><url>
-    <loc>https://dfamonteiro.com/tags/</loc>
     <lastmod>2021-07-21T23:11:53+01:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/about/</loc>
