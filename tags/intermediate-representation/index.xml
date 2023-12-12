@@ -6,15 +6,14 @@
     <description>Recent content in intermediate representation on Daniel&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 21 Jul 2021 23:11:53 +0100</lastBuildDate><atom:link href="https://dfamonteiro.com/tags/intermediate-representation/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 21 Jul 2021 23:11:53 +0100</lastBuildDate>
+    <atom:link href="https://dfamonteiro.com/tags/intermediate-representation/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Developing an intermediate representation of Brainfuck using Rust</title>
       <link>https://dfamonteiro.com/posts/brainfuck-ir/</link>
       <pubDate>Wed, 21 Jul 2021 23:11:53 +0100</pubDate>
-      
       <guid>https://dfamonteiro.com/posts/brainfuck-ir/</guid>
       <description>Brainfuck is an interesting programming language, to say the least. As the most prominent Esoteric programming language out there, it provides a truly cursed programming experience. It is quite minimalistic as well, featuring only 8 distinct instructions and a programming model that can be best described as a glorified Turing machine, making writing a Brainfuck compiler an interesting programming exercise. However, we might as well go a step further and develop an intermediate representation for it, because, well, why not?</description>
     </item>
-    
   </channel>
 </rss>
