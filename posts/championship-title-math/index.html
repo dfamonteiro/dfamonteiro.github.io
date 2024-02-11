@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Language" content="en">
-    <meta name="color-scheme" content="light dark">
+<head>
+  <title>
+  How soon can a driver clinch the title: a nuanced analysis · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 
-    
 
-    <meta name="author" content="Daniel Monteiro">
-    <meta name="description" content="We go way too deep in the mathematical nuances of securing a championship">
-    <meta name="keywords" content="blog,developer,personal,engineering">
 
-    <meta name="twitter:card" content="summary"/><meta name="twitter:title" content="How soon can a driver clinch the title: a nuanced analysis"/>
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="We go way too deep in the mathematical nuances of securing a championship">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="How soon can a driver clinch the title: a nuanced analysis"/>
 <meta name="twitter:description" content="We go way too deep in the mathematical nuances of securing a championship"/>
 
-    <meta property="og:title" content="How soon can a driver clinch the title: a nuanced analysis" />
+<meta property="og:title" content="How soon can a driver clinch the title: a nuanced analysis" />
 <meta property="og:description" content="We go way too deep in the mathematical nuances of securing a championship" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://dfamonteiro.com/posts/championship-title-math/" /><meta property="article:section" content="posts" />
@@ -25,64 +28,74 @@
 
 
 
-    <title>
-  How soon can a driver clinch the title: a nuanced analysis · Daniel&#39;s blog
-</title>
 
-    
-      <link rel="canonical" href="https://dfamonteiro.com/posts/championship-title-math/">
-    
 
-    <link rel="preload" href="https://dfamonteiro.com/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+<link rel="canonical" href="https://dfamonteiro.com/posts/championship-title-math/">
 
-    
-      
-      
-      <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.708686f8ab8176e91d44fcbe488a0fe0333b94f405cf18a52383d67ba22f0ccb.css" integrity="sha256-cIaG&#43;KuBdukdRPy&#43;SIoP4DM7lPQFzxilI4PWe6IvDMs=" crossorigin="anonymous" media="screen" />
-    
 
-    
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
 
-    
-      
-        
-        
-        <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.aa883b9ce35a8ff4a2a5008619005175e842bb18a8a9f9cc2bbcf44dab2d91fa.css" integrity="sha256-qog7nONaj/SipQCGGQBRdehCuxioqfnMK7z0Tastkfo=" crossorigin="anonymous" media="screen" />
-      
-    
-
-    
-
-    
-
-    <link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
-
-    <link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
-
-    
-
-    <meta name="generator" content="Hugo 0.122.0">
-  </head>
 
   
   
-    
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
   
-  <body class="preload-transitions colorscheme-auto"
-        onload=""
-  >
     
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
 <div class="float-container">
     <a id="dark-mode-toggle" class="colorscheme-toggle">
-        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
     </a>
 </div>
 
 
-    <main class="wrapper">
-      <nav class="navigation">
+  <main class="wrapper">
+    <nav class="navigation">
   <section class="container">
     <a class="navigation-title" href="https://dfamonteiro.com/">
       Daniel&#39;s blog
@@ -90,21 +103,21 @@
     
       <input type="checkbox" id="menu-toggle" />
       <label class="menu-button float-right" for="menu-toggle">
-        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
       </label>
       <ul class="navigation-list">
         
           
             <li class="navigation-item">
-              <a class="navigation-link" href="https://dfamonteiro.com/posts/">Blog</a>
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link" href="https://dfamonteiro.com/about/">About</a>
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link" href="https://dfamonteiro.com/motorsport-schedule/">Motorsport Schedule</a>
+              <a class="navigation-link " href="https://dfamonteiro.com/motorsport-schedule/">Motorsport Schedule</a>
             </li>
           
         
@@ -115,8 +128,8 @@
 </nav>
 
 
-      <div class="content">
-        
+    <div class="content">
+      
   <section class="container post">
     <article>
       <header>
@@ -130,22 +143,20 @@
         <div class="post-meta">
           <div class="date">
             <span class="posted-on">
-              <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2021-07-23T21:40:37&#43;01:00'>
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2021-07-23T21:40:37&#43;01:00">
                 July 23, 2021
               </time>
             </span>
             <span class="reading-time">
-              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
               5-minute read
             </span>
           </div>
-          <div class="authors">
-    <i class="fa fa-user" aria-hidden="true"></i>
-      <a href="https://dfamonteiro.com/authors/daniel-monteiro/">Daniel Monteiro</a></div>
+          
           
           <div class="tags">
-  <i class="fa fa-tag" aria-hidden="true"></i>
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
     <span class="tag">
       <a href="https://dfamonteiro.com/tags/motorsport/">motorsport</a>
     </span>
@@ -157,13 +168,14 @@
         </div>
       </header>
 
-      <div>
+      <div class="post-content">
         
         <p>The 2020 Formula 1 championship was one of the most uncompetitive seasons in recent history. Facing an underpowered Ferrari<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> and a RedBull plagued with rear instability problems, Mercedes in some people&rsquo;s eyes had already won the title<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> before even turning a wheel in a free practice session. Lewis Hamilton, however, did need to beat his teammate Valttery Bottas in order to win the driver&rsquo;s championship, but anyone who watches F1 knows that Hamilton is simply on another level, compared to Bottas. Ultimately, Hamilton clinched the title with three races to go at the Turkish Grand Prix with a memorable charge through the field. Watching this domination, I wondered to myself: what is the theoretical soonest that a championship can be wrapped up? Lets find out.</p>
 <h2 id="lewis-always-wins-max-always-comes-second">
   Lewis always wins, Max always comes second
   <a class="heading-link" href="#lewis-always-wins-max-always-comes-second">
-    <i class="fa fa-link" aria-hidden="true"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
   </a>
 </h2>
 <p>Lets start by concretely defining our problem</p>
@@ -201,7 +213,8 @@ $$l \geqslant 14$$</p>
 <h2 id="lets-think-about-gaps">
   Lets think about gaps
   <a class="heading-link" href="#lets-think-about-gaps">
-    <i class="fa fa-link" aria-hidden="true"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
   </a>
 </h2>
 <p>Instead of assuming that Hamilton doesn&rsquo;t finish in the points every, lets presume that RedBull outdeveloped Mercedes and they now finish 1-2 every race, Max in first and Lewis in third. We will also approach the problem by considering the points difference between Lewis and Max, rather than the total points tally.</p>
@@ -236,7 +249,8 @@ $$l \geqslant 11$$</p>
 <h2 id="visualizing-all-the-possibilities">
   Visualizing all the possibilities
   <a class="heading-link" href="#visualizing-all-the-possibilities">
-    <i class="fa fa-link" aria-hidden="true"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
   </a>
 </h2>
 <p>We&rsquo;ve seen what happens if Lewis finishes in third. We also saw what happens if Lewis finishes in eleventh. But what if he finishes second? or fourth? or seventh? We simply have to adjust the amount of points that Lewis loses to Max. You can even plot it in a chart, with $S_m$ as the X axis and $l$ as the Y axis. Feel free to change the constants below!</p>
@@ -255,7 +269,7 @@ $$l \geqslant 11$$</p>
 <p>I look forward to the day that the details of the deal made between Ferrari and the FIA regarding Ferrari&rsquo;s <em>creativity</em> are disclosed (i.e. never)&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:2">
-<p>It doesn&rsquo;t help that they found a loophole in the regulations that allows them to adjust the <a href="https://en.wikipedia.org/wiki/Toe_(automotive)" title="Toe Wikipedia page">toe</a> of the car by longitudinally pushing and pulling the steering column. I do wonder if they regretted not saving this innovation for a more rainy day, now that we see how the 2021 season is playing out&hellip;&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>It doesn&rsquo;t help that they found a loophole in the regulations that allows them to adjust the <a href="https://en.wikipedia.org/wiki/Toe_%28automotive%29" title="Toe Wikipedia page"  class="external-link" target="_blank" rel="noopener">toe</a> of the car by longitudinally pushing and pulling the steering column. I do wonder if they regretted not saving this innovation for a more rainy day, now that we see how the 2021 season is playing out&hellip;&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </div>
@@ -270,71 +284,90 @@ $$l \geqslant 11$$</p>
         
         
         
+        
+        
+
+        
       </footer>
     </article>
 
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
   
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <script>
-    MathJax = {
-      tex: {
-        inlineMath: [
-          ['$', '$'], ['\\(', '\\)']
-        ],
-        processEscapes: true,
-        processEnvironments: true
-      },
-      options: {
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
       }
-    };
-  </script>
+    );"></script>
   </section>
 
-      </div>
+    </div>
 
-      
-  <footer class="footer">
-    <section class="container">
-      
-      
-        ©
-        
-        2024
-         Daniel Monteiro 
-      
-      
-         · 
-        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
-      
-      
-    </section>
-  </footer>
-
-
-    </main>
-
+    <footer class="footer">
+  <section class="container">
+    ©
     
-      
-      <script src="https://dfamonteiro.com/js/coder.min.cb0c595e02234420f3ad3886bf4a9bd2874d0e1e78e090138a9ef158b35aaf17.js" integrity="sha256-ywxZXgIjRCDzrTiGv0qb0odNDh544JATip7xWLNarxc="></script>
+    2024
+     Daniel Monteiro 
+    ·
     
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
 
-    
+  </main>
 
-    
+  
 
-    
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
 
-    
+  
 
-    
+  
 
-    
 
-    
+  
 
-    
-  </body>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
 
 </html>
