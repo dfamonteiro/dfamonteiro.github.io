@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Solving the Jindosh Riddle with constraint programming · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="I was playing Dishonored II (great game, by the way), when I came across a locked door. In order to make progress in the game, I had to open this door. When you get close to it, you begin to realise that there is more to this door than it first meets the eye:
+The Jindosh Riddle door lockThere is no key that opens this door. Instead, you have 5 slots with names and 5 slots with objects which need to have the right values to unlock the door.">
+<meta name="keywords" content="blog,developer,personal,engineering">
+<meta name="fediverse:creator" content="" />
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Solving the Jindosh Riddle with constraint programming">
+  <meta name="twitter:description" content="I was playing Dishonored II (great game, by the way), when I came across a locked door. In order to make progress in the game, I had to open this door. When you get close to it, you begin to realise that there is more to this door than it first meets the eye:
+The Jindosh Riddle door lockThere is no key that opens this door. Instead, you have 5 slots with names and 5 slots with objects which need to have the right values to unlock the door.">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/jindosh-riddle/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Solving the Jindosh Riddle with constraint programming">
+  <meta property="og:description" content="I was playing Dishonored II (great game, by the way), when I came across a locked door. In order to make progress in the game, I had to open this door. When you get close to it, you begin to realise that there is more to this door than it first meets the eye:
+The Jindosh Riddle door lockThere is no key that opens this door. Instead, you have 5 slots with names and 5 slots with objects which need to have the right values to unlock the door.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-08-31T21:38:40+01:00">
+    <meta property="article:modified_time" content="2024-08-31T21:38:40+01:00">
+    <meta property="article:tag" content="Maths">
+    <meta property="article:tag" content="Programming">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/jindosh-riddle/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.07092c1350ffd254998dc43a44ae96e617d14af4df4602626878df89189c5e1a.css" integrity="sha256-BwksE1D/0lSZjcQ6RK6W5hfRSvTfRgJiaHjfiRicXho=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/jindosh-riddle/">
+              Solving the Jindosh Riddle with constraint programming
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-08-31T21:38:40&#43;01:00">
+                August 31, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              9-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/maths/">Maths</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>I was playing Dishonored II (great game, by the way), when I came across a locked door. In order to make progress in the game, I had to open this door. When you get close to it, you begin to realise that there is more to this door than it first meets the eye:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/Jindosh-Lock.png" alt="Guia circuit track layout">
+    <figcaption><b>The Jindosh Riddle door lock</b></figcaption>
+</figure>
+<p>There is no key that opens this door. Instead, you have 5 slots with names and 5 slots with objects which need to have the right values to unlock the door. You don&rsquo;t have to brute force the combination, though, because right next to the door you can find the following riddle:</p>
+<blockquote>
+<p>At the dinner party were Lady Winslow, Doctor Marcolla, Countess Contee, Madam Natsiou, and Baroness Finch.</p>
+<p>The women sat in a row. They all wore different colors and Doctor Marcolla wore a jaunty white hat. Countess Contee was at the far left, next to the guest wearing a blue jacket. The lady in green sat left of someone in red. I remember that green outfit because the woman spilled her absinthe all over it. The traveller from Dabokva was dressed entirely in purple. When one of the dinner guests bragged about her Snuff Tin, the woman next to her said they were finer in Dabokva, where she lived.</p>
+<p>So Lady Winslow showed off a prized Diamond, at which the lady from Fraeport scoffed, saying it was no match for her War Medal. Someone else carried a valuable Ring and when she saw it, the visitor from Karnaca next to her almost spilled her neighbor&rsquo;s rum. Madam Natsiou raised her wine in toast. The lady from Baleton, full of beer, jumped onto the table, falling onto the guest in the center in the center seat, spilling the poor woman&rsquo;s whiskey. Then Baroness Finch captivated them all with a story about her wild youth in Dunwall.</p>
+<p>In the morning, there were four heirlooms under the table: the Snuff Tin, Bird Pendant, the War Medal, and the Ring.</p>
+<p>But who owned each?</p>
+</blockquote>
+<p>There are other ways of finding the lock combination without having to solve the riddle, but when I first came across it I was dead set on solving it. It did take me a couple of hours and a lot of scribbles, but I managed to figure it out. However, while I was frying my brain solving this riddle, I started to wonder: wouldn&rsquo;t it be easier to write a program to solve this riddle for me? That&rsquo;s what we will be doing in this blog post.</p>
+<h2 id="initial-setup">
+  Initial setup
+  <a class="heading-link" href="#initial-setup">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Before we start writing code, we should begin by making our lives easier by clearly stating the entities of our riddle:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Heirloom</th>
+<th>Color</th>
+<th>Drink</th>
+<th>Origin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Winslow</td>
+<td>Snuff Tin</td>
+<td>White</td>
+<td>Absinthe</td>
+<td>Dabokva</td>
+</tr>
+<tr>
+<td>Marcolla</td>
+<td>Bird Pendant</td>
+<td>Blue</td>
+<td>Rum</td>
+<td>Fraeport</td>
+</tr>
+<tr>
+<td>Contee</td>
+<td>War Medal</td>
+<td>Green</td>
+<td>Wine</td>
+<td>Karnaca</td>
+</tr>
+<tr>
+<td>Natsiou</td>
+<td>Ring</td>
+<td>Red</td>
+<td>Beer</td>
+<td>Baleton</td>
+</tr>
+<tr>
+<td>Finch</td>
+<td>Diamond</td>
+<td>Purple</td>
+<td>Whiskey</td>
+<td>Dunwall</td>
+</tr>
+</tbody>
+</table>
+<p>We also need to define how the solution will be structured. When solved this riddle manually I used a grid, and there&rsquo;s no reason to not do the same here:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Far-left</strong></th>
+<th><strong>Left</strong></th>
+<th><strong>Middle</strong></th>
+<th><strong>Right</strong></th>
+<th><strong>Far-right</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Origin</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Drink</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Color</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Name</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Heirloom</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="initial-setup-code">
+  Initial setup (code)
+  <a class="heading-link" href="#initial-setup-code">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>We will be using python as our programming language and <a href="https://developers.google.com/optimization" title="OR-Tools home page"  class="external-link" target="_blank" rel="noopener">OR-Tools</a> as our constraint solver. Let&rsquo;s begin with a very basic MVP:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> ortools.sat.python <span style="color:#f92672">import</span> cp_model
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>RIDDLE_DATA <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Name&#34;</span> : [<span style="color:#e6db74">&#39;Winslow&#39;</span>, <span style="color:#e6db74">&#39;Marcolla&#39;</span>, <span style="color:#e6db74">&#39;Contee&#39;</span>, <span style="color:#e6db74">&#39;Natsiou&#39;</span>, <span style="color:#e6db74">&#39;Finch&#39;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Heirloom&#34;</span> : [<span style="color:#e6db74">&#39;Snuff Tin&#39;</span>, <span style="color:#e6db74">&#39;Bird Pendant&#39;</span>, <span style="color:#e6db74">&#39;War Medal&#39;</span>, <span style="color:#e6db74">&#39;Ring&#39;</span>, <span style="color:#e6db74">&#39;Diamond&#39;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Color&#34;</span> : [<span style="color:#e6db74">&#39;White&#39;</span>, <span style="color:#e6db74">&#39;Blue&#39;</span>, <span style="color:#e6db74">&#39;Green&#39;</span>, <span style="color:#e6db74">&#39;Red&#39;</span>, <span style="color:#e6db74">&#39;Purple&#39;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Drink&#34;</span> : [<span style="color:#e6db74">&#39;Absinthe&#39;</span>, <span style="color:#e6db74">&#39;Rum&#39;</span>, <span style="color:#e6db74">&#39;Wine&#39;</span>, <span style="color:#e6db74">&#39;Beer&#39;</span>, <span style="color:#e6db74">&#39;Whiskey&#39;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Origin&#34;</span> : [<span style="color:#e6db74">&#39;Dabokva&#39;</span>, <span style="color:#e6db74">&#39;Fraeport&#39;</span>, <span style="color:#e6db74">&#39;Karnaca&#39;</span>, <span style="color:#e6db74">&#39;Baleton&#39;</span>, <span style="color:#e6db74">&#39;Dunwall&#39;</span>],
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>FAR_LEFT, LEFT, MIDDLE, RIGHT, FAR_RIGHT <span style="color:#f92672">=</span> (<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>solution_grid <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> cp_model<span style="color:#f92672">.</span>CpModel()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">setup_solution_grid</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> category, entities <span style="color:#f92672">in</span> RIDDLE_DATA<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>        solution_grid[category] <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> seat <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>            solution_grid[category]<span style="color:#f92672">.</span>append({})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> entity <span style="color:#f92672">in</span> entities:
+</span></span><span style="display:flex;"><span>                solution_grid[category][seat][entity] <span style="color:#f92672">=</span> model<span style="color:#f92672">.</span>new_bool_var(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>category<span style="color:#e6db74">}</span><span style="color:#e6db74">-</span><span style="color:#e6db74">{</span>seat<span style="color:#e6db74">}</span><span style="color:#e6db74">-</span><span style="color:#e6db74">{</span>entity<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">solve</span>() <span style="color:#f92672">-&gt;</span> cp_model<span style="color:#f92672">.</span>CpSolver:
+</span></span><span style="display:flex;"><span>    solver <span style="color:#f92672">=</span> cp_model<span style="color:#f92672">.</span>CpSolver()
+</span></span><span style="display:flex;"><span>    status <span style="color:#f92672">=</span> solver<span style="color:#f92672">.</span>solve(model)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">assert</span> status <span style="color:#f92672">in</span> (cp_model<span style="color:#f92672">.</span>OPTIMAL, cp_model<span style="color:#f92672">.</span>FEASIBLE)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> solver
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">debug_print</span>(solver : cp_model<span style="color:#f92672">.</span>CpSolver):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> category, entities <span style="color:#f92672">in</span> RIDDLE_DATA<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>category<span style="color:#e6db74">}</span><span style="color:#e6db74">:&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> seat <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;    Seat </span><span style="color:#e6db74">{</span>seat<span style="color:#e6db74">}</span><span style="color:#e6db74">:&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> entity <span style="color:#f92672">in</span> entities:
+</span></span><span style="display:flex;"><span>                value <span style="color:#f92672">=</span> solver<span style="color:#f92672">.</span>value(solution_grid[category][seat][entity])
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;        </span><span style="color:#e6db74">{</span>entity<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>value<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    setup_solution_grid()
+</span></span><span style="display:flex;"><span>    solver <span style="color:#f92672">=</span> solve()
+</span></span><span style="display:flex;"><span>    debug_print(solver)
+</span></span></code></pre></div><p>The most important thing to understand is the <code>solution_grid</code> variable. It has the following structure:</p>
+<ul>
+<li>Category (Name, Heirloom, etc.)
+<ul>
+<li>Seat (0,1,2,3,4)
+<ul>
+<li>Entity (White, Blue, Green, etc. if the selected category was &ldquo;Color&rdquo;)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>If, for example, you want to enforce that Countess Contee is at the far left (like it&rsquo;s specified in the riddle), you can write the following code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>model<span style="color:#f92672">.</span>add(solution_grid[<span style="color:#e6db74">&#34;Name&#34;</span>][<span style="color:#ae81ff">0</span>][<span style="color:#e6db74">&#34;Contee&#34;</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>)
+</span></span></code></pre></div><h3 id="initial-setup-basic-constraints">
+  Initial setup (basic constraints)
+  <a class="heading-link" href="#initial-setup-basic-constraints">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>If we run the code shown above, we get the following output:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>PS C:\Users\Daniel\Desktop\github\blog\jindosh-riddle&gt; python solver.py
+</span></span><span style="display:flex;"><span>Name:
+</span></span><span style="display:flex;"><span>    Seat 0:
+</span></span><span style="display:flex;"><span>        Winslow: 0
+</span></span><span style="display:flex;"><span>        Marcolla: 0
+</span></span><span style="display:flex;"><span>        Contee: 0
+</span></span><span style="display:flex;"><span>        Natsiou: 0
+</span></span><span style="display:flex;"><span>        Finch: 0
+</span></span><span style="display:flex;"><span>    Seat 1:
+</span></span><span style="display:flex;"><span>        Winslow: 0
+</span></span><span style="display:flex;"><span>        Marcolla: 0
+</span></span><span style="display:flex;"><span>        Contee: 0
+</span></span><span style="display:flex;"><span>        Natsiou: 0
+</span></span><span style="display:flex;"><span>        Finch: 0
+</span></span><span style="display:flex;"><span>    Seat 2:
+</span></span><span style="display:flex;"><span>        Winslow: 0
+</span></span><span style="display:flex;"><span>        Marcolla: 0
+</span></span><span style="display:flex;"><span>        Contee: 0
+</span></span><span style="display:flex;"><span>        Natsiou: 0
+</span></span><span style="display:flex;"><span>        Finch: 0
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre></div><p>No value is selected for any grid cell, which obviously isn&rsquo;t what we want. Let&rsquo;s fix it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">enforce_single_value_in_every_cell</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> category, entities <span style="color:#f92672">in</span> RIDDLE_DATA<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> seat <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>            entity_total <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> entity <span style="color:#f92672">in</span> entities:
+</span></span><span style="display:flex;"><span>                entity_total <span style="color:#f92672">+=</span> solution_grid[category][seat][entity]
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            model<span style="color:#f92672">.</span>Add(entity_total <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>)
+</span></span></code></pre></div><p>This simple constraint solves our initial problem, but another crops up:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>PS C:\Users\Daniel\Desktop\github\blog\jindosh-riddle&gt; python solver.py
+</span></span><span style="display:flex;"><span>Name:
+</span></span><span style="display:flex;"><span>    Seat 0:
+</span></span><span style="display:flex;"><span>        Winslow: 1
+</span></span><span style="display:flex;"><span>        Marcolla: 0
+</span></span><span style="display:flex;"><span>        Contee: 0
+</span></span><span style="display:flex;"><span>        Natsiou: 0
+</span></span><span style="display:flex;"><span>        Finch: 0
+</span></span><span style="display:flex;"><span>    Seat 1:
+</span></span><span style="display:flex;"><span>        Winslow: 1
+</span></span><span style="display:flex;"><span>        Marcolla: 0
+</span></span><span style="display:flex;"><span>        Contee: 0
+</span></span><span style="display:flex;"><span>        Natsiou: 0
+</span></span><span style="display:flex;"><span>        Finch: 0
+</span></span><span style="display:flex;"><span>    Seat 2:
+</span></span><span style="display:flex;"><span>        Winslow: 1
+</span></span><span style="display:flex;"><span>        Marcolla: 0
+</span></span><span style="display:flex;"><span>        Contee: 0
+</span></span><span style="display:flex;"><span>        Natsiou: 0
+</span></span><span style="display:flex;"><span>        Finch: 0
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre></div><p>Notice how Lady Winslow is selected for every seat at the table. This is obviously not the expected behaviour. This will require another constraint:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">enforce_different_values_for_every_category</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> category, entities <span style="color:#f92672">in</span> RIDDLE_DATA<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> entity <span style="color:#f92672">in</span> entities:
+</span></span><span style="display:flex;"><span>            seat_total <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> seat <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>                seat_total <span style="color:#f92672">+=</span> solution_grid[category][seat][entity]
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            model<span style="color:#f92672">.</span>Add(seat_total <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>)
+</span></span></code></pre></div><p>Now every woman gets her own seat:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>PS C:\Users\Daniel\Desktop\github\blog\jindosh-riddle&gt; python solver.py
+</span></span><span style="display:flex;"><span>Name:
+</span></span><span style="display:flex;"><span>    Seat 0:
+</span></span><span style="display:flex;"><span>        Winslow: 0
+</span></span><span style="display:flex;"><span>        Marcolla: 0
+</span></span><span style="display:flex;"><span>        Contee: 0
+</span></span><span style="display:flex;"><span>        Natsiou: 1
+</span></span><span style="display:flex;"><span>        Finch: 0
+</span></span><span style="display:flex;"><span>    Seat 1:
+</span></span><span style="display:flex;"><span>        Winslow: 0
+</span></span><span style="display:flex;"><span>        Marcolla: 0
+</span></span><span style="display:flex;"><span>        Contee: 1
+</span></span><span style="display:flex;"><span>        Natsiou: 0
+</span></span><span style="display:flex;"><span>        Finch: 0
+</span></span><span style="display:flex;"><span>    Seat 2:
+</span></span><span style="display:flex;"><span>        Winslow: 1
+</span></span><span style="display:flex;"><span>        Marcolla: 0
+</span></span><span style="display:flex;"><span>        Contee: 0
+</span></span><span style="display:flex;"><span>        Natsiou: 0
+</span></span><span style="display:flex;"><span>        Finch: 0
+</span></span></code></pre></div><p>The only thing missing now is a pretty-print functionality:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">print_grid</span>(solver : cp_model<span style="color:#f92672">.</span>CpSolver):
+</span></span><span style="display:flex;"><span>    print()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> category, entities <span style="color:#f92672">in</span> RIDDLE_DATA<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> category <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;Name&#34;</span>:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;=&#34;</span> <span style="color:#f92672">*</span> (<span style="color:#ae81ff">10</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">14</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>category<span style="color:#e6db74">}</span><span style="color:#e6db74">:&#34;</span><span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">10</span>), end<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> seat <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> entity <span style="color:#f92672">in</span> entities:
+</span></span><span style="display:flex;"><span>                value <span style="color:#f92672">=</span> solver<span style="color:#f92672">.</span>value(solution_grid[category][seat][entity])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> value <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>:
+</span></span><span style="display:flex;"><span>                    print(entity<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">14</span>), end<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>        print()
+</span></span><span style="display:flex;"><span>    print()
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>PS C:\Users\Daniel\Desktop\github\blog\jindosh-riddle&gt; python solver.py
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Origin:   Baleton       Karnaca       Dabokva       Fraeport      Dunwall
+</span></span><span style="display:flex;"><span>Drink:    Absinthe      Beer          Wine          Whiskey       Rum
+</span></span><span style="display:flex;"><span>Color:    Blue          Red           Green         White         Purple
+</span></span><span style="display:flex;"><span>=========================================================================
+</span></span><span style="display:flex;"><span>Name:     Contee        Marcolla      Natsiou       Winslow       Finch
+</span></span><span style="display:flex;"><span>Heirloom: Ring          Bird Pendant  Snuff Tin     War Medal     Diamond
+</span></span></code></pre></div><h2 id="creating-the-constraints">
+  Creating the constraints
+  <a class="heading-link" href="#creating-the-constraints">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="first-paragraph">
+  First paragraph
+  <a class="heading-link" href="#first-paragraph">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<blockquote>
+<p>The women sat in a row. They all wore different colors and Doctor Marcolla wore a jaunty white hat. Countess Contee was at the far left, next to the guest wearing a blue jacket. The lady in green sat left of someone in red. I remember that green outfit because the woman spilled her absinthe all over it. The traveller from Dabokva was dressed entirely in purple. When one of the dinner guests bragged about her Snuff Tin, the woman next to her said they were finer in Dabokva, where she lived.</p>
+</blockquote>
+<p>Let&rsquo;s enumerate the facts and strip away the riddle&rsquo;s prose:</p>
+<ul>
+<li>Marcolla wears white</li>
+<li>Contee is at the far-left</li>
+<li>The person next to Contee wears blue</li>
+<li>Lady in green seats left of lady in red</li>
+<li>Lady in green drinks Absinthe</li>
+<li>Lady from Dabokva wears purple</li>
+<li>Lady with Snuff Tin is next to lady from Dabokva</li>
+</ul>
+<p>Now let&rsquo;s enforce these facts in our program:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">enforce_first_paragraph</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Marcolla wears white</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Lady in green drinks Absinthe</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Lady from Dabokva wears purple</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> seat <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#34;Name&#34;</span>][seat][<span style="color:#e6db74">&#34;Marcolla&#34;</span>] <span style="color:#f92672">==</span> solution_grid[<span style="color:#e6db74">&#34;Color&#34;</span>][seat][<span style="color:#e6db74">&#34;White&#34;</span>])
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#39;Color&#39;</span>][seat][<span style="color:#e6db74">&#34;Green&#34;</span>] <span style="color:#f92672">==</span> solution_grid[<span style="color:#e6db74">&#34;Drink&#34;</span>][seat][<span style="color:#e6db74">&#34;Absinthe&#34;</span>])
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#34;Origin&#34;</span>][seat][<span style="color:#e6db74">&#34;Dabokva&#34;</span>] <span style="color:#f92672">==</span> solution_grid[<span style="color:#e6db74">&#34;Color&#34;</span>][seat][<span style="color:#e6db74">&#34;Purple&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Contee is at the far-left</span>
+</span></span><span style="display:flex;"><span>    model<span style="color:#f92672">.</span>add(solution_grid[<span style="color:#e6db74">&#34;Name&#34;</span>][FAR_LEFT][<span style="color:#e6db74">&#34;Contee&#34;</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># The person next to Contee wears blue</span>
+</span></span><span style="display:flex;"><span>    enforce_a_next_to_b((<span style="color:#e6db74">&#34;Name&#34;</span>, <span style="color:#e6db74">&#34;Contee&#34;</span>), (<span style="color:#e6db74">&#34;Color&#34;</span>, <span style="color:#e6db74">&#34;Blue&#34;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Lady in green seats left of lady in red</span>
+</span></span><span style="display:flex;"><span>    model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#39;Color&#39;</span>][FAR_LEFT][<span style="color:#e6db74">&#34;Red&#34;</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> seat <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>        left <span style="color:#f92672">=</span> seat <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> left <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">continue</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        red_variable  <span style="color:#f92672">=</span> solution_grid[<span style="color:#e6db74">&#39;Color&#39;</span>][seat][<span style="color:#e6db74">&#34;Red&#34;</span>]
+</span></span><span style="display:flex;"><span>        left_variable <span style="color:#f92672">=</span> solution_grid[<span style="color:#e6db74">&#34;Color&#34;</span>][left][<span style="color:#e6db74">&#34;Green&#34;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(left_variable <span style="color:#f92672">==</span> red_variable)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Lady with Snuff Tin is next to lady from Dabokva</span>
+</span></span><span style="display:flex;"><span>    enforce_a_next_to_b((<span style="color:#e6db74">&#34;Heirloom&#34;</span>, <span style="color:#e6db74">&#34;Snuff Tin&#34;</span>), (<span style="color:#e6db74">&#34;Origin&#34;</span>, <span style="color:#e6db74">&#34;Dabokva&#34;</span>))
+</span></span></code></pre></div><p><code>enforce_a_next_to_b</code> is an auxiliary funcion that enforces &ldquo;person with characteristic <code>a</code> is next to person with characteristic <code>b</code>&rdquo;. This constraint shows up multiple times in both paragraphs, which justifies moving this logic to its own seperate function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">enforce_a_next_to_b</span>(a : Tuple[str, str], b : Tuple[str, str]):
+</span></span><span style="display:flex;"><span>    a_category, a_entity <span style="color:#f92672">=</span> a
+</span></span><span style="display:flex;"><span>    b_category, b_entity <span style="color:#f92672">=</span> b
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> seat <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>        left <span style="color:#f92672">=</span> seat <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        right <span style="color:#f92672">=</span> seat <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        middle_variable <span style="color:#f92672">=</span> solution_grid[a_category][seat][a_entity]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> left <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            left_variable <span style="color:#f92672">=</span> solution_grid[b_category][left][b_entity]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            left_variable <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> right <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">5</span>:
+</span></span><span style="display:flex;"><span>            right_variable <span style="color:#f92672">=</span> solution_grid[b_category][right][b_entity]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            right_variable <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(middle_variable <span style="color:#f92672">&lt;=</span> left_variable <span style="color:#f92672">+</span> right_variable)
+</span></span></code></pre></div><p>A quick look at the solutions that the solver now provides shows that the constraints from the first paragraph are being enforced:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>PS C:\Users\Daniel\Desktop\github\blog\jindosh-riddle&gt; python solver.py
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Origin:   Dabokva       Baleton       Karnaca       Fraeport      Dunwall
+</span></span><span style="display:flex;"><span>Drink:    Whiskey       Rum           Beer          Absinthe      Wine
+</span></span><span style="display:flex;"><span>Color:    Purple        Blue          White         Green         Red
+</span></span><span style="display:flex;"><span>=========================================================================
+</span></span><span style="display:flex;"><span>Name:     Contee        Winslow       Marcolla      Finch         Natsiou
+</span></span><span style="display:flex;"><span>Heirloom: War Medal     Snuff Tin     Bird Pendant  Ring          Diamond
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>165888 solutions
+</span></span></code></pre></div><h3 id="second-paragraph">
+  Second Paragraph
+  <a class="heading-link" href="#second-paragraph">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<blockquote>
+<p>So Lady Winslow showed off a prized Diamond, at which the lady from Fraeport scoffed, saying it was no match for her War Medal. Someone else carried a valuable Ring and when she saw it, the visitor from Karnaca next to her almost spilled her neighbor’s rum. Madam Natsiou raised her wine in toast. The lady from Baleton, full of beer, jumped onto the table, falling onto the guest in the center in the center seat, spilling the poor woman’s whiskey. Then Baroness Finch captivated them all with a story about her wild youth in Dunwall.</p>
+</blockquote>
+<p>Lets once again enumerate the facts:</p>
+<ul>
+<li>Winslow has the Diamond</li>
+<li>Lady from Fraeport has the War Medal</li>
+<li>Lady with Ring is next to lady from Karnaca</li>
+<li>Lady from Karnaka is next to lady with Rum</li>
+<li>Natsiou drinks Wine</li>
+<li>Lady from Baleton drinks Beer</li>
+<li>Lady in the center drinks Whiskey</li>
+<li>Finch is from Dunwall</li>
+</ul>
+<p>Enforcing these facts is pretty straightforward:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">enforce_second_paragraph</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Lady in the center drinks Whiskey</span>
+</span></span><span style="display:flex;"><span>    model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#34;Drink&#34;</span>][MIDDLE][<span style="color:#e6db74">&#34;Whiskey&#34;</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Winslow has the Diamond</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Lady from Fraeport has the War Medal</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Natsiou drinks Wine</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Lady from Baleton drinks Beer</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Finch is from Dunwall</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> seat <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#34;Name&#34;</span>][seat][<span style="color:#e6db74">&#34;Winslow&#34;</span>] <span style="color:#f92672">==</span> solution_grid[<span style="color:#e6db74">&#34;Heirloom&#34;</span>][seat][<span style="color:#e6db74">&#34;Diamond&#34;</span>])
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#34;Origin&#34;</span>][seat][<span style="color:#e6db74">&#34;Fraeport&#34;</span>] <span style="color:#f92672">==</span> solution_grid[<span style="color:#e6db74">&#34;Heirloom&#34;</span>][seat][<span style="color:#e6db74">&#34;War Medal&#34;</span>])
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#34;Name&#34;</span>][seat][<span style="color:#e6db74">&#34;Natsiou&#34;</span>] <span style="color:#f92672">==</span> solution_grid[<span style="color:#e6db74">&#34;Drink&#34;</span>][seat][<span style="color:#e6db74">&#34;Wine&#34;</span>])
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#34;Origin&#34;</span>][seat][<span style="color:#e6db74">&#34;Baleton&#34;</span>] <span style="color:#f92672">==</span> solution_grid[<span style="color:#e6db74">&#34;Drink&#34;</span>][seat][<span style="color:#e6db74">&#34;Beer&#34;</span>])
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">.</span>Add(solution_grid[<span style="color:#e6db74">&#34;Name&#34;</span>][seat][<span style="color:#e6db74">&#34;Finch&#34;</span>] <span style="color:#f92672">==</span> solution_grid[<span style="color:#e6db74">&#34;Origin&#34;</span>][seat][<span style="color:#e6db74">&#34;Dunwall&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Lady with Ring is next to lady from Karnaca</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Lady from Karnaka is next to lady with Rum</span>
+</span></span><span style="display:flex;"><span>    enforce_a_next_to_b((<span style="color:#e6db74">&#34;Heirloom&#34;</span>, <span style="color:#e6db74">&#34;Ring&#34;</span>), (<span style="color:#e6db74">&#34;Origin&#34;</span>, <span style="color:#e6db74">&#34;Karnaca&#34;</span>))
+</span></span><span style="display:flex;"><span>    enforce_a_next_to_b((<span style="color:#e6db74">&#34;Origin&#34;</span>, <span style="color:#e6db74">&#34;Karnaca&#34;</span>), (<span style="color:#e6db74">&#34;Drink&#34;</span>, <span style="color:#e6db74">&#34;Rum&#34;</span>))
+</span></span></code></pre></div><p>And this is the final result:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Origin:   Dabokva       Karnaca       Fraeport      Dunwall       Baleton
+</span></span><span style="display:flex;"><span>Drink:    Rum           Wine          Whiskey       Absinthe      Beer
+</span></span><span style="display:flex;"><span>Color:    Purple        Blue          White         Green         Red
+</span></span><span style="display:flex;"><span>=========================================================================
+</span></span><span style="display:flex;"><span>Name:     Contee        Natsiou       Marcolla      Finch         Winslow
+</span></span><span style="display:flex;"><span>Heirloom: Ring          Snuff Tin     War Medal     Bird Pendant  Diamond
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>1 solution
+</span></span></code></pre></div><h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I was pleasantly surprised by how well the riddle&rsquo;s facts mapped to python code. I had a lot of fun solving the riddle using constraint programming but it remains to be seen if simply solving the riddle by hand would be a quicker approach. It doesn&rsquo;t really matter, in the end: when it comes to games, the only metric that has ever mattered is whether or not you are having fun playing them.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+  
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

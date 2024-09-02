@@ -4,19 +4,26 @@
     <title>Tags on Daniel&#39;s blog</title>
     <link>https://dfamonteiro.com/tags/</link>
     <description>Recent content in Tags on Daniel&#39;s blog</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 06 Jan 2024 02:26:37 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 31 Aug 2024 21:38:40 +0100</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>maths</title>
+      <title>Maths</title>
       <link>https://dfamonteiro.com/tags/maths/</link>
-      <pubDate>Sat, 06 Jan 2024 02:26:37 +0000</pubDate>
+      <pubDate>Sat, 31 Aug 2024 21:38:40 +0100</pubDate>
       <guid>https://dfamonteiro.com/tags/maths/</guid>
       <description></description>
     </item>
     <item>
-      <title>motorsport</title>
+      <title>Programming</title>
+      <link>https://dfamonteiro.com/tags/programming/</link>
+      <pubDate>Sat, 31 Aug 2024 21:38:40 +0100</pubDate>
+      <guid>https://dfamonteiro.com/tags/programming/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Motorsport</title>
       <link>https://dfamonteiro.com/tags/motorsport/</link>
       <pubDate>Sat, 06 Jan 2024 02:26:37 +0000</pubDate>
       <guid>https://dfamonteiro.com/tags/motorsport/</guid>
@@ -37,14 +44,14 @@
       <description></description>
     </item>
     <item>
-      <title>compilers</title>
+      <title>Compilers</title>
       <link>https://dfamonteiro.com/tags/compilers/</link>
       <pubDate>Wed, 21 Jul 2021 23:11:53 +0100</pubDate>
       <guid>https://dfamonteiro.com/tags/compilers/</guid>
       <description></description>
     </item>
     <item>
-      <title>intermediate representation</title>
+      <title>Intermediate Representation</title>
       <link>https://dfamonteiro.com/tags/intermediate-representation/</link>
       <pubDate>Wed, 21 Jul 2021 23:11:53 +0100</pubDate>
       <guid>https://dfamonteiro.com/tags/intermediate-representation/</guid>

@@ -4,10 +4,17 @@
     <title>Daniel&#39;s blog</title>
     <link>https://dfamonteiro.com/</link>
     <description>Recent content on Daniel&#39;s blog</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 06 Jan 2024 02:26:37 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 31 Aug 2024 21:38:40 +0100</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solving the Jindosh Riddle with constraint programming</title>
+      <link>https://dfamonteiro.com/posts/jindosh-riddle/</link>
+      <pubDate>Sat, 31 Aug 2024 21:38:40 +0100</pubDate>
+      <guid>https://dfamonteiro.com/posts/jindosh-riddle/</guid>
+      <description>I was playing Dishonored II (great game, by the way), when I came across a locked door. In order to make progress in the game, I had to open this door. When you get close to it, you begin to realise that there is more to this door than it first meets the eye:&#xA;The Jindosh Riddle door lock&#xD;There is no key that opens this door. Instead, you have 5 slots with names and 5 slots with objects which need to have the right values to unlock the door.</description>
+    </item>
     <item>
       <title>Applying clustering techniques to the F1 2024 schedule for fun and profit</title>
       <link>https://dfamonteiro.com/posts/f1-clustering/</link>
@@ -55,7 +62,7 @@
       <link>https://dfamonteiro.com/about/</link>
       <pubDate>Fri, 18 Sep 2020 13:13:52 +0100</pubDate>
       <guid>https://dfamonteiro.com/about/</guid>
-      <description>I&amp;rsquo;m a software engineer with a MSc in Informatics and Computer Engineering @FEUP (Faculty of Engineering of the University of Porto).&#xA;I am currently interested in multithreaded programming, rocket control, orbital dynamics and in analysing mega constellations as distributed systems. As a fan of motorsport (F1, MotoGP, WEC, etc), I enjoy analysing certain aspects of those championships and imagining what the future of motorsport will look like, on a technical level.</description>
+      <description>I&amp;rsquo;m a software engineer with a MSc in Informatics and Computer Engineering @FEUP (Faculty of Engineering of the University of Porto). I am currently working at Critical Manufacturing.&#xA;I am currently interested in multithreaded programming, rocket control, orbital dynamics and in analysing mega constellations as distributed systems. As a fan of motorsport (F1, MotoGP, WEC, etc), I enjoy analysing certain aspects of those championships and imagining what the future of motorsport will look like, on a technical level.</description>
     </item>
   </channel>
 </rss>

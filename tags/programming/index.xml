@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Programming on Daniel&#39;s blog</title>
+    <link>https://dfamonteiro.com/tags/programming/</link>
+    <description>Recent content in Programming on Daniel&#39;s blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 31 Aug 2024 21:38:40 +0100</lastBuildDate>
+    <atom:link href="https://dfamonteiro.com/tags/programming/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solving the Jindosh Riddle with constraint programming</title>
+      <link>https://dfamonteiro.com/posts/jindosh-riddle/</link>
+      <pubDate>Sat, 31 Aug 2024 21:38:40 +0100</pubDate>
+      <guid>https://dfamonteiro.com/posts/jindosh-riddle/</guid>
+      <description>I was playing Dishonored II (great game, by the way), when I came across a locked door. In order to make progress in the game, I had to open this door. When you get close to it, you begin to realise that there is more to this door than it first meets the eye:&#xA;The Jindosh Riddle door lock&#xD;There is no key that opens this door. Instead, you have 5 slots with names and 5 slots with objects which need to have the right values to unlock the door.</description>
+    </item>
+    <item>
+      <title>Applying clustering techniques to the F1 2024 schedule for fun and profit</title>
+      <link>https://dfamonteiro.com/posts/f1-clustering/</link>
+      <pubDate>Sat, 06 Jan 2024 02:26:37 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/f1-clustering/</guid>
+      <description>I was finishing my Formula 1 Cornering Performance Breakdown project when I came up with the idea of using the existing code infrastructure to generate cornering data for every track on the 2024 calendar. As part of that project, I tagged every corner with a tag highlighting how fast that corner is. With that information, I can determine how much time is spent on each type of corner. The remainder of the time in lap, which isn’t spent negotiating a corner, is the time the drivers spend at full throttle on a lap, tagged below as STRAIGHT.</description>
+    </item>
+    <item>
+      <title>Developing an intermediate representation of Brainfuck using Rust</title>
+      <link>https://dfamonteiro.com/posts/brainfuck-ir/</link>
+      <pubDate>Wed, 21 Jul 2021 23:11:53 +0100</pubDate>
+      <guid>https://dfamonteiro.com/posts/brainfuck-ir/</guid>
+      <description>Brainfuck is an interesting programming language, to say the least. As the most prominent Esoteric programming language out there, it provides a truly cursed programming experience. It is quite minimalistic as well, featuring only 8 distinct instructions and a programming model that can be best described as a glorified Turing machine, making writing a Brainfuck compiler an interesting programming exercise. However, we might as well go a step further and develop an intermediate representation for it, because, well, why not?</description>
+    </item>
+  </channel>
+</rss>
