@@ -6,14 +6,21 @@
     <description>Recent content on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 31 Aug 2024 21:38:40 +0100</lastBuildDate>
+    <lastBuildDate>Sun, 08 Dec 2024 13:52:39 +0000</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solving the mathematics of Factorio Quality: The Fundamentals</title>
+      <link>https://dfamonteiro.com/posts/factorio-quality-1/</link>
+      <pubDate>Sun, 08 Dec 2024 13:52:39 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/factorio-quality-1/</guid>
+      <description>Prologue&#xD;Link to heading&#xD;Video games have this incredible ability to evoque certain feelings and states of mind on the people that play them. You can experience pretty much every emotion, starting from happiness, amazement, and wonder going all the way to sadness, frustation, and heartbreak. Games can make you laugh and cry, they can make you focus, and sometimes they make you think.&#xA;Factorio is a game that makes you think.</description>
+    </item>
     <item>
       <title>Solving the Jindosh Riddle with constraint programming</title>
       <link>https://dfamonteiro.com/posts/jindosh-riddle/</link>
       <pubDate>Sat, 31 Aug 2024 21:38:40 +0100</pubDate>
       <guid>https://dfamonteiro.com/posts/jindosh-riddle/</guid>
-      <description>I was playing Dishonored II (great game, by the way), when I came across a locked door. In order to make progress in the game, I had to open this door. When you get close to it, you begin to realise that there is more to this door than it first meets the eye:&#xA;The Jindosh Riddle door lock&#xD;There is no key that opens this door. Instead, you have 5 slots with names and 5 slots with objects which need to have the right values to unlock the door.</description>
+      <description>I was playing Dishonored II, when I came across a locked door. In order to make progress in the game, I had to open this door. When you get close to it, you begin to realise that there is more to this door than it first meets the eye:&#xA;The Jindosh Riddle door lock&#xD;There is no key that opens this door. Instead, you have 5 slots with names and 5 slots with objects which need to have the right values to unlock the door.</description>
     </item>
     <item>
       <title>Applying clustering techniques to the F1 2024 schedule for fun and profit</title>

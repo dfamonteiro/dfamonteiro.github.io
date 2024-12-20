@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Solving the mathematics of Factorio Quality: The Fundamentals · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="PrologueLink to headingVideo games have this incredible ability to evoque certain feelings and states of mind on the people that play them. You can experience pretty much every emotion, starting from happiness, amazement, and wonder going all the way to sadness, frustation, and heartbreak. Games can make you laugh and cry, they can make you focus, and sometimes they make you think.
+Factorio is a game that makes you think.">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Solving the mathematics of Factorio Quality: The Fundamentals">
+  <meta name="twitter:description" content="PrologueLink to headingVideo games have this incredible ability to evoque certain feelings and states of mind on the people that play them. You can experience pretty much every emotion, starting from happiness, amazement, and wonder going all the way to sadness, frustation, and heartbreak. Games can make you laugh and cry, they can make you focus, and sometimes they make you think.
+Factorio is a game that makes you think.">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/factorio-quality-1/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Solving the mathematics of Factorio Quality: The Fundamentals">
+  <meta property="og:description" content="PrologueLink to headingVideo games have this incredible ability to evoque certain feelings and states of mind on the people that play them. You can experience pretty much every emotion, starting from happiness, amazement, and wonder going all the way to sadness, frustation, and heartbreak. Games can make you laugh and cry, they can make you focus, and sometimes they make you think.
+Factorio is a game that makes you think.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-12-08T13:52:39+00:00">
+    <meta property="article:modified_time" content="2024-12-08T13:52:39+00:00">
+    <meta property="article:tag" content="Maths">
+    <meta property="article:tag" content="Programming">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/factorio-quality-1/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.ed30115a76cdaa62f2229e973d5b1c89b2d3dd4b1d9c07a729baad06aa3b0cbe.css" integrity="sha256-7TARWnbNqmLyIp6XPVscibLT3UsdnAenKbqtBqo7DL4=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/factorio-quality-1/">
+              Solving the mathematics of Factorio Quality: The Fundamentals
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-12-08T13:52:39Z">
+                December 8, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              10-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/maths/">Maths</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h2 id="prologue">
+  Prologue
+  <a class="heading-link" href="#prologue">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Video games have this incredible ability to evoque certain feelings and states of mind on the people that play them. You can experience pretty much every emotion, starting from happiness, amazement, and wonder going all the way to sadness, frustation, and heartbreak. Games can make you laugh and cry, they can make you focus, and sometimes they make you <em>think</em>.</p>
+<p>Factorio is a game that makes you think. It gives such fascinating production and logistics challenges to its players that sometimes they stop playing and write <a href="https://scholar.google.pt/scholar?hl=en&amp;q=factorio" title="Factorio research"  class="external-link" target="_blank" rel="noopener">research papers</a> about the problems they face in this game<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>. In the recently released Factorio <a href="https://www.factorio.com/space-age/content" title="Space Age web page"  class="external-link" target="_blank" rel="noopener">Space Age</a> expansion, a new feature was added that allows the player to gamble their way into having better versions of every item in the game: <a href="https://www.factorio.com/blog/post/fff-375" title="Dev post about quality"  class="external-link" target="_blank" rel="noopener">Quality</a>.</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/fff-375-quality-modules.png" alt="The 3 tiers of quality modules"/>
+    <figcaption>The 3 tiers of quality modules.<br>(image source: fff-375)</figcaption>
+</div>
+<p>Getting a complete understanding of the probabilities behind the mass production of quality items is not easy, and neither is converting this set of probabilities into workable flow rates. With this is mind, and after struggling with this myself, I have decided to write a series of blog posts detailing step by step the math required to truly understand quality. I will assume that the reader has played Factorio: Space Age and has a working understanding of the quality mechanic, but even if you haven&rsquo;t played Factorio before, feel free to follow along. Without further ado, let&rsquo;s begin:</p>
+<h2 id="building-the-quality-matrix">
+  Building the quality matrix
+  <a class="heading-link" href="#building-the-quality-matrix">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>When you insert a quality module in a assembler<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>, a new stat appears on the machine&rsquo;s tooltip: Quality. The goal of this chapter is to convert this singular value into a probability matrix.</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/Quality-stat-example.png" alt="An assembly machine with 4 T3 quality modules and a quality chance of 10%."/>
+    <figcaption> An assembly machine with 4 T3 quality modules.<br> Each module contributes 2.5% quality chance for a grand total of 10%.</figcaption>
+</div>
+<p>This quality chance, which I will call $q$ from now on, represents the probability of a machine crafting items of a higher quality than their ingredients. Please note that a quality upgrade of multiple tiers is entirely possible, but becomes more unlikely by a factor of 10 for every &ldquo;bonus&rdquo; quality upgrade. Using this knowledge we can craft a template quality upgrade probability table, which indicates the probability of ingredients of quality <code>Input</code> turning into items of quality <code>Output</code>:</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/Quality-Upgrade-Table.png" alt="Quality upgrade probability table generalized for any quality chance Q"/>
+    <figcaption> Quality upgrade probability table generalized for any quality chance $q$. <br>(image source: <a href="https://wiki.factorio.com/Quality">Factorio Wiki</a>)</figcaption>
+</div>
+<p>At this point, we have a solid enough understanding of quality for us to try to replicate some of the results found in <a href="https://wiki.factorio.com/Quality"  class="external-link" target="_blank" rel="noopener">Factorio Wiki</a> with our own python code, which will be very useful in the future when we what to test several scenarios and do some data analysis. We will start our python implementation of these quality concepts by writing a function $f(q)$ that returns a 5x5 probability matrix $Q_q$:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">QualityTier</span>(IntEnum):
+</span></span><span style="display:flex;"><span>    Normal    <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    Uncommon  <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    Rare      <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>    Epic      <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>    Legendary <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">quality_probability</span>(
+</span></span><span style="display:flex;"><span>        quality_chance : float,
+</span></span><span style="display:flex;"><span>        input_tier : QualityTier,
+</span></span><span style="display:flex;"><span>        output_tier : QualityTier) <span style="color:#f92672">-&gt;</span> float:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Calculates the probability of a machine craft with a certain `quality_chance` upgrading 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    the resulting product from the tier of the products (`input_tier`) to the `output_tier`.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Args:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        quality_chance (float): Quality chance (in %).
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        input_tier (QualityTier): Quality tier of the ingredients.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        output_tier (QualityTier): Quality tier of the product.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        float: A probability from 0 to 1.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Some QoL conversions</span>
+</span></span><span style="display:flex;"><span>    quality_chance <span style="color:#f92672">/=</span> <span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span>    i <span style="color:#f92672">=</span> input_tier
+</span></span><span style="display:flex;"><span>    o <span style="color:#f92672">=</span> output_tier
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># An item can never be downgraded</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> input_tier <span style="color:#f92672">&gt;</span> output_tier:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># If the item is already legendary, it will remain legendary</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> input_tier <span style="color:#f92672">==</span> QualityTier<span style="color:#f92672">.</span>Legendary:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Probability of item staying in the same tier</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> input_tier <span style="color:#f92672">==</span> output_tier:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> quality_chance
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Probability of item going straight to legendary</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> output_tier <span style="color:#f92672">==</span> QualityTier<span style="color:#f92672">.</span>Legendary:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> quality_chance <span style="color:#f92672">/</span> (<span style="color:#ae81ff">10</span> <span style="color:#f92672">**</span> (<span style="color:#ae81ff">3</span> <span style="color:#f92672">-</span> i))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># else</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (quality_chance <span style="color:#f92672">*</span> <span style="color:#ae81ff">9</span><span style="color:#f92672">/</span><span style="color:#ae81ff">10</span>) <span style="color:#f92672">/</span> (<span style="color:#ae81ff">10</span> <span style="color:#f92672">**</span> (o <span style="color:#f92672">-</span> i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">quality_matrix</span>(quality_chance : float) <span style="color:#f92672">-&gt;</span> np<span style="color:#f92672">.</span>ndarray:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Returns the quality matrix for the corresponding `quality_chance` which indicates 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    the probabilities of any input tier jumping to any other tier.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Args:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        quality_chance (float): Quality chance (in %).
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        np.ndarray: 5x5 matrix. The columns represent the input quality tier and go
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            from legendary to normal, from left to right. The lines represent the output
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            quality tier and go from normal to legendary, from top to bottom.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros((<span style="color:#ae81ff">5</span>,<span style="color:#ae81ff">5</span>))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> row <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> column <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>            res[row][column] <span style="color:#f92672">=</span> quality_probability(quality_chance, row, column)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res
+</span></span></code></pre></div><p>Calling <code>quality_matrix(10)</code> returns the following result:</p>
+<p>$$Q_{10} =
+\begin{bmatrix}
+0.9 &amp; 0.09 &amp; 0.009 &amp; 0.0009 &amp; 0.0001 \\
+0   &amp; 0.9  &amp; 0.09  &amp; 0.009  &amp; 0.001  \\
+0   &amp; 0    &amp; 0.9   &amp; 0.09   &amp; 0.01   \\
+0   &amp; 0    &amp; 0     &amp; 0.9    &amp; 0.1    \\
+0   &amp; 0    &amp; 0     &amp; 0      &amp; 1      \\
+\end{bmatrix}$$</p>
+<p>Which perfectly matches the table in the wiki:</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/10-percent-quality-table.png" alt="Quality upgrade probability table for a quality chance of 10%"/>
+    <figcaption> Quality upgrade probability table for a quality chance of 10%. <br>(image source: <a href="https://wiki.factorio.com/Quality">Factorio Wiki</a>)</figcaption>
+</div>
+<h2 id="building-the-production-matrix">
+  Building the production matrix
+  <a class="heading-link" href="#building-the-production-matrix">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="production-ratio">
+  Production ratio
+  <a class="heading-link" href="#production-ratio">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Now that we have our quality matrix we can use it as a basis for creating production matrices that reflect any crafting or recycling scenario. For any crafting situation there are only two values we need to worry about: the <strong>quality chance</strong> of the machine and the <strong>production ratio</strong> of output items relative to input items.</p>
+<p>We have already talked extensively about the quality chance, so let&rsquo;s take a moment to understand how to come up with a production ratio for an arbitrary scenario. Let&rsquo;s take blue circuits as an example:</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/Blue-Circuit-Recipe.png" alt="Blue circuit crafting recipe"/>
+    <figcaption> Blue circuit crafting recipe. <br>(image source: <a href="https://wiki.factorio.com/Processing_unit">Factorio Wiki</a>)</figcaption>
+</div>
+<p>In order to craft a single blue circuit you need 22 solid ingredients, leading to a rather low production ratio of 0.04545. Luckily for us, we haven&rsquo;t factored in productivity yet. Let&rsquo;s assume that:</p>
+<ul>
+<li>We researched 3 levels of blue circuit productivity (+30% Productivity)</li>
+<li>The circuits are being crafted in a <a href="https://wiki.factorio.com/Electromagnetic_plant"  class="external-link" target="_blank" rel="noopener">EM Plant</a> (+50% Productivity)</li>
+<li>The EM plant has one tier 3 productivity module (+10% Productivity)</li>
+</ul>
+<p>In total we have a 90% productivity bonus, which means we get a borderline 2 for 1 deal for blue circuit crafting. We can now update our production ratio value:</p>
+<p>$$ r = \frac{o}{i} (1 + p) = \frac{1}{22} (1 + \frac{9}{10}) = \frac{19}{220} = 0.0863636$$</p>
+<h3 id="production-matrix">
+  Production matrix
+  <a class="heading-link" href="#production-matrix">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Building a basic production matrix is as simple as multiplying the corresponding quality matrix by the production ratio:</p>
+<p>$$ P_{q, r} = r Q_q $$</p>
+<p>The corresponding python function is just as straightforward:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">basic_production_matrix</span>(quality_chance : float, production_ratio : float) <span style="color:#f92672">-&gt;</span> np<span style="color:#f92672">.</span>ndarray:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Returns the production matrix for the corresponding quality_chance and production_ratio&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> quality_matrix(quality_chance) <span style="color:#f92672">*</span> production_ratio
+</span></span></code></pre></div><p>Now that we know the basics, let&rsquo;s calculate the production matrix for the EM plant from the previous subchapter, which has 1 T3 productivity module and 4 T3 quality modules (i.e. 10% quality chance):</p>
+<p>$$ P_{10, \frac{19}{220}} = \frac{19}{220} Q_{10} =
+\begin{bmatrix}
+0.07772727 &amp; 0.00777273 &amp; 0.00077727 &amp; 0.00007773 &amp; 0.00000864 \\
+0          &amp; 0.07772727 &amp; 0.00777273 &amp; 0.00077727 &amp; 0.00008636 \\
+0          &amp; 0          &amp; 0.07772727 &amp; 0.00777273 &amp; 0.00086364 \\
+0          &amp; 0          &amp; 0          &amp; 0.07772727 &amp; 0.00863636 \\
+0          &amp; 0          &amp; 0          &amp; 0          &amp; 0.08636364 \\
+\end{bmatrix}$$</p>
+<p>This matrix is completely fine at first glance, but what if we want to anything even remotely complex?</p>
+<ul>
+<li>If we&rsquo;re crafting with legendary ingredients, why not load the EM Plant with the best quality modules you have?</li>
+<li>What if we want to remove all legendary items from the system?</li>
+<li>What if want my EM Plants to have more quality modules for lower quality items, and more productivity modules for the higher quality items?</li>
+</ul>
+<p>The solution for these issues is to have the ability to customize the quality chance &amp; production ratio for every row in the matrix:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">custom_production_matrix</span>(parameters_per_row : List[Tuple[float, float]]) <span style="color:#f92672">-&gt;</span> np<span style="color:#f92672">.</span>ndarray:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Returns a production matrix where every row has a specific quality chance
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        and prodution ratio.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Args:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        parameters_per_row (List[Tuple[float, float]]): List of five tuples. Each tuple
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            indicates the quality chance (%) and production ratio for the respective row.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        np.ndarray: 5x5 production matrix.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros((<span style="color:#ae81ff">5</span>,<span style="color:#ae81ff">5</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> row <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>        quality_chance, production_ratio <span style="color:#f92672">=</span> parameters_per_row[row]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> column <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>            res[row][column] <span style="color:#f92672">=</span>\
+</span></span><span style="display:flex;"><span>                quality_probability(quality_chance, row, column) <span style="color:#f92672">*</span> production_ratio
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res
+</span></span></code></pre></div><p>Now that we&rsquo;re armed with this new function, we can easily modify the EM scenario in order to only have productivity modules when crafting with legendary items:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(custom_production_matrix([(<span style="color:#ae81ff">10</span>, (<span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0.9</span>)<span style="color:#f92672">/</span><span style="color:#ae81ff">22</span>)] <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">+</span> [(<span style="color:#ae81ff">0</span>, (<span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1.3</span>)<span style="color:#f92672">/</span><span style="color:#ae81ff">22</span>)]))
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># [[0.07772727 0.00777273 0.00077727 0.00007773 0.00000864]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.         0.07772727 0.00777273 0.00077727 0.00008636]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.         0.         0.07772727 0.00777273 0.00086364]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.         0.         0.         0.07772727 0.00863636]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.         0.         0.         0.         0.10454545]]</span>
+</span></span></code></pre></div><h3 id="how-to-use-the-production-matrix-a-simple-exercise">
+  How to use the production matrix: a simple exercise
+  <a class="heading-link" href="#how-to-use-the-production-matrix-a-simple-exercise">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>We have spent all this time coming up with this production matrices, but we still don&rsquo;t know how to use them. Let&rsquo;s change that by solving a simple exercise:</p>
+<blockquote>
+<p>A recycler with 2 rare and 2 epic T3 quality modules is being fed iron plates of several qualities:</p>
+<ul>
+<li>10 normal iron plates/s</li>
+<li>5 rare iron plates/s</li>
+<li>4 epic iron plates/s</li>
+</ul>
+<p>How many iron plates of each quality level are being produced by the recycler?</p>
+</blockquote>
+<p>Our first step is to calculate the quality chance $q$:</p>
+<p>$$ q = 4 * 2 + 4.7 * 2 = 17.6\% $$</p>
+<p>The production ratio $r$ of a recycler is quite straightforward to calculate, but please note that the input $i$ and output $o$ of a recipe are switched in the production ratio formula because we are <em>recycling</em>:</p>
+<p>$$ r = \frac{i}{o} (1 + p) = \frac{i}{o} (1 + (- 0.75)) = \frac{i}{4o}$$</p>
+<p>Iron plates recycle into themselves, which means $i = o = 1$ and the production ratio $r$ is 0.25. We can now create the production matrix for the recycler:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>custom_production_matrix([(<span style="color:#ae81ff">17.6</span>, <span style="color:#ae81ff">0.25</span>)] <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span>)
+</span></span></code></pre></div><p>$$ \begin{bmatrix}
+0.206 &amp; 0.0396 &amp; 0.00396 &amp; 0.000396 &amp; 0.000044 \\
+0     &amp; 0.206 &amp; 0.0396   &amp; 0.00396  &amp; 0.00044 \\
+0     &amp; 0     &amp; 0.206    &amp; 0.0396   &amp; 0.0044 \\
+0     &amp; 0     &amp; 0        &amp; 0.206    &amp; 0.044 \\
+0     &amp; 0     &amp; 0        &amp; 0        &amp; 0.25 \\
+\end{bmatrix}$$</p>
+<p>Notice how the numbers of each row add up to the production ratio value of 0.25, as we expected.</p>
+<p>We have our recycler in the form of a matrix, we&rsquo;re only missing the intake for it, which will be represented by a row vector with five values (one for each level of quality):</p>
+<p>$$ \vec{f} = \begin{bmatrix} 10 &amp; 0 &amp; 5 &amp; 4 &amp; 0 \end{bmatrix}$$</p>
+<p>In order to get the solution $\vec{s}$ for our little exercise, we simply multiply $\vec{f}$ by the production matrix of the recycler:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>np<span style="color:#f92672">.</span>array([<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">0</span>]) <span style="color:#f92672">@</span> custom_production_matrix([(<span style="color:#ae81ff">17.6</span>, <span style="color:#ae81ff">0.25</span>)] <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span>)
+</span></span></code></pre></div><p>$$ \vec{s} = \begin{bmatrix} 10 &amp; 0 &amp; 5 &amp; 4 &amp; 0 \end{bmatrix} \cdot \begin{bmatrix}
+0.206 &amp; 0.0396 &amp; 0.00396 &amp; 0.000396 &amp; 0.000044 \\
+0     &amp; 0.206 &amp; 0.0396   &amp; 0.00396  &amp; 0.00044 \\
+0     &amp; 0     &amp; 0.206    &amp; 0.0396   &amp; 0.0044 \\
+0     &amp; 0     &amp; 0        &amp; 0.206    &amp; 0.044 \\
+0     &amp; 0     &amp; 0        &amp; 0        &amp; 0.25 \\
+\end{bmatrix} $$</p>
+<p>$$ \vec{s} = \begin{bmatrix} 2.06 &amp; 0.396 &amp; 1.0696 &amp; 1.02596 &amp; 0.19844 \end{bmatrix}$$</p>
+<p>We can confidently say that the recycler will produce:</p>
+<ul>
+<li>2.06 normal iron plates/s</li>
+<li>0.396 uncommon iron plates/s</li>
+<li>1.0696 rare iron plates/s</li>
+<li>1.02596 epic iron plates/s</li>
+<li>0.19844 legendary iron plates/s</li>
+</ul>
+<h2 id="next-step-pure-recycling-looppostsfactorio-pure-recycling-loop">
+  Next step: <a href="https://dfamonteiro.com/posts/factorio-pure-recycling-loop/" ><strong>Pure Recycling Loop</strong></a>
+  <a class="heading-link" href="#next-step-pure-recycling-looppostsfactorio-pure-recycling-loop">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>We have a mathematical foundation firmly set in place. Our attention will now turn towards solving specific quality grinding scenarios starting with the simplest of them all: a <a href="https://dfamonteiro.com/posts/factorio-pure-recycling-loop/" >pure recycling loop</a>.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>I&rsquo;m particularly fond of the effort and research that has gone into <a href="https://tuprints.ulb.tu-darmstadt.de/17621/8/thesis.pdf"  class="external-link" target="_blank" rel="noopener">belt balancers</a>.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>Or a recycler, crusher, smelter, etc. All of them are valid quality module recipients.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+  
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
