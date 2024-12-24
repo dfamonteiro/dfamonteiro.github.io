@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 08 Dec 2024 13:52:39 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 15 Dec 2024 23:42:06 +0000</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solving the mathematics of Factorio Quality: Pure Recycler Loop</title>
+      <link>https://dfamonteiro.com/posts/factorio-pure-recycler-loop/</link>
+      <pubDate>Sun, 15 Dec 2024 23:42:06 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/factorio-pure-recycler-loop/</guid>
+      <description>The pure recycler loop is the simplest possible way to grind for legendary items, making it the logical next step of our quality analysis journey. Armed with the knowledge we gained from the previous post of this series, we&amp;rsquo;re going to calculate the efficiency of this quality grinding method and do some statistical analysis of how the production of quality items is affected by the quality chance of the recyclers.</description>
+    </item>
     <item>
       <title>Solving the mathematics of Factorio Quality: The Fundamentals</title>
       <link>https://dfamonteiro.com/posts/factorio-quality-1/</link>

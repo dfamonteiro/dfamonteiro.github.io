@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Factio on Daniel&#39;s blog</title>
+    <link>http://localhost:1313/tags/factio/</link>
+    <description>Recent content in Factio on Daniel&#39;s blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 15 Dec 2024 23:42:06 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/factio/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solving the mathematics of Factorio Quality: Pure Recycler Loop</title>
+      <link>http://localhost:1313/posts/factorio-pure-recycler-loop/</link>
+      <pubDate>Sun, 15 Dec 2024 23:42:06 +0000</pubDate>
+      <guid>http://localhost:1313/posts/factorio-pure-recycler-loop/</guid>
+      <description>The pure recycler loop is the simplest possible way to grind for legendary items, making it the logical next step of our quality analysis journey. Armed with the knowledge we gained from the previous post of this series&#xA;Example of a pure recycler loop setup&#xD;</description>
+    </item>
+  </channel>
+</rss>
