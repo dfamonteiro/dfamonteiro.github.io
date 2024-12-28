@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Solving the mathematics of Factorio Quality: Asteroid Chunk Recycling · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="Asteroid chunk recycling is one of the the most effective methods to get legendary resources in Factorio. It is one of the more unique quality grinding setups you&rsquo;ll ever find, but the calculations needed to assess the efficiency of this method are quite straightforward, as it will be shown in this blog post. Please note that I will assume that the reader has read my analysis of pure recyler loops.">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Solving the mathematics of Factorio Quality: Asteroid Chunk Recycling">
+  <meta name="twitter:description" content="Asteroid chunk recycling is one of the the most effective methods to get legendary resources in Factorio. It is one of the more unique quality grinding setups you’ll ever find, but the calculations needed to assess the efficiency of this method are quite straightforward, as it will be shown in this blog post. Please note that I will assume that the reader has read my analysis of pure recyler loops.">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/factorio-asteroid-chunk-recycling/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Solving the mathematics of Factorio Quality: Asteroid Chunk Recycling">
+  <meta property="og:description" content="Asteroid chunk recycling is one of the the most effective methods to get legendary resources in Factorio. It is one of the more unique quality grinding setups you’ll ever find, but the calculations needed to assess the efficiency of this method are quite straightforward, as it will be shown in this blog post. Please note that I will assume that the reader has read my analysis of pure recyler loops.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-12-27T16:59:26+00:00">
+    <meta property="article:modified_time" content="2024-12-27T16:59:26+00:00">
+    <meta property="article:tag" content="Maths">
+    <meta property="article:tag" content="Programming">
+    <meta property="article:tag" content="Factorio Quality">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/factorio-asteroid-chunk-recycling/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.ed30115a76cdaa62f2229e973d5b1c89b2d3dd4b1d9c07a729baad06aa3b0cbe.css" integrity="sha256-7TARWnbNqmLyIp6XPVscibLT3UsdnAenKbqtBqo7DL4=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/factorio-asteroid-chunk-recycling/">
+              Solving the mathematics of Factorio Quality: Asteroid Chunk Recycling
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-12-27T16:59:26Z">
+                December 27, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/maths/">Maths</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/factorio-quality/">Factorio Quality</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+</script>
+<p>Asteroid chunk recycling is one of the the most effective methods to get legendary resources in Factorio. It is one of the more unique quality grinding setups you&rsquo;ll ever find, but the calculations needed to assess the efficiency of this method are quite straightforward, as it will be shown in this blog post. Please note that I will assume that the reader has read my analysis of <a href="https://dfamonteiro.com/posts/factorio-pure-recycler-loop/" >pure recyler loops</a>.</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/quality-recycling-screenshot.jpg" alt="The 3 tiers of quality modules"/>
+    <figcaption>Screenshot of an asteroid chunk recycling setup.<br>(image source: <a href="https://youtu.be/gZCFnG8HDCA?si=gj-YBPIGAiUe_OTY&t=2297">Konage</a>)</figcaption>
+</div>
+<h2 id="simply-a-better-version-of-the-pure-recycler-loop">
+  Simply a better version of the pure recycler loop
+  <a class="heading-link" href="#simply-a-better-version-of-the-pure-recycler-loop">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The core mechanic that enables asteroid chunk recycling is the ability to reprocess asteroids chunks with quality modules in the crushers:</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/asteroid-reprocessing-recipes.png" alt="Quality upgrade probability table generalized for any quality chance Q"/>
+    <figcaption> The reprocessing recipes for all three asteroid types. <br>(image source: <a href="https://wiki.factorio.com/Crusher">Factorio Wiki</a>)</figcaption>
+</div>
+<p>At first glance, calculating the efficiency of this setup might seem incredibly complicated, but there is a key simplification that will make our lives a whole lot easier: <strong>we don&rsquo;t care about the type of asteroid we get</strong>. After all, we can use the very same reprocessing recipes to get whichever type of asteroid chunk is needed.</p>
+<p>With this knowledge in hand, we can simply treat the crusher as a recycler with only 2 module slots and a production ratio of 0.8. We can even use the python functions written in the previous blog post to save a bunch of work:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pure_recycler_loop <span style="color:#f92672">import</span> recycler_loop, recycler_matrix
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Let&#39;s lean on the functions from pure_recycler_loop.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">asteroid_crusher_matrix</span>(quality_chance : float) <span style="color:#f92672">-&gt;</span> np<span style="color:#f92672">.</span>ndarray:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> recycler_matrix(quality_chance, production_ratio<span style="color:#f92672">=</span><span style="color:#ae81ff">0.8</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">asteroid_crusher_loop</span>(
+</span></span><span style="display:flex;"><span>        input_vector : float,
+</span></span><span style="display:flex;"><span>        quality_chance : float,
+</span></span><span style="display:flex;"><span>        quality_to_keep : int <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">-&gt;</span> np<span style="color:#f92672">.</span>ndarray:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> recycler_loop(input_vector, quality_chance, quality_to_keep, production_ratio<span style="color:#f92672">=</span><span style="color:#ae81ff">0.8</span>)
+</span></span></code></pre></div><p>We have everything needed to do our statistical analysis, but I still want to see how a crusher production matrix looks like (assume that the quality chance $q$ is 5%):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(asteroid_crusher_matrix(<span style="color:#ae81ff">5</span>))
+</span></span></code></pre></div><p>$$ C_{5} = \begin{bmatrix}
+0.76 &amp; 0.036 &amp; 0.0036 &amp; 0.00036 &amp; 0.00004 \\
+0    &amp; 0.76  &amp; 0.036  &amp; 0.0036  &amp; 0.0004 \\
+0    &amp; 0     &amp; 0.76   &amp; 0.036   &amp; 0.004 \\
+0    &amp; 0     &amp; 0      &amp; 0.76    &amp; 0.04 \\
+0    &amp; 0     &amp; 0      &amp; 0       &amp; 0 \\
+\end{bmatrix}$$</p>
+<h2 id="statistical-analysis">
+  Statistical analysis
+  <a class="heading-link" href="#statistical-analysis">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>A good portion of the statistical analysis I&rsquo;m about to make was already done in the exact same way in the <a href="https://dfamonteiro.com/posts/factorio-pure-recycler-loop/" >previous blog post</a>, so it&rsquo;s understandable if you have a feeling of <em>déjà vu</em>.</p>
+<h3 id="number-of-normal-asteroids-needed-to-craft-a-legendary-asteroid">
+  Number of normal asteroids needed to craft a legendary asteroid
+  <a class="heading-link" href="#number-of-normal-asteroids-needed-to-craft-a-legendary-asteroid">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>indices <span style="color:#f92672">=</span> list(range(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">13</span>)) <span style="color:#f92672">+</span> [<span style="color:#ae81ff">12.4</span>]
+</span></span><span style="display:flex;"><span>ratios <span style="color:#f92672">=</span> [float(<span style="color:#ae81ff">1</span><span style="color:#f92672">/</span>asteroid_crusher_loop(<span style="color:#ae81ff">1</span>, i)[<span style="color:#ae81ff">4</span>]) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>indices<span style="color:#e6db74">=}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>ratios<span style="color:#e6db74">=}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># indices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12.4]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ratios=[10658.332544237915, 2916.0000561843026, 1231.4670876459584, 643.8607287181613, 384.0000047970801, 250.63328840475552, 174.71534904370753, 128.05539424941833, 97.6291795243653, 76.83200027295233, 62.06060624879639, 51.22968018283643, 47.698631555272826]</span>
+</span></span></code></pre></div><pre style="text-align:center" class="mermaid">
+---
+config:
+  theme: dark
+---
+xychart-beta
+    title "Normal items needed to craft a legendary item"
+    x-axis "Quality chance (%)" [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12.4]
+    y-axis "Number of normal items" 0 --> 11000
+    line [10658.332544237915, 2916.0000561843026, 1231.4670876459584, 643.8607287181613, 384.0000047970801, 250.63328840475552, 174.71534904370753, 128.05539424941833, 97.6291795243653, 76.83200027295233, 62.06060624879639, 51.22968018283643, 47.698631555272826]
+</pre>
+<pre style="text-align:center" class="mermaid">
+---
+config:
+  theme: dark
+---
+xychart-beta
+    title "Normal items needed to craft a legendary item (starting from 5%)"
+    x-axis "Quality chance (%)" [5, 6, 7, 8, 9, 10, 11, 12, 12.4]
+    y-axis "Number of normal items" 0 --> 400
+    line [384.0000047970801, 250.63328840475552, 174.71534904370753, 128.05539424941833, 97.6291795243653, 76.83200027295233, 62.06060624879639, 51.22968018283643, 47.698631555272826]
+</pre>
+<h3 id="efficiency-of-asteroid-chunk-recycling-for-every-quality-level">
+  Efficiency of asteroid chunk recycling for every quality level
+  <a class="heading-link" href="#efficiency-of-asteroid-chunk-recycling-for-every-quality-level">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In the charts below, the lines are color-coded to match their quality level&rsquo;s color (green for common, blue for rare, etc).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>indices <span style="color:#f92672">=</span> list(range(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">13</span>)) <span style="color:#f92672">+</span> [<span style="color:#ae81ff">12.4</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>uncommon  <span style="color:#f92672">=</span> [float(asteroid_crusher_loop(<span style="color:#ae81ff">100</span>, i, <span style="color:#ae81ff">2</span>)[<span style="color:#ae81ff">1</span>]) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices]
+</span></span><span style="display:flex;"><span>rare      <span style="color:#f92672">=</span> [float(asteroid_crusher_loop(<span style="color:#ae81ff">100</span>, i, <span style="color:#ae81ff">3</span>)[<span style="color:#ae81ff">2</span>]) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices]
+</span></span><span style="display:flex;"><span>epic      <span style="color:#f92672">=</span> [float(asteroid_crusher_loop(<span style="color:#ae81ff">100</span>, i, <span style="color:#ae81ff">4</span>)[<span style="color:#ae81ff">3</span>]) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices]
+</span></span><span style="display:flex;"><span>legendary <span style="color:#f92672">=</span> [float(asteroid_crusher_loop(<span style="color:#ae81ff">100</span>, i, <span style="color:#ae81ff">5</span>)[<span style="color:#ae81ff">4</span>]) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>uncommon<span style="color:#e6db74">=}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>rare<span style="color:#e6db74">=}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>epic<span style="color:#e6db74">=}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>legendary<span style="color:#e6db74">=}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># uncommon=[3.4615384615260094, 6.6666666666465115, 9.642857142830861, 12.413793103415511, 14.999999999958789, 17.41935483866937, 19.687499999959517, 21.818181818139728, 23.82352941171918, 25.714285714234272, 27.49999999995658, 29.189189189135714, 29.83957219245846]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># rare=[0.465976331353591, 1.1111111110940393, 1.8941326530371276, 2.782401902468548, 3.749999999959269, 4.7762747137958605, 5.844726562452839, 6.942148760279247, 8.057958477466594, 9.18367346933998, 10.312499999943766, 11.439006574092652, 11.887957905523466]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># epic=[0.06272758306376097, 0.1851851851747421, 0.3720617711167263, 0.623641805702194, 0.9374999999701643, 1.3096237118236027, 1.7351531982007549, 2.2088655146028944, 2.7254859555867896, 3.2798833818761275, 3.8671874999424296, 4.48285392765304, 4.736111571954229]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># legendary=[0.009382330798851889, 0.034293552803847605, 0.08120395796876448, 0.15531309335629098, 0.26041666663694074, 0.3989893028560425, 0.572359561880939, 0.7809120505857308, 1.0242839375283508, 1.3015410245193235, 1.6113281249513514, 1.9519934519426527, 2.096496209768022]</span>
+</span></span></code></pre></div><pre style="text-align:center" class="mermaid" id="asteroid-chunk-recycling-loop-efficiency-chart">
+---
+config:
+  theme: dark
+---
+xychart-beta
+    title "Efficiency of asteroid chunk recycling"
+    x-axis "Quality chance (%)" [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12.4]
+    y-axis "Efficiency (%)" 0 --> 30
+    line [3.4615384615260094, 6.6666666666465115, 9.642857142830861, 12.413793103415511, 14.999999999958789, 17.41935483866937, 19.687499999959517, 21.818181818139728, 23.82352941171918, 25.714285714234272, 27.49999999995658, 29.189189189135714, 29.83957219245846]
+    line [0.465976331353591, 1.1111111110940393, 1.8941326530371276, 2.782401902468548, 3.749999999959269, 4.7762747137958605, 5.844726562452839, 6.942148760279247, 8.057958477466594, 9.18367346933998, 10.312499999943766, 11.439006574092652, 11.887957905523466]
+    line [0.06272758306376097, 0.1851851851747421, 0.3720617711167263, 0.623641805702194, 0.9374999999701643, 1.3096237118236027, 1.7351531982007549, 2.2088655146028944, 2.7254859555867896, 3.2798833818761275, 3.8671874999424296, 4.48285392765304, 4.736111571954229]
+    line [0.009382330798851889, 0.034293552803847605, 0.08120395796876448, 0.15531309335629098, 0.26041666663694074, 0.3989893028560425, 0.572359561880939, 0.7809120505857308, 1.0242839375283508, 1.3015410245193235, 1.6113281249513514, 1.9519934519426527, 2.096496209768022]
+</pre>
+<style>
+#asteroid-chunk-recycling-loop-efficiency-chart svg[aria-roledescription="xychart"] g.line-plot-0 path {stroke: #3eec57 !important;}
+#asteroid-chunk-recycling-loop-efficiency-chart svg[aria-roledescription="xychart"] g.line-plot-1 path {stroke: #2495ff !important;}
+#asteroid-chunk-recycling-loop-efficiency-chart svg[aria-roledescription="xychart"] g.line-plot-2 path {stroke: #c400ff !important;}
+#asteroid-chunk-recycling-loop-efficiency-chart svg[aria-roledescription="xychart"] g.line-plot-3 path {stroke: #ff9500 !important;}
+</style>
+<p>The fact that we don&rsquo;t even need a separate chart for epic and legendary efficiency speaks volumes about how good asteroid recycling is. If you have normal T3 quality modules the efficiency will be 0.26%, otherwise if you happen to have legendary T3 quality modules, the efficiency improves by an order of magnitude to 2.0964%<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>.</p>
+<h3 id="number-of-crushers-required-per-quality-level">
+  Number of crushers required per quality level
+  <a class="heading-link" href="#number-of-crushers-required-per-quality-level">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>When you build these asteroid reprocessing ships you can probably wing it with the amount of crushers you use for every quality level and be completely fine. However, we can do better with the tools we have at our disposal.
+Let&rsquo;s assume that we&rsquo;re feeding a full belt of asteroid chunks to the system:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(asteroid_crusher_loop(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">12.4</span>)[:<span style="color:#ae81ff">4</span>])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># [3.34224599 0.9973119  0.3973248  0.1582925 ]</span>
+</span></span></code></pre></div><p>As you might recall from the <a href="https://dfamonteiro.com/posts/factorio-pure-recycler-loop/#basic-analysis-of-the-function-recycler_loops-output" >previous blog post</a>, the first four values of this function represent the internal flow of the system. Knowing this, we can infer that in order to fully process a full green belt of asteroid chunks we need:</p>
+<ul>
+<li>Enough common asteroid crushers to process 3.34 belts (~371 crushers).</li>
+<li>Enough uncommon asteroid crushers to process 1 belt (~111 crushers).</li>
+<li>Enough rare asteroid crushers to process 0.4 belts (~45 crushers).</li>
+<li>Enough epic asteroid crushers to process 0.16 belts (~18 crushers).</li>
+</ul>
+<p>Building a ship with this many crushers would be a massive undertaking (and it would require a fusion plant big enough to power Liechtenstein<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>). Instead of constraining the asteroid recycling setup by the input belt, let&rsquo;s limit ourselves by the number of epic asteroid crushers in the setup:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(asteroid_crusher_loop(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">12.4</span>)[:<span style="color:#ae81ff">4</span>] <span style="color:#f92672">/</span> asteroid_crusher_loop(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">12.4</span>)[<span style="color:#ae81ff">3</span>])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># [21.1143675   6.30043693  2.51006712  1.        ]</span>
+</span></span></code></pre></div><p>For every epic asteroid crusher in the setup we need:</p>
+<ul>
+<li>2.51 rare asteroid crushers.
+<ul>
+<li>x2.51 increase relative to the number of epic asteroid crushers.</li>
+</ul>
+</li>
+<li>6.3 uncommon asteroid crushers.
+<ul>
+<li>x2.51 increase relative to the number of rare asteroid crushers.</li>
+</ul>
+</li>
+<li>21.11 common asteroid crushers.
+<ul>
+<li>x3.35 increase relative to the number of uncommon asteroid crushers.</li>
+</ul>
+</li>
+</ul>
+<h4 id="my-personal-asteroid-crusher-count-recommendation">
+  My personal asteroid crusher count recommendation
+  <a class="heading-link" href="#my-personal-asteroid-crusher-count-recommendation">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Having only one epic asteroid crusher is quite annoying because you have to switch between 3 different recipes on demand. I personally prefer having an asteroid crushing setup with 3 epic asteroid crushers, one for each recipe:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(asteroid_crusher_loop(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">12.4</span>)[:<span style="color:#ae81ff">4</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">/</span> asteroid_crusher_loop(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">12.4</span>)[<span style="color:#ae81ff">3</span>])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># [63.3431025  18.9013108   7.53020136  3.        ]</span>
+</span></span></code></pre></div><p>Here is my personal recommendation:</p>
+<ul>
+<li>60 common asteroid crushers (I&rsquo;d organize them in 4 rows of 15).</li>
+<li>18 uncommon asteroid crushers</li>
+<li>9 rare asteroid crushers (slight overkill, but I want to keep every number divisible by 3)</li>
+<li>3 epic asteroid crushers (one for each asteroid type)</li>
+</ul>
+<h2 id="next-step-recycler-assembler-loopspostsfactorio-recycler-assembler-loop">
+  Next step: <a href="https://dfamonteiro.com/posts/factorio-recycler-assembler-loop/" ><strong>recycler-assembler loops</strong></a>
+  <a class="heading-link" href="#next-step-recycler-assembler-loopspostsfactorio-recycler-assembler-loop">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The only quality grinding setup that remains to be analysed is the recycler-assembler loop. That will be the goal of the <a href="https://dfamonteiro.com/posts/factorio-recycler-assembler-loop/" >next</a> (and final) blog post of this series.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>This is consistent with the results <a href="https://youtu.be/gZCFnG8HDCA?si=2veyz-4isrfpC62v&amp;t=2383"  class="external-link" target="_blank" rel="noopener">other people</a> have been getting.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>Power required by 545 crushers: 304.11MW. Average power consumption of the Principality of Liechtenstein in 2015: 44.9MW.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+  
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

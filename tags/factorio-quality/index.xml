@@ -6,8 +6,15 @@
     <description>Recent content in Factorio Quality on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 15 Dec 2024 23:42:06 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 27 Dec 2024 16:59:26 +0000</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/tags/factorio-quality/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solving the mathematics of Factorio Quality: Asteroid Chunk Recycling</title>
+      <link>https://dfamonteiro.com/posts/factorio-asteroid-chunk-recycling/</link>
+      <pubDate>Fri, 27 Dec 2024 16:59:26 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/factorio-asteroid-chunk-recycling/</guid>
+      <description>Asteroid chunk recycling is one of the the most effective methods to get legendary resources in Factorio. It is one of the more unique quality grinding setups you&amp;rsquo;ll ever find, but the calculations needed to assess the efficiency of this method are quite straightforward, as it will be shown in this blog post. Please note that I will assume that the reader has read my analysis of pure recyler loops.</description>
+    </item>
     <item>
       <title>Solving the mathematics of Factorio Quality: Pure Recycler Loop</title>
       <link>https://dfamonteiro.com/posts/factorio-pure-recycler-loop/</link>
