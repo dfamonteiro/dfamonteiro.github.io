@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+<head>
   <title>
   Solving the mathematics of Factorio Quality: Recycler-Assembler Loop · Daniel&#39;s blog
 </title>
@@ -13,19 +13,19 @@
 
 
 <meta name="author" content="Daniel Monteiro">
-<meta name="description" content="Daniel Monteiro&#39;s personal website">
+<meta name="description" content="The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality.">
 <meta name="keywords" content="blog,developer,personal,engineering">
 
 
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Solving the mathematics of Factorio Quality: Recycler-Assembler Loop">
-  <meta name="twitter:description" content="Daniel Monteiro&#39;s personal website">
+  <meta name="twitter:description" content="The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality.">
 
-<meta property="og:url" content="http://localhost:1313/posts/factorio-recycler-assembler-loop/">
+<meta property="og:url" content="https://dfamonteiro.com/posts/factorio-recycler-assembler-loop/">
   <meta property="og:site_name" content="Daniel&#39;s blog">
   <meta property="og:title" content="Solving the mathematics of Factorio Quality: Recycler-Assembler Loop">
-  <meta property="og:description" content="Daniel Monteiro&#39;s personal website">
+  <meta property="og:description" content="The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality.">
   <meta property="og:locale" content="en">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -38,17 +38,17 @@
 
 
 
-<link rel="canonical" href="http://localhost:1313/posts/factorio-recycler-assembler-loop/">
+<link rel="canonical" href="https://dfamonteiro.com/posts/factorio-recycler-assembler-loop/">
 
 
-<link rel="preload" href="http://localhost:1313/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="http://localhost:1313/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="http://localhost:1313/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
 
 
   
   
-  <link rel="stylesheet" href="http://localhost:1313/css/coder.css" media="screen">
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.ed30115a76cdaa62f2229e973d5b1c89b2d3dd4b1d9c07a729baad06aa3b0cbe.css" integrity="sha256-7TARWnbNqmLyIp6XPVscibLT3UsdnAenKbqtBqo7DL4=" crossorigin="anonymous" media="screen" />
 
 
 
@@ -58,7 +58,7 @@
   
     
     
-    <link rel="stylesheet" href="http://localhost:1313/css/coder-dark.css" media="screen">
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
   
 
 
@@ -68,15 +68,15 @@
 
 
 
-<link rel="icon" type="image/svg+xml" href="http://localhost:1313/images/favicon.svg" sizes="any">
-<link rel="icon" type="image/png" href="http://localhost:1313/images/favicon-32x32.png" sizes="32x32">
-<link rel="icon" type="image/png" href="http://localhost:1313/images/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
 
-<link rel="apple-touch-icon" href="http://localhost:1313/images/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="http://localhost:1313/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
 
-<link rel="manifest" href="http://localhost:1313/site.webmanifest">
-<link rel="mask-icon" href="http://localhost:1313/images/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
 
 
 
@@ -106,7 +106,7 @@
     <nav class="navigation">
   <section class="container">
     
-    <a class="navigation-title" href="http://localhost:1313/">
+    <a class="navigation-title" href="https://dfamonteiro.com/">
       Daniel&#39;s blog
     </a>
     
@@ -119,11 +119,11 @@
         
           
             <li class="navigation-item">
-              <a class="navigation-link " href="http://localhost:1313/posts/">Blog</a>
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link " href="http://localhost:1313/about/">About</a>
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
             </li>
           
         
@@ -141,7 +141,7 @@
       <header>
         <div class="post-title">
           <h1 class="title">
-            <a class="title-link" href="http://localhost:1313/posts/factorio-recycler-assembler-loop/">
+            <a class="title-link" href="https://dfamonteiro.com/posts/factorio-recycler-assembler-loop/">
               Solving the mathematics of Factorio Quality: Recycler-Assembler Loop
             </a>
           </h1>
@@ -156,7 +156,7 @@
             </span>
             <span class="reading-time">
               <i class="fa-solid fa-clock" aria-hidden="true"></i>
-              0-minute read
+              18-minute read
             </span>
           </div>
           
@@ -164,15 +164,15 @@
           <div class="tags">
   <i class="fa-solid fa-tag" aria-hidden="true"></i>
     <span class="tag">
-      <a href="http://localhost:1313/tags/maths/">Maths</a>
+      <a href="https://dfamonteiro.com/tags/maths/">Maths</a>
     </span>
       <span class="separator">•</span>
     <span class="tag">
-      <a href="http://localhost:1313/tags/programming/">Programming</a>
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
     </span>
       <span class="separator">•</span>
     <span class="tag">
-      <a href="http://localhost:1313/tags/factorio-quality/">Factorio Quality</a>
+      <a href="https://dfamonteiro.com/tags/factorio-quality/">Factorio Quality</a>
     </span></div>
 
         </div>
@@ -180,7 +180,518 @@
 
       <div class="post-content">
         
-        
+        <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+</script>
+<p>The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality. Emulating a recycler-assembler loop is slightly more complex than the <a href="https://dfamonteiro.com/posts/factorio-pure-recycler-loop/" >pure recycling loops</a> we have dealt with previously, but the same fundamental ideas still apply. Please note that functions from previous blog posts will be reused here.</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/factorio-recycler-assembler-loop.webp" alt="Example of a recycler-assembler loop setup"/>
+    <figcaption> Example of a recycler-assembler loop setup. <br> (Credit for this design: <a href="https://youtu.be/Z1BEXm4RIfs?si=XCf6b7F-cjY_5G5E&t=584">Konage</a>)</figcaption>
+</div>
+<h2 id="unrolling-the-infinite-loop">
+  Unrolling the infinite loop
+  <a class="heading-link" href="#unrolling-the-infinite-loop">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Before we start crafting transition matrices, we need to figure out a way to deal with the outputs of the system getting fed back into the system<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>:</p>
+<pre style="text-align:center" class="mermaid">
+---
+title: Conceptual model of a recycler-assembler loop
+config:
+  theme: dark
+---
+flowchart TD
+    A[Ingredient Input] -->|Q=0 Ingredients| B[Assembler]
+    B -->|Q<=4 Items| C[Recycler]
+    C -->|Q<=4 Ingredients| B
+    B -->|Q=5 Items| D[Q5 Item Storage]
+    C -->|Q=5 Ingredients| E[Q5 Ingredient Storage]
+</pre>
+<p>Notice how I&rsquo;m using &ldquo;Q&rdquo; as a shorthand for the level of quality of the items. Q=1 means common items and Q=5 means legendary items.</p>
+<p>Finding a way to get around loops is never easy. Fortunately for us, we can take a page from a compiler optimization book and unroll the loop:</p>
+<pre style="text-align:center" class="mermaid">
+---
+title: Conceptual model of a recycler-assembler loop, unrolled into an infinite line
+config:
+  theme: dark
+---
+flowchart TD
+    A[Ingredient Input] --> A0
+    A0 -->|Q<=4 Items| R0
+    A0 -->|Q=5 Items| END[Q5 Item/Ingredient Storage]
+
+    R0 -->|Q=5 Ingredients| END
+    R0 -->|Q<=4 Ingredients| A1
+
+    A1 -->|Q=5 Items| END
+    A1 -->|Q<=4 Items| R1
+
+    R1 -->|Q=5 Ingredients| END
+    R1 -->|Q<=4 Ingredients|An[An]
+
+    An -->|Q=5 Items| END
+    An -->|Q<=4 Items|Rn1[Rn]
+
+    Rn1 -->|Q=5 Ingredients| END
+    Rn1 -->|Q<=4 Ingredients|Rn2[...]
+</pre>
+<p>Doing this trick does get rid of the loop and gives us a more workable linear problem. Unfortunately, this comes at a cost of having to handle the recycler-assembler line being theoretically infinite. In practice, the system runs out of materials very quickly because all the materials that don&rsquo;t get voided will eventually turn into legendary items/ingredients and will get removed from the system.</p>
+<h2 id="crafting-a-transition-matrix">
+  Crafting a transition matrix
+  <a class="heading-link" href="#crafting-a-transition-matrix">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="an-initial-approach">
+  An initial approach
+  <a class="heading-link" href="#an-initial-approach">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In theory, we could use the techniques we created in previous blog posts to calculate the outputs of this recycler-assembler line. We would need to know:</p>
+<ul>
+<li>The <a href="https://dfamonteiro.com/posts/factorio-quality-1/#building-the-production-matrix" >production matrix</a> of the recycler $R$.</li>
+<li>The production matrix of the assembler $A$.</li>
+<li>An input vector of ingredients $\vec{a_0}$.
+<ul>
+<li>Let&rsquo;s assume that $\vec{a_0}= \begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \end{bmatrix}$ by default.</li>
+</ul>
+</li>
+<li>What is the output of the system and what gets recycled (items/ingredients, and of which quality).
+<ul>
+<li>This information would be incorporated in $A$ and $R$ by zeroing out the necessary matrix rows.</li>
+</ul>
+</li>
+</ul>
+<p>The state of the system would be represented by two vectors $\vec{a_x}$ and $\vec{r_x}$, which respectively represent the amount of ingredients and items after iteration $x$. In order to process $\vec{a_x}$ into $\vec{r_x}$ and vice versa, you must use the production matrices $R$ and $A$:</p>
+<p>$$ \vec{a_x} = \vec{r_{x}} \cdot R $$</p>
+<p>$$ \vec{r_x} = \vec{a_{x-1}} \cdot A $$</p>
+<p>The final step would be to collect the production statistics after every iteration:</p>
+<p>$$ \vec{a} = \vec{a_0} + \vec{a_1} + \vec{a_2} + \vec{a_3} + \vec{a_4} + \vec{a_n} + \vec{a_{n+1}} + &hellip;$$</p>
+<p>$$ \vec{r} = \vec{r_1} + \vec{r_2} + \vec{r_3} + \vec{r_4} + \vec{r_n} + \vec{r_{n+1}} + &hellip;$$</p>
+<p>I theory, this approach would work. In practice, however, having to flip-flop between items and ingredient vectors constantly is very annoying, confusing and hard to implement correctly without bugs. Luckily, we can make our lives a lot easier by having the matrix do the flip-flopping for us.</p>
+<h3 id="introducing-stochastic-matriceshttpsenwikipediaorgwikistochastic_matrix">
+  Introducing <a href="https://en.wikipedia.org/wiki/Stochastic_matrix"  class="external-link" target="_blank" rel="noopener"><strong>stochastic matrices</strong></a>
+  <a class="heading-link" href="#introducing-stochastic-matriceshttpsenwikipediaorgwikistochastic_matrix">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>A stochastic matrix is a a square matrix whose values represent the probability of a state transitioning to another state<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>. They are incredibly useful in a multitude of scientific fields and are also known as probability matrices, Markov matrices, substitution matrices, or, as the <a href="https://wiki.factorio.com/Quality"  class="external-link" target="_blank" rel="noopener">Factorio wiki</a> prefers to call them, <strong>transition matrices</strong>.</p>
+<p>In our case, we have two states: <code>ingredient</code> and <code>item</code>. We also have two transitions: <code>item</code>-&gt;<code>ingredient</code> and <code>ingredient</code>-&gt;<code>item</code>. Creating the transition matrix $M$ for this simple use case is quite straightforward:</p>
+<p>$$ M = \begin{bmatrix}
+0 &amp; 1 \\
+1 &amp; 0 \\
+\end{bmatrix} $$</p>
+<p>Let&rsquo;s say that we have an input vector $\vec{v_0} = \begin{bmatrix} 1 &amp; 0\end{bmatrix}$ whose first value represents the ingredients and the second value represents the items. Let&rsquo;s multiply $\vec{v}$ by $M$:</p>
+<p>$$ \vec{v_1} = \vec{v_0} \cdot M = \begin{bmatrix} 1 &amp; 0\end{bmatrix} \cdot \begin{bmatrix}
+0 &amp; 1 \\
+1 &amp; 0 \\
+\end{bmatrix} = \begin{bmatrix} 0 &amp; 1\end{bmatrix}$$</p>
+<p>The values of the vector flipped! Let&rsquo;s try it again:</p>
+<p>$$ \vec{v_2} = \vec{v_1} \cdot M = \begin{bmatrix} 0 &amp; 1\end{bmatrix} \cdot \begin{bmatrix}
+0 &amp; 1 \\
+1 &amp; 0 \\
+\end{bmatrix} = \begin{bmatrix} 1 &amp; 0\end{bmatrix}$$</p>
+<p>The values flipped back!! This is exactly the behaviour we need from a matrix. Now we only have to find a way to fit our recycler and assembler matrices in $M$.</p>
+<h3 id="assembling-the-transition-matrix">
+  Assembling the transition matrix
+  <a class="heading-link" href="#assembling-the-transition-matrix">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>We have everything we need to assemble our transition matrix $T$. Let&rsquo;s assume that the assembler has a productivity of 50% and both the assembler and the recycler have a quality chance of 25%. Let&rsquo;s also assume that we only want to keep the legendary items of the loop. $A$ and $R$ would look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># The code and logic behind custom_production_matrix()</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># was already explained in previous blog posts.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(custom_production_matrix([(<span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">1.5</span>)] <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span>)) <span style="color:#75715e"># Assembler</span>
+</span></span><span style="display:flex;"><span>print(custom_production_matrix([(<span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">0.25</span>)] <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">+</span> [(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>)])) <span style="color:#75715e"># Recycler</span>
+</span></span></code></pre></div><p>$$ A = \begin{bmatrix}
+1.125 &amp; 0.3375 &amp; 0.03375 &amp; 0.003375 &amp; 0.000375\\
+0     &amp; 1.125  &amp; 0.3375  &amp; 0.03375  &amp; 0.00375 \\
+0     &amp; 0      &amp; 1.125   &amp; 0.3375   &amp; 0.0375  \\
+0     &amp; 0      &amp; 0       &amp; 1.125    &amp; 0.375   \\
+0     &amp; 0      &amp; 0       &amp; 0        &amp; 1.5     \\
+\end{bmatrix} $$</p>
+<p>$$ R = \begin{bmatrix}
+0.1875 &amp; 0.05625 &amp; 0.005625 &amp; 0.0005625 &amp; 0.0000625\\
+0      &amp; 0.1875  &amp; 0.05625  &amp; 0.005625  &amp; 0.000625 \\
+0      &amp; 0       &amp; 0.1875   &amp; 0.05625   &amp; 0.00625  \\
+0      &amp; 0       &amp; 0        &amp; 0.1875    &amp; 0.0625   \\
+0      &amp; 0       &amp; 0        &amp; 0         &amp; 0        \\
+\end{bmatrix} $$</p>
+<p>Notice how the last row of $R$ is zeroed out so that the legendary items are removed from our system. Let&rsquo;s design our transition matrix $T$ (with some inspiration from the stochastic matrix we created in the previous subchapter):</p>
+<p>$$T = \begin{bmatrix}
+0 &amp; A \\
+R &amp; 0 \\
+\end{bmatrix} $$</p>
+<p>The only thing left to do is to replace $A$ and $R$ with actual values:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">custom_transition_matrix</span>(
+</span></span><span style="display:flex;"><span>        recycler_matrix : np<span style="color:#f92672">.</span>ndarray,
+</span></span><span style="display:flex;"><span>        assembler_matrix : np<span style="color:#f92672">.</span>ndarray) <span style="color:#f92672">-&gt;</span> np<span style="color:#f92672">.</span>ndarray:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Creates a transition matrix based on the
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    provided recycler and assembler production matrices.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Args:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        recycler_matrix (np.ndarray): Recycler production matrix.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        assembler_matrix (np.ndarray): Assembler production matrix.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        np.ndarray: Transition matrix with the recycler production matrix
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        in the lower left and assembler production matrix in the upper right.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros((<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">10</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> j <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>            res[i <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>][j] <span style="color:#f92672">=</span> recycler_matrix[i, j]
+</span></span><span style="display:flex;"><span>            res[i][j <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>] <span style="color:#f92672">=</span> assembler_matrix[i, j]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    print(custom_transition_matrix(
+</span></span><span style="display:flex;"><span>        custom_production_matrix([(<span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">0.25</span>)] <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">+</span> [(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>)]),
+</span></span><span style="display:flex;"><span>        custom_production_matrix([(<span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">1.5</span>)] <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span>)
+</span></span><span style="display:flex;"><span>    ))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># [[0.     0.      0.       0.        0.        1.125 0.3375 0.03375 0.003375 0.000375]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.     0.      0.       0.        0.        0.    1.125  0.3375  0.03375  0.00375 ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.     0.      0.       0.        0.        0.    0.     1.125   0.3375   0.0375  ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.     0.      0.       0.        0.        0.    0.     0.      1.125    0.375   ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.     0.      0.       0.        0.        0.    0.     0.      0.       1.5     ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.1875 0.05625 0.005625 0.0005625 0.0000625 0.    0.     0.      0.       0.      ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.     0.1875  0.05625  0.005625  0.000625  0.    0.     0.      0.       0.      ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.     0.      0.1875   0.05625   0.00625   0.    0.     0.      0.       0.      ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.     0.      0.       0.1875    0.0625    0.    0.     0.      0.       0.      ]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  [0.     0.      0.       0.        0.        0.    0.     0.      0.       0.      ]]</span>
+</span></span></code></pre></div><p>$$ T = $$</p>
+<p>$$\small{\begin{bmatrix}
+0      &amp; 0       &amp; 0        &amp; 0         &amp; 0         &amp; 1.125 &amp; 0.3375 &amp; 0.03375 &amp; 0.003375 &amp; 0.000375 \\
+0      &amp; 0       &amp; 0        &amp; 0         &amp; 0         &amp; 0     &amp; 1.125  &amp; 0.3375  &amp; 0.03375  &amp; 0.00375  \\
+0      &amp; 0       &amp; 0        &amp; 0         &amp; 0         &amp; 0     &amp; 0      &amp; 1.125   &amp; 0.3375   &amp; 0.0375   \\
+0      &amp; 0       &amp; 0        &amp; 0         &amp; 0         &amp; 0     &amp; 0      &amp; 0       &amp; 1.125    &amp; 0.375    \\
+0      &amp; 0       &amp; 0        &amp; 0         &amp; 0         &amp; 0     &amp; 0      &amp; 0       &amp; 0        &amp; 1.5      \\
+0.1875 &amp; 0.05625 &amp; 0.005625 &amp; 0.0005625 &amp; 0.0000625 &amp; 0     &amp; 0      &amp; 0       &amp; 0        &amp; 0        \\
+0      &amp; 0.1875  &amp; 0.05625  &amp; 0.005625  &amp; 0.000625  &amp; 0     &amp; 0      &amp; 0       &amp; 0        &amp; 0        \\
+0      &amp; 0       &amp; 0.1875   &amp; 0.05625   &amp; 0.00625   &amp; 0     &amp; 0      &amp; 0       &amp; 0        &amp; 0        \\
+0      &amp; 0       &amp; 0        &amp; 0.1875    &amp; 0.0625    &amp; 0     &amp; 0      &amp; 0       &amp; 0        &amp; 0        \\
+0      &amp; 0       &amp; 0        &amp; 0         &amp; 0         &amp; 0     &amp; 0      &amp; 0       &amp; 0        &amp; 0        \\
+\end{bmatrix}} $$</p>
+<p>$T$ matches<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> the matrix in the <a href="https://wiki.factorio.com/Quality"  class="external-link" target="_blank" rel="noopener">Factorio wiki</a>, which is a good sign that we generated this matrix correctly:</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/transition-matrix-table-wiki.png" alt="Example of a transition matrix with P=50% and Q=25% from the Factorio Wiki"/>
+    <figcaption> Example of a transition matrix with P=50% and Q=25% from the <a href="https://wiki.factorio.com/Quality">Factorio Wiki</a>.</figcaption>
+</div>
+<h2 id="calculating-the-production-rate-of-the-infinite-recycler-assembler-line">
+  Calculating the production rate of the infinite recycler-assembler line
+  <a class="heading-link" href="#calculating-the-production-rate-of-the-infinite-recycler-assembler-line">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In order to get the total production of Q5 items (or ingredients), we have to add the Q5 production of every single recycler and assembler in the infinite chain:</p>
+<p>$$ \vec{t} = \vec{t_0} + \vec{t_1} + \vec{t_2} + \vec{t_3} + \vec{t_4} + \vec{t_n} + \vec{t_{n+1}} + &hellip;$$</p>
+<p>$\vec{t_x}$ is the state of the system after one loop of recycler and assembler $x$. The first five values represent the ingredients in the system (from Q0 in the first position to Q5 in the fifth position) and the last five values represent the items in the system (with the quality increasing from left to right likewise). $\vec{t_x}$ can be calculated in the following manner:</p>
+<p>$$ \vec{t_x} = \vec{t_{x-1}} \cdot T $$</p>
+<p>$T$ is the previously discussed transition matrix. $ \vec{t_0} $ represents the input of the system, which by default is a belt of common items:</p>
+<p>$$ \vec{t_0} = \begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \end{bmatrix} $$</p>
+<p>We have everything needed to start simulating a recycler-assembler loop. Luckily for us, the code that was written to simulate <a href="https://dfamonteiro.com/posts/factorio-pure-recycler-loop/#calculating-the-production-rate-of-the-infinite-recycler-line" >pure recycler loops</a> won&rsquo;t require too many tweaks to work with transition matrices:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>input_vector <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([<span style="color:#ae81ff">1</span>] <span style="color:#f92672">+</span> [<span style="color:#ae81ff">0</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">9</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Transition matrix from the previous chapter</span>
+</span></span><span style="display:flex;"><span>transition_matrix <span style="color:#f92672">=</span> custom_transition_matrix(
+</span></span><span style="display:flex;"><span>    custom_production_matrix([(<span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">0.25</span>)] <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">+</span> [(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>)]),
+</span></span><span style="display:flex;"><span>    custom_production_matrix([(<span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">1.5</span>)] <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>result_flows <span style="color:#f92672">=</span> [input_vector]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>    result_flows<span style="color:#f92672">.</span>append(result_flows[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">@</span> transition_matrix)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> sum(abs(result_flows[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">-</span> result_flows[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">1E-10</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># There&#39;s nothing left in the system</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(sum(result_flows))
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># [1.26732673 0.20327419 0.08342292 0.02966277 0.00632351 1.42574257 0.65640623 0.2052281  0.07266358 0.02497469]</span>
+</span></span></code></pre></div><p>Simulating a recycler-assembler loop with the transition matrix from the previous chapter yields the following result:</p>
+<p>$$\vec{t} = \begin{bmatrix} 1.267 &amp; 0.203 &amp; 0.083 &amp; 0.0297 &amp; 0.0063 &amp; 1.426 &amp; 0.656 &amp; 0.205 &amp; 0.073 &amp; 0.02497 \end{bmatrix}$$</p>
+<p>Feeding 1 belt of ingredients to this loop will result in 0.02497 belts of legendary items being produced. In other words, this setup has an efficiency of 2.497%.</p>
+<p>These are the fundamentals of simulating recycler-assembler loops. Now, all that remains to be done is to determine which questions about this quality grinding method should be asked, and how to answer them with the tools we have at our disposal.</p>
+<h2 id="the-recycler_assembler_loop-function">
+  The recycler_assembler_loop() function
+  <a class="heading-link" href="#the-recycler_assembler_loop-function">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The simulation code from the previous chapter works well enough for simple cases. Nevertheless, if we wish to simulate tons of variations in setups, we&rsquo;ll need a solution that doesn&rsquo;t involve having to manually calculate the productivity and quality chance of every row of the transition matrix.</p>
+<p>Having felt the need for a higher level approach to simulating recycler-assembler loops (so that I could stop dealing with productivity bonuses and quality chances and start dealing with quality and productivity modules), I came up with the following function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">recycler_assembler_loop</span>(
+</span></span><span style="display:flex;"><span>        input_vector : Union[np<span style="color:#f92672">.</span>array, float],
+</span></span><span style="display:flex;"><span>        assembler_modules_config : Union[Tuple[float, float], List[Tuple[float, float]]],
+</span></span><span style="display:flex;"><span>        items_quality_to_keep : Union[int, <span style="color:#66d9ef">None</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>,
+</span></span><span style="display:flex;"><span>        ingredients_quality_to_keep : Union[int, <span style="color:#66d9ef">None</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>,
+</span></span><span style="display:flex;"><span>        base_prod_bonus : float <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>        recipe_ratio : float <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>        prod_module_bonus : float <span style="color:#f92672">=</span> <span style="color:#ae81ff">25</span>,
+</span></span><span style="display:flex;"><span>        qual_module_bonus : float <span style="color:#f92672">=</span> <span style="color:#ae81ff">6.2</span>) <span style="color:#f92672">-&gt;</span> np<span style="color:#f92672">.</span>array:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># The docstring was cut from this code snippet for the sake of brevity</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> type(assembler_modules_config) <span style="color:#f92672">==</span> tuple:
+</span></span><span style="display:flex;"><span>        assembler_modules_config <span style="color:#f92672">=</span> [assembler_modules_config] <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Parameters for the production matrices</span>
+</span></span><span style="display:flex;"><span>    recycler_parameters  <span style="color:#f92672">=</span> get_recycler_parameters(
+</span></span><span style="display:flex;"><span>        items_quality_to_keep <span style="color:#66d9ef">if</span> items_quality_to_keep <span style="color:#f92672">!=</span> <span style="color:#66d9ef">None</span> <span style="color:#66d9ef">else</span> <span style="color:#ae81ff">6</span>,
+</span></span><span style="display:flex;"><span>        recipe_ratio,
+</span></span><span style="display:flex;"><span>        qual_module_bonus
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    assembler_parameters <span style="color:#f92672">=</span> get_assembler_parameters(
+</span></span><span style="display:flex;"><span>        assembler_modules_config,
+</span></span><span style="display:flex;"><span>        ingredients_quality_to_keep <span style="color:#66d9ef">if</span> ingredients_quality_to_keep <span style="color:#f92672">!=</span> <span style="color:#66d9ef">None</span> <span style="color:#66d9ef">else</span> <span style="color:#ae81ff">6</span>,
+</span></span><span style="display:flex;"><span>        base_prod_bonus,
+</span></span><span style="display:flex;"><span>        recipe_ratio,
+</span></span><span style="display:flex;"><span>        prod_module_bonus,
+</span></span><span style="display:flex;"><span>        qual_module_bonus
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> type(input_vector) <span style="color:#f92672">in</span> (float, int):
+</span></span><span style="display:flex;"><span>        input_vector <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array([input_vector] <span style="color:#f92672">+</span> [<span style="color:#ae81ff">0</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">9</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    result_flows <span style="color:#f92672">=</span> [input_vector]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        result_flows<span style="color:#f92672">.</span>append(
+</span></span><span style="display:flex;"><span>            result_flows[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">@</span> custom_transition_matrix(
+</span></span><span style="display:flex;"><span>                custom_production_matrix(recycler_parameters),
+</span></span><span style="display:flex;"><span>                custom_production_matrix(assembler_parameters)
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> sum(abs(result_flows[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">-</span> result_flows[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">1E-10</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># There&#39;s nothing left in the system</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> sum(result_flows)
+</span></span></code></pre></div><p>For the sake of keeping the the code snippet above as short as possible, I decided to leave out the auxiliary functions <code>get_recycler_parameters</code> and <code>get_assembler_parameters</code>, and the docstring for the function above<sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup>. Given that we don&rsquo;t have a doc string, I will instead explain below what this function does in writing.</p>
+<h3 id="recycler_assembler_loop-details">
+  recycler_assembler_loop() details
+  <a class="heading-link" href="#recycler_assembler_loop-details">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The <code>recycler_assembler_loop()</code> function simulates a recycler-assembler loop by unrolling the loop into a line and processing the ingredients and items in the system until there is nothing left. The successive states of the system are then all added up and returned as a vector with 10 values. The first five values represent the ingredients and the last five values represent the items, going from common to legendary.</p>
+<p>The values of the vector mean different things, depending on whether items/ingredients of that quality are kept or reprocessed by the system:</p>
+<ul>
+<li><strong>If they are kept</strong>: the value is the <strong>production rate</strong> of ingredients/items of that quality level.</li>
+<li><strong>If they are reprocessed</strong>: the value is the <strong>internal flow rate</strong> of ingredients/items of that quality level in the system.</li>
+</ul>
+<p>This function has eight arguments:</p>
+<ul>
+<li><code>input_vector</code>: The input vector of the system.</li>
+<li><code>assembler_modules_config</code>: The module configuration (i.e. number of productivity and quality modules) of the assemblers of the system. Some examples:
+<ul>
+<li>Let&rsquo;s say that you want to load every assembler with quality modules: <code>(0, 4)</code>.</li>
+<li>Now let&rsquo;s say that we want to load the legendary item crafter with productivity modules instead: <code>[(0, 4), (0, 4), (0, 4), (0, 4), (4, 0)]</code>.</li>
+</ul>
+</li>
+<li><code>items_quality_to_keep</code>: Minimum quality level of the items to be removed from the system. If set to <code>None</code>, nothing is removed and all items are reprocessed.</li>
+<li><code>ingredients_quality_to_keep</code>: Minimum quality level of the ingredients to be removed from the system. If set to <code>None</code>, nothing is removed and all ingredients are reprocessed.</li>
+<li><code>base_prod_bonus</code>: Base productivity of assembler + productivity technologies (as a %).</li>
+<li><code>recipe_ratio</code> Ratio of items to ingredients of the crafting recipe.</li>
+<li><code>prod_module_bonus</code>: Productivity bonus from productivity modules. Defaults to 25%.</li>
+<li><code>qual_module_bonus</code>: Quality chance bonus from quality modules. Defaults to 6.2%.</li>
+</ul>
+<p>With this function, we will be able to easily calculate the efficiency of every possible module allocation in the assemblers of the loop.</p>
+<h2 id="statistical-analysis">
+  Statistical analysis
+  <a class="heading-link" href="#statistical-analysis">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In this final chapter, we will focus on calculating the efficiency of every relevant module configuration for every type of assembler. We will have to control for four variables:</p>
+<ul>
+<li>Number of modules (assembler-specific).</li>
+<li>Base productivity without modules (assembler-specific).</li>
+<li>What is the output of the system (<code>Ingredients</code> or <code>Items</code>)<sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup>.</li>
+<li>How should the modules be placed in the assemblers (<code>FullQuality</code>, <code>FullProductivity</code>, <code>Optimize</code>).</li>
+</ul>
+<p>The input to the system will consist of a belt of normal ingredients.</p>
+<p>The function below takes the four previously mentioned variables as arguments and outputs an efficiency value as a percentage:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">recycler_assembler_efficiency</span>(
+</span></span><span style="display:flex;"><span>        module_slots : int,
+</span></span><span style="display:flex;"><span>        base_productivity : float,
+</span></span><span style="display:flex;"><span>        system_output : SystemOutput,
+</span></span><span style="display:flex;"><span>        module_strategy : ModuleStrategy) <span style="color:#f92672">-&gt;</span> float:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Returns the efficiency of the setup with the given parameters (%).&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">assert</span> module_slots <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">and</span> base_productivity <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> system_output <span style="color:#f92672">==</span> SystemOutput<span style="color:#f92672">.</span>ITEMS:
+</span></span><span style="display:flex;"><span>        keep_items <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        keep_ingredients <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>: <span style="color:#75715e"># system_output == SystemOutput.INGREDIENTS:</span>
+</span></span><span style="display:flex;"><span>        keep_items <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>        keep_ingredients <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># What is the output of the system: ingredients or items?</span>
+</span></span><span style="display:flex;"><span>    result_index <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span> <span style="color:#66d9ef">if</span> system_output <span style="color:#f92672">==</span> SystemOutput<span style="color:#f92672">.</span>INGREDIENTS <span style="color:#66d9ef">else</span> <span style="color:#ae81ff">9</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> module_strategy <span style="color:#f92672">!=</span> ModuleStrategy<span style="color:#f92672">.</span>OPTIMIZE:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> module_strategy <span style="color:#f92672">==</span> ModuleStrategy<span style="color:#f92672">.</span>FULL_PRODUCTIVITY:
+</span></span><span style="display:flex;"><span>            config <span style="color:#f92672">=</span> (module_slots, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            config <span style="color:#f92672">=</span> (<span style="color:#ae81ff">0</span>, module_slots)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        output <span style="color:#f92672">=</span> recycler_assembler_loop(
+</span></span><span style="display:flex;"><span>            <span style="color:#ae81ff">100</span>, config, keep_items, keep_ingredients, base_productivity)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> output[result_index]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        best_config <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>        best_efficiency <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        all_configs <span style="color:#f92672">=</span> get_all_configs(module_slots)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> config <span style="color:#f92672">in</span> tqdm(list(all_configs)):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> config[<span style="color:#ae81ff">4</span>] <span style="color:#f92672">!=</span> (module_slots, <span style="color:#ae81ff">0</span>):
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Makes no sense to put quality modules on legendary item crafter</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">continue</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            output <span style="color:#f92672">=</span> recycler_assembler_loop(
+</span></span><span style="display:flex;"><span>                <span style="color:#ae81ff">100</span>, list(config), keep_items, keep_ingredients, base_productivity)
+</span></span><span style="display:flex;"><span>            efficiency <span style="color:#f92672">=</span> float(output[result_index])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> best_efficiency <span style="color:#f92672">&lt;</span> efficiency:
+</span></span><span style="display:flex;"><span>                best_config <span style="color:#f92672">=</span> config
+</span></span><span style="display:flex;"><span>                best_efficiency <span style="color:#f92672">=</span> efficiency
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> best_efficiency
+</span></span></code></pre></div><p>Let&rsquo;s say that we want to calculate the efficiency of a recycler-assembler loop with cryogenic plants where you only take the items and the module configuration is optimized:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>recycler_assembler_efficiency(<span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">0</span>, SystemOutput<span style="color:#f92672">.</span>ITEMS, ModuleStrategy<span style="color:#f92672">.</span>OPTIMIZE)<span style="color:#e6db74">}</span><span style="color:#e6db74">%&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 14.505597006563411%</span>
+</span></span></code></pre></div><p>Alternatively, you might want to use EM plants instead:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>recycler_assembler_efficiency(<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">50</span>, SystemOutput<span style="color:#f92672">.</span>ITEMS, ModuleStrategy<span style="color:#f92672">.</span>OPTIMIZE)<span style="color:#e6db74">}</span><span style="color:#e6db74">%&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 7.556345820541531%</span>
+</span></span></code></pre></div><p>And what if you&rsquo;re crafting blue circuits and have 10 levels of blue circuit productivity?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>productivity_research <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>efficiency <span style="color:#f92672">=</span> recycler_assembler_efficiency(
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">50</span> <span style="color:#f92672">+</span> productivity_research <span style="color:#f92672">*</span> <span style="color:#ae81ff">10</span>, SystemOutput<span style="color:#f92672">.</span>ITEMS, ModuleStrategy<span style="color:#f92672">.</span>OPTIMIZE)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>efficiency<span style="color:#e6db74">}</span><span style="color:#e6db74">%&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 156.67377286511638%</span>
+</span></span></code></pre></div><p>Woah, 156.67%?! We&rsquo;re pretty much getting 3 legendary items for every two common ingredients. The reason for this anomaly is the absurdly high level of productivity of the EM plants (275%) and the fact that our input belt of ingredients transforms into 3.75 belts of items before being touched by a single recycler. In matter of fact, if we get to level 13 of blue circuit productivity we should hit an &ldquo;efficiency&rdquo; of 400%, which reflects a limit imposed by the game to prevent net-positive recycling loops:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>productivity_research <span style="color:#f92672">=</span> <span style="color:#ae81ff">13</span>
+</span></span><span style="display:flex;"><span>efficiency <span style="color:#f92672">=</span> recycler_assembler_efficiency(
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">50</span> <span style="color:#f92672">+</span> productivity_research <span style="color:#f92672">*</span> <span style="color:#ae81ff">10</span>, SystemOutput<span style="color:#f92672">.</span>ITEMS, ModuleStrategy<span style="color:#f92672">.</span>OPTIMIZE)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>efficiency<span style="color:#e6db74">}</span><span style="color:#e6db74">%&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 399.9999999999473%</span>
+</span></span></code></pre></div><p>If we change the system output to ingredients, the efficiency number should make a lot more sense:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>productivity_research <span style="color:#f92672">=</span> <span style="color:#ae81ff">13</span>
+</span></span><span style="display:flex;"><span>efficiency <span style="color:#f92672">=</span> recycler_assembler_efficiency(
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">50</span> <span style="color:#f92672">+</span> productivity_research <span style="color:#f92672">*</span> <span style="color:#ae81ff">10</span>, SystemOutput<span style="color:#f92672">.</span>INGREDIENTS, ModuleStrategy<span style="color:#f92672">.</span>OPTIMIZE)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>efficiency<span style="color:#e6db74">}</span><span style="color:#e6db74">%&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 99.99999999998285%</span>
+</span></span></code></pre></div><p>As expected, the system is lossless.</p>
+<h3 id="efficiency-table-for-all-assembler-types">
+  Efficiency table for all assembler types
+  <a class="heading-link" href="#efficiency-table-for-all-assembler-types">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The only thing we haven&rsquo;t done yet<sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup> is a table with every possible assembler type and every possible system output and module strategy combination:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>DATA <span style="color:#f92672">=</span> { <span style="color:#75715e"># (number of slots, base productivity)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Electric furnace/Centrifuge&#34;</span> : (<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">0</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Chemical Plant&#34;</span>              : (<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">0</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Assembling machine&#34;</span>          : (<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">0</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Foundry/Biochamber&#34;</span>          : (<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">50</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Electromagnetic plant&#34;</span>       : (<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">50</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Cryogenic plant&#34;</span>             : (<span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">0</span>),
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>OUTPUTS <span style="color:#f92672">=</span> (SystemOutput<span style="color:#f92672">.</span>ITEMS, SystemOutput<span style="color:#f92672">.</span>INGREDIENTS)
+</span></span><span style="display:flex;"><span>STRATEGIES <span style="color:#f92672">=</span> (
+</span></span><span style="display:flex;"><span>    ModuleStrategy<span style="color:#f92672">.</span>FULL_QUALITY,
+</span></span><span style="display:flex;"><span>    ModuleStrategy<span style="color:#f92672">.</span>FULL_PRODUCTIVITY,
+</span></span><span style="display:flex;"><span>    ModuleStrategy<span style="color:#f92672">.</span>OPTIMIZE
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>KEY_NAMES <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    (SystemOutput<span style="color:#f92672">.</span>ITEMS, ModuleStrategy<span style="color:#f92672">.</span>FULL_QUALITY) : <span style="color:#e6db74">&#34;(D) Quality only, max items&#34;</span>,
+</span></span><span style="display:flex;"><span>    (SystemOutput<span style="color:#f92672">.</span>ITEMS, ModuleStrategy<span style="color:#f92672">.</span>FULL_PRODUCTIVITY) : <span style="color:#e6db74">&#34;(E) Prod only, max items&#34;</span>,
+</span></span><span style="display:flex;"><span>    (SystemOutput<span style="color:#f92672">.</span>ITEMS, ModuleStrategy<span style="color:#f92672">.</span>OPTIMIZE) : <span style="color:#e6db74">&#34;(F) Optimal modules, max items&#34;</span>,
+</span></span><span style="display:flex;"><span>    (SystemOutput<span style="color:#f92672">.</span>INGREDIENTS, ModuleStrategy<span style="color:#f92672">.</span>FULL_QUALITY) : <span style="color:#e6db74">&#34;(G) Quality only, max ingredients&#34;</span>,
+</span></span><span style="display:flex;"><span>    (SystemOutput<span style="color:#f92672">.</span>INGREDIENTS, ModuleStrategy<span style="color:#f92672">.</span>FULL_PRODUCTIVITY) : <span style="color:#e6db74">&#34;(H) Prod only, max ingredients&#34;</span>,
+</span></span><span style="display:flex;"><span>    (SystemOutput<span style="color:#f92672">.</span>INGREDIENTS, ModuleStrategy<span style="color:#f92672">.</span>OPTIMIZE) : <span style="color:#e6db74">&#34;(I) Optimal modules, max ingredients&#34;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>table <span style="color:#f92672">=</span> {key : {} <span style="color:#66d9ef">for</span> key <span style="color:#f92672">in</span> DATA}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> assembler_type, (slots, base_prod) <span style="color:#f92672">in</span> DATA<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> output <span style="color:#f92672">in</span> OUTPUTS:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> strategy <span style="color:#f92672">in</span> STRATEGIES:
+</span></span><span style="display:flex;"><span>            eff <span style="color:#f92672">=</span> recycler_assembler_efficiency(slots, base_prod, output, strategy)
+</span></span><span style="display:flex;"><span>            table[assembler_type][KEY_NAMES[(output, strategy)]] <span style="color:#f92672">=</span> eff
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(pandas<span style="color:#f92672">.</span>DataFrame(table)<span style="color:#f92672">.</span>T<span style="color:#f92672">.</span>to_string())
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                      (D) Quality only, (E) Prod only, (F) Optimal modules, (G) Quality only,  (H) Prod only, (I) Optimal modules,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                              max items      max items            max items   max ingredients max ingredients      max ingredients</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Electric furnace/Centrifuge   0.264155       0.197364             0.324414          0.156426       0.131576              0.174408</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Chemical Plant                0.435917       0.418846             0.656637          0.234063       0.239340              0.312047</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Assembling machine            0.646313       0.861710             1.251900          0.323126       0.430855              0.539714</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Foundry/Biochamber            2.452490       3.503164             4.124319          1.001224       1.401265              1.547671</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Electromagnetic plant         3.322265       7.074719             7.556346          1.299017       2.572625              2.657463</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Cryogenic plant               1.866389      14.505597            14.505597          0.786774       4.835199              4.835199</span>
+</span></span></code></pre></div><p>The values of this table perfectly match the <a href="https://docs.google.com/spreadsheets/d/1IOgJuv9Vb7EXnHDPqRLjJeQpZrYCCjy3GQkYl73_ylk/edit?gid=0#gid=0"  class="external-link" target="_blank" rel="noopener">work</a> done by <a href="https://www.youtube.com/@KonageYoutube"  class="external-link" target="_blank" rel="noopener">Konage</a>:</p>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/konage-table.png" alt="Konage table"/>
+    <figcaption> Screenshot of <a href="https://www.youtube.com/@KonageYoutube">Konage</a>'s <a href="https://docs.google.com/spreadsheets/d/1fGQry4MZ6S95vWrt59TQoNRy1yJMx-er202ai0r4R-w/edit?gid=0#gid=0">spreadsheet</a>.</figcaption>
+</div>
+<p>This will conclude our statistical analysis of recycler-assembler loops. We only scratched the tip of the iceberg<sup id="fnref1:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup> here, but this blog post is already way too long.</p>
+<h2 id="next-step-up-to-you-to-decide">
+  Next step? Up to you to decide
+  <a class="heading-link" href="#next-step-up-to-you-to-decide">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This marks the end our journey unveiling the mathematical underpinnings of Factorio&rsquo;s Quality feature. Please do note that there&rsquo;s plenty left still to uncover and analyse (refer to this tooltip<sup id="fnref2:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup>), but if you reached this far you have every tool on your belt to chart a path by yourself.<sup id="fnref:8"><a href="#fn:8" class="footnote-ref" role="doc-noteref">8</a></sup> I&rsquo;m no longer needed.</p>
+<p>Lastly, I would like to thank you, the reader, for reading this blog post/series of blog posts. I hope you learned something interesting along the way.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>Productivity modules are only allowed under certain circumstances in the assembling step, whereas quality modules are always allowed in both the recycling and assembling steps.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>You might be getting a strong feeling of <em>déjà vu</em> if you have already read &ldquo;<a href="https://dfamonteiro.com/posts/factorio-pure-recycler-loop/" >Solving the mathematics of Factorio Quality: Pure Recycler Loop</a>&rdquo; previously.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>There is an argument to be made that the quality and production matrices used throughout this series of blog posts <em>are</em> stochastic matrices.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>The <code>1</code> in the bottom right corner of the wiki table doesn&rsquo;t match with $T$. This is expected because I calculate the production rates in a slightly different way than most people do.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p>All the code written for this series of blog posts can be found <a href="https://github.com/dfamonteiro/blog/tree/main/Factorio%20Quality"  class="external-link" target="_blank" rel="noopener">here</a>.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:6">
+<p>Outputting both legendary items and ingredients is also a valid possiblility, but we won&rsquo;t consider that today.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:7">
+<p>I&rsquo;m paraphrasing here. There&rsquo;s a ton of topics we haven&rsquo;t touched in this series of blog posts, such as having inputs with some quality items/ingredients already, internal flow analysis of recycler-assembler loops (i.e. why it still makes sense to use legendary quality modules in lossless loops), efficiency of recycler-assembler loops when you feed it items instead of ingredients to name a few.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref2:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:8">
+<p>If you are looking for a more practical approach to quality, I heartily recommend Konage&rsquo;s <a href="https://www.reddit.com/r/factorio/comments/1hhzpbb/comprehensive_quality_guide_get_everything"  class="external-link" target="_blank" rel="noopener">comprehensive quality guide</a>.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
       </div>
 
 
@@ -223,7 +734,7 @@
   <section class="container">
     ©
     
-    2024
+    2025
      Daniel Monteiro 
     ·
     
@@ -238,7 +749,7 @@
 
   
   
-  <script src="http://localhost:1313/js/coder.js"></script>
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
   
 
   

@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 27 Dec 2024 16:59:26 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 28 Dec 2024 22:09:26 +0000</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solving the mathematics of Factorio Quality: Recycler-Assembler Loop</title>
+      <link>https://dfamonteiro.com/posts/factorio-recycler-assembler-loop/</link>
+      <pubDate>Sat, 28 Dec 2024 22:09:26 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/factorio-recycler-assembler-loop/</guid>
+      <description>The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality.</description>
+    </item>
     <item>
       <title>Solving the mathematics of Factorio Quality: Asteroid Chunk Recycling</title>
       <link>https://dfamonteiro.com/posts/factorio-asteroid-chunk-recycling/</link>
