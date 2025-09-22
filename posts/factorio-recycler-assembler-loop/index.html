@@ -13,19 +13,20 @@
 
 
 <meta name="author" content="Daniel Monteiro">
-<meta name="description" content="The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality.">
+<meta name="description" content="
+The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality. Emulating a recycler-assembler loop is slightly more complex than the pure recycling loops we have dealt with previously, but the same fundamental ideas still apply. Please note that functions from previous blog posts will be reused here.">
 <meta name="keywords" content="blog,developer,personal,engineering">
 
 
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Solving the mathematics of Factorio Quality: Recycler-Assembler Loop">
-  <meta name="twitter:description" content="The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality.">
+  <meta name="twitter:description" content="The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality. Emulating a recycler-assembler loop is slightly more complex than the pure recycling loops we have dealt with previously, but the same fundamental ideas still apply. Please note that functions from previous blog posts will be reused here.">
 
 <meta property="og:url" content="https://dfamonteiro.com/posts/factorio-recycler-assembler-loop/">
   <meta property="og:site_name" content="Daniel&#39;s blog">
   <meta property="og:title" content="Solving the mathematics of Factorio Quality: Recycler-Assembler Loop">
-  <meta property="og:description" content="The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality.">
+  <meta property="og:description" content="The recycler-assembler loop is probably the most commonly used quality grinding method in Factorio. It is a two step looping process where in the first step, the ingredients are crafted by an assembler into items, which are then recycled back into ingredients. By having quality and productivity1 modules in both the assembling and the recycling steps, the quality and items and ingredients in the loop will eventually improve all the way to legendary quality. Emulating a recycler-assembler loop is slightly more complex than the pure recycling loops we have dealt with previously, but the same fundamental ideas still apply. Please note that functions from previous blog posts will be reused here.">
   <meta property="og:locale" content="en">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -48,7 +49,7 @@
 
   
   
-  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.7763f8bc6341ecf82378e867c285e1549abb063a899be313ccd25dbfcd24fa7d.css" integrity="sha256-d2P4vGNB7PgjeOhnwoXhVJq7BjqJm&#43;MTzNJdv80k&#43;n0=" crossorigin="anonymous" media="screen" />
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.022594d625780e2edf64581b893d32cb35c11de5d88953ea4ad3c2e45451e214.css" integrity="sha256-AiWU1iV4Di7fZFgbiT0yyzXBHeXYiVPqStPC5FRR4hQ=" crossorigin="anonymous" media="screen" />
 
 
 
@@ -275,9 +276,9 @@ flowchart TD
 <p>$$ \vec{a} = \vec{a_0} + \vec{a_1} + \vec{a_2} + \vec{a_3} + \vec{a_4} + \vec{a_n} + \vec{a_{n+1}} + &hellip;$$</p>
 <p>$$ \vec{r} = \vec{r_1} + \vec{r_2} + \vec{r_3} + \vec{r_4} + \vec{r_n} + \vec{r_{n+1}} + &hellip;$$</p>
 <p>I theory, this approach would work. In practice, however, having to flip-flop between items and ingredient vectors constantly is very annoying, confusing and hard to implement correctly without bugs. Luckily, we can make our lives a lot easier by having the matrix do the flip-flopping for us.</p>
-<h3 id="introducing-stochastic-matriceshttpsenwikipediaorgwikistochastic_matrix">
+<h3 id="introducing-stochastic-matrices">
   Introducing <a href="https://en.wikipedia.org/wiki/Stochastic_matrix"  class="external-link" target="_blank" rel="noopener"><strong>stochastic matrices</strong></a>
-  <a class="heading-link" href="#introducing-stochastic-matriceshttpsenwikipediaorgwikistochastic_matrix">
+  <a class="heading-link" href="#introducing-stochastic-matrices">
     <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
@@ -758,9 +759,6 @@ R &amp; 0 \\
 
 
   
-  
-
-
 
   
 

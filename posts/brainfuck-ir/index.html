@@ -50,7 +50,7 @@
 
   
   
-  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.7763f8bc6341ecf82378e867c285e1549abb063a899be313ccd25dbfcd24fa7d.css" integrity="sha256-d2P4vGNB7PgjeOhnwoXhVJq7BjqJm&#43;MTzNJdv80k&#43;n0=" crossorigin="anonymous" media="screen" />
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.022594d625780e2edf64581b893d32cb35c11de5d88953ea4ad3c2e45451e214.css" integrity="sha256-AiWU1iV4Di7fZFgbiT0yyzXBHeXYiVPqStPC5FRR4hQ=" crossorigin="anonymous" media="screen" />
 
 
 
@@ -326,7 +326,7 @@
 </span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#39;&gt;&#39;</span> <span style="color:#f92672">=&gt;</span> OpCode::MoveRight(len),
 </span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#39;+&#39;</span> <span style="color:#f92672">=&gt;</span> OpCode::Increment(len <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>),
 </span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#39;-&#39;</span> <span style="color:#f92672">=&gt;</span> OpCode::Decrement(len <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>),
-</span></span><span style="display:flex;"><span>                        _ <span style="color:#f92672">=&gt;</span> panic!(),
+</span></span><span style="display:flex;"><span>                        _ <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">panic!</span>(),
 </span></span><span style="display:flex;"><span>                    };
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>                    res.push(opcode);
@@ -411,7 +411,7 @@
 </span></span><span style="display:flex;"><span>                OpCode::MoveRight(i) <span style="color:#f92672">=&gt;</span> self.mem_pointer <span style="color:#f92672">+=</span> i,
 </span></span><span style="display:flex;"><span>                OpCode::Zero <span style="color:#f92672">=&gt;</span> self.memory[self.mem_pointer] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
 </span></span><span style="display:flex;"><span>                OpCode::Read <span style="color:#f92672">=&gt;</span> self.read_input(),
-</span></span><span style="display:flex;"><span>                OpCode::Write <span style="color:#f92672">=&gt;</span> print!(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#34;</span>, self.memory[self.mem_pointer] <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">char</span>),
+</span></span><span style="display:flex;"><span>                OpCode::Write <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">print!</span>(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#34;</span>, self.memory[self.mem_pointer] <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">char</span>),
 </span></span><span style="display:flex;"><span>                _ <span style="color:#f92672">=&gt;</span> (),
 </span></span><span style="display:flex;"><span>            }
 </span></span></code></pre></div><p>The code pointer manipulation logic is handled separately to ensure that it is done correctly:</p>
@@ -518,9 +518,6 @@
 
 
   
-  
-
-
 
   
 

@@ -6,42 +6,49 @@
     <description>Recent content in Motorsport on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 06 Jan 2024 02:26:37 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 20 Sep 2025 18:51:17 +0100</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/tags/motorsport/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Analysing karting lap times for fun and profit</title>
+      <link>https://dfamonteiro.com/posts/karting/</link>
+      <pubDate>Sat, 20 Sep 2025 18:51:17 +0100</pubDate>
+      <guid>https://dfamonteiro.com/posts/karting/</guid>
+      <description>&lt;p&gt;Recently, as part of a team-building activity, me and a bunch of work colleagues went to a karting track. The format was quite simple: 5 minutes of practice/qualifying, followed by a 15 minute race. I went to this karting affair with absolutely no racing experience other than playing Gran Turismo 5&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; and watching way too much Formula 1, and did pretty well in qualifying, starting P3! Unfortunately my lack of experience surfaced during the race and I spun a couple of times in a tricky hairpin, and as a result I ended up P7 by the checkered flag.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Applying clustering techniques to the F1 2024 schedule for fun and profit</title>
       <link>https://dfamonteiro.com/posts/f1-clustering/</link>
       <pubDate>Sat, 06 Jan 2024 02:26:37 +0000</pubDate>
       <guid>https://dfamonteiro.com/posts/f1-clustering/</guid>
-      <description>I was finishing my Formula 1 Cornering Performance Breakdown project when I came up with the idea of using the existing code infrastructure to generate cornering data for every track on the 2024 calendar. As part of that project, I tagged every corner with a tag highlighting how fast that corner is. With that information, I can determine how much time is spent on each type of corner. The remainder of the time in lap, which isn’t spent negotiating a corner, is the time the drivers spend at full throttle on a lap, tagged below as STRAIGHT.</description>
+      <description>&lt;p&gt;I was finishing my &lt;a href=&#34;https://github.com/dfamonteiro/Formula-1-Cornering-Performance-Breakdown&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Formula 1 Cornering Performance Breakdown&lt;/a&gt; project when I came up with the idea of using the existing code infrastructure to generate cornering data for every track on the 2024 calendar. As part of that project, I tagged every corner with a tag highlighting how fast that corner is. With that information, I can determine how much time is spent on each type of corner. The remainder of the time in lap, which isn’t spent negotiating a corner, is the time the drivers spend at full throttle on a lap, tagged below as &lt;strong&gt;STRAIGHT&lt;/strong&gt;.&lt;/p&gt;</description>
     </item>
     <item>
       <title>The Formula 1 ATR rules have to account for dominance</title>
       <link>https://dfamonteiro.com/posts/f1-atr/</link>
       <pubDate>Sun, 03 Dec 2023 22:00:08 +0000</pubDate>
       <guid>https://dfamonteiro.com/posts/f1-atr/</guid>
-      <description>Dominance is a common occurrence in Formula 1. While most other forms of motorsport have made efforts to limit the amount of design freedom that teams have (to save costs), F1 and MotoGP swim against the current and remain the only premier competitions where pretty much everything is bespoke1. This leads to the creation of incredible works of engineering in the form of the fastest racing bikes and cars on this planet.</description>
+      <description>&lt;p&gt;Dominance is a common occurrence in Formula 1. While most other forms of motorsport have made efforts to limit the amount of design freedom that teams have (to save costs), F1 and MotoGP swim against the current and remain the only premier competitions where pretty much everything is bespoke&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. This leads to the creation of incredible works of engineering in the form of the fastest racing bikes and cars on this planet. Still, it also carries a grave risk of having a season entirely dominated by a manufacturer: RedBull has won 21/22 races in 2023, and Ducati had a similar MotoGP performance in the same year.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Formula 1&#39;s cost cap could be improved: here&#39;s how</title>
       <link>https://dfamonteiro.com/posts/cost-cap-f1/</link>
       <pubDate>Sat, 16 Jul 2022 00:52:04 +0100</pubDate>
       <guid>https://dfamonteiro.com/posts/cost-cap-f1/</guid>
-      <description>The introduction of the cost cap in Formula 1 has allowed teams to do something they aren&amp;rsquo;t exactly well known to do: turning a profit. F1 teams suddenly had a business case that made sense for the first time since the inception of the sport and instantly saw their valuations skyrocket. It has also meant that the bigger F1 outfits have had to downsize to fit the cost cap, which led to a couple of interesting side effects1.</description>
+      <description>&lt;p&gt;The introduction of the cost cap in Formula 1 has allowed teams to do something they aren&amp;rsquo;t exactly well known to do: turning a profit. F1 teams suddenly had a business case that made sense for the first time since the inception of the sport and instantly saw their valuations skyrocket. It has also meant that the bigger F1 outfits have had to downsize to fit the cost cap, which led to a couple of &lt;em&gt;interesting side effects&lt;/em&gt;&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Can Formula E race at Macau?</title>
       <link>https://dfamonteiro.com/posts/macau_gen3/</link>
       <pubDate>Thu, 05 Aug 2021 19:33:17 +0100</pubDate>
       <guid>https://dfamonteiro.com/posts/macau_gen3/</guid>
-      <description>When it comes to historical races, the Monaco Grand Prix is definitely an odd one. Older than Formula 1 itself, it is F1&amp;rsquo;s most glamorous and most prestigious race on the calendar, featuring a track layout that remains largely unchanged1 since the race&amp;rsquo;s inception in 1929. Unfortunately, when it comes to on-track action, it is an absolutely dreadful race, with cars that are impossible to race on this track. So, when Formula E announced that the full track layout would be used for the 2021 Monaco E-Prix, people were hopeful that the premier electric series would provide a good race in this historical venue.</description>
+      <description>&lt;p&gt;When it comes to historical races, the Monaco Grand Prix is definitely an odd one. Older than Formula 1 itself, it is F1&amp;rsquo;s most glamorous and most prestigious race on the calendar, featuring a track layout that remains largely unchanged&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; since the race&amp;rsquo;s inception in 1929. Unfortunately, when it comes to on-track action, it is an absolutely dreadful race, with cars that are impossible to race on this track. So, when Formula E announced that the full track layout would be used for the 2021 Monaco E-Prix, people were hopeful that the premier electric series would provide a good race in this historical venue.&lt;/p&gt;</description>
     </item>
     <item>
       <title>How soon can a driver clinch the title: a nuanced analysis</title>
       <link>https://dfamonteiro.com/posts/championship-title-math/</link>
       <pubDate>Fri, 23 Jul 2021 21:40:37 +0100</pubDate>
       <guid>https://dfamonteiro.com/posts/championship-title-math/</guid>
-      <description>The 2020 Formula 1 championship was one of the most uncompetitive seasons in recent history. Facing an underpowered Ferrari1 and a RedBull plagued with rear instability problems, Mercedes in some people&amp;rsquo;s eyes had already won the title2 before even turning a wheel in a free practice session. Lewis Hamilton, however, did need to beat his teammate Valttery Bottas in order to win the driver&amp;rsquo;s championship, but anyone who watches F1 knows that Hamilton is simply on another level, compared to Bottas.</description>
+      <description>&lt;p&gt;The 2020 Formula 1 championship was one of the most uncompetitive seasons in recent history. Facing an underpowered Ferrari&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; and a RedBull plagued with rear instability problems, Mercedes in some people&amp;rsquo;s eyes had already won the title&lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; before even turning a wheel in a free practice session. Lewis Hamilton, however, did need to beat his teammate Valttery Bottas in order to win the driver&amp;rsquo;s championship, but anyone who watches F1 knows that Hamilton is simply on another level, compared to Bottas. Ultimately, Hamilton clinched the title with three races to go at the Turkish Grand Prix with a memorable charge through the field. Watching this domination, I wondered to myself: what is the theoretical soonest that a championship can be wrapped up? Lets find out.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

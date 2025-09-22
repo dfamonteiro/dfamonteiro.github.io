@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Analysing karting lap times for fun and profit · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="Recently, as part of a team-building activity, me and a bunch of work colleagues went to a karting track. The format was quite simple: 5 minutes of practice/qualifying, followed by a 15 minute race. I went to this karting affair with absolutely no racing experience other than playing Gran Turismo 51 and watching way too much Formula 1, and did pretty well in qualifying, starting P3! Unfortunately my lack of experience surfaced during the race and I spun a couple of times in a tricky hairpin, and as a result I ended up P7 by the checkered flag.">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Analysing karting lap times for fun and profit">
+  <meta name="twitter:description" content="Recently, as part of a team-building activity, me and a bunch of work colleagues went to a karting track. The format was quite simple: 5 minutes of practice/qualifying, followed by a 15 minute race. I went to this karting affair with absolutely no racing experience other than playing Gran Turismo 51 and watching way too much Formula 1, and did pretty well in qualifying, starting P3! Unfortunately my lack of experience surfaced during the race and I spun a couple of times in a tricky hairpin, and as a result I ended up P7 by the checkered flag.">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/karting/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Analysing karting lap times for fun and profit">
+  <meta property="og:description" content="Recently, as part of a team-building activity, me and a bunch of work colleagues went to a karting track. The format was quite simple: 5 minutes of practice/qualifying, followed by a 15 minute race. I went to this karting affair with absolutely no racing experience other than playing Gran Turismo 51 and watching way too much Formula 1, and did pretty well in qualifying, starting P3! Unfortunately my lack of experience surfaced during the race and I spun a couple of times in a tricky hairpin, and as a result I ended up P7 by the checkered flag.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-09-20T18:51:17+01:00">
+    <meta property="article:modified_time" content="2025-09-20T18:51:17+01:00">
+    <meta property="article:tag" content="Maths">
+    <meta property="article:tag" content="Motorsport">
+    <meta property="article:tag" content="Programming">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/karting/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.022594d625780e2edf64581b893d32cb35c11de5d88953ea4ad3c2e45451e214.css" integrity="sha256-AiWU1iV4Di7fZFgbiT0yyzXBHeXYiVPqStPC5FRR4hQ=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/karting/">
+              Analysing karting lap times for fun and profit
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2025-09-20T18:51:17&#43;01:00">
+                September 20, 2025
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              11-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/maths/">Maths</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/motorsport/">Motorsport</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>Recently, as part of a team-building activity, me and a bunch of work colleagues went to a karting track. The format was quite simple: 5 minutes of practice/qualifying, followed by a 15 minute race. I went to this karting affair with absolutely no racing experience other than playing Gran Turismo 5<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> and watching way too much Formula 1, and did pretty well in qualifying, starting P3! Unfortunately my lack of experience surfaced during the race and I spun a couple of times in a tricky hairpin, and as a result I ended up P7 by the checkered flag.</p>
+<p>We were about to leave the track, when something unexpected happened: they gave us two sheets with everyone&rsquo;s lap times, for both the qualifying and the race! We ended up spending the lunch poring over the data, with everyone comparing their lap times to everyone else&rsquo;s. That was when I got the idea: we have the raw lap time data, we could pull out some really neat statistics from it! I have seen plenty of F1 analytics Twitter accounts posting charts about Formula 1 qualifying and race sessions, it would be fun to do something similar for a race that in which I was an active participant.</p>
+<h2 id="parsing-the-lap-time-data">
+  Parsing the lap time data
+  <a class="heading-link" href="#parsing-the-lap-time-data">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The first step in this rather silly side project is to extract the lap times from the sheets given to us by the karting track. Sadly I don&rsquo;t have any silver bullets for you: I just sat down and copied the values by hand. It&rsquo;s easy to make a mistake with data entry, but luckily for us the sheets also came with an average lap time per driver, which I was able to compute and compare for a sanity check.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>QUALIFYING <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;FT&#34;</span>: [<span style="color:#e6db74">&#34;1:07.125&#34;</span>,   <span style="color:#e6db74">&#34;57.652&#34;</span>,   <span style="color:#e6db74">&#34;56.817&#34;</span>,   <span style="color:#e6db74">&#34;57.383&#34;</span>, <span style="color:#e6db74">&#34;1:00.082&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;MF&#34;</span>: [<span style="color:#e6db74">&#34;1:22.641&#34;</span>, <span style="color:#e6db74">&#34;1:05.738&#34;</span>,   <span style="color:#e6db74">&#34;58.961&#34;</span>,   <span style="color:#e6db74">&#34;57.832&#34;</span>, <span style="color:#e6db74">&#34;1:03.613&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;DM&#34;</span>: [<span style="color:#e6db74">&#34;1:17.055&#34;</span>, <span style="color:#e6db74">&#34;1:01.305&#34;</span>, <span style="color:#e6db74">&#34;1:14.781&#34;</span>,   <span style="color:#e6db74">&#34;59.715&#34;</span>, <span style="color:#e6db74">&#34;1:00.090&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;EO&#34;</span>: [<span style="color:#e6db74">&#34;1:13.242&#34;</span>, <span style="color:#e6db74">&#34;1:00.239&#34;</span>, <span style="color:#e6db74">&#34;1:00.554&#34;</span>,   <span style="color:#e6db74">&#34;59.805&#34;</span>, <span style="color:#e6db74">&#34;1:02.660&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;RM&#34;</span>: [<span style="color:#e6db74">&#34;1:26.934&#34;</span>, <span style="color:#e6db74">&#34;1:07.441&#34;</span>, <span style="color:#e6db74">&#34;1:02.844&#34;</span>, <span style="color:#e6db74">&#34;1:01.027&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;DL&#34;</span>: [<span style="color:#e6db74">&#34;1:05.973&#34;</span>, <span style="color:#e6db74">&#34;1:02.847&#34;</span>, <span style="color:#e6db74">&#34;1:02.590&#34;</span>, <span style="color:#e6db74">&#34;1:02.340&#34;</span>, <span style="color:#e6db74">&#34;1:01.649&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;FR&#34;</span>: [<span style="color:#e6db74">&#34;1:23.523&#34;</span>, <span style="color:#e6db74">&#34;1:13.407&#34;</span>, <span style="color:#e6db74">&#34;1:09.519&#34;</span>, <span style="color:#e6db74">&#34;1:04.473&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;RV&#34;</span>: [<span style="color:#e6db74">&#34;1:28.496&#34;</span>, <span style="color:#e6db74">&#34;1:10.340&#34;</span>, <span style="color:#e6db74">&#34;1:05.187&#34;</span>, <span style="color:#e6db74">&#34;1:07.911&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;MC&#34;</span>: [<span style="color:#e6db74">&#34;1:31.586&#34;</span>, <span style="color:#e6db74">&#34;1:14.031&#34;</span>, <span style="color:#e6db74">&#34;1:07.582&#34;</span>, <span style="color:#e6db74">&#34;1:05.520&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;JS&#34;</span>: [<span style="color:#e6db74">&#34;1:23.668&#34;</span>, <span style="color:#e6db74">&#34;1:18.141&#34;</span>, <span style="color:#e6db74">&#34;1:06.277&#34;</span>, <span style="color:#e6db74">&#34;1:08.086&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;TG&#34;</span>: [<span style="color:#e6db74">&#34;1:30.301&#34;</span>, <span style="color:#e6db74">&#34;1:17.484&#34;</span>, <span style="color:#e6db74">&#34;1:09.547&#34;</span>, <span style="color:#e6db74">&#34;1:18.750&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;MT&#34;</span>: [<span style="color:#e6db74">&#34;1:36.375&#34;</span>, <span style="color:#e6db74">&#34;1:21.176&#34;</span>, <span style="color:#e6db74">&#34;1:15.015&#34;</span>, <span style="color:#e6db74">&#34;1:13.414&#34;</span>],
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>RACE <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;FT&#34;</span>: [<span style="color:#e6db74">&#34;1:02.441&#34;</span>,   <span style="color:#e6db74">&#34;56.949&#34;</span>,   <span style="color:#e6db74">&#34;57.274&#34;</span>,   <span style="color:#e6db74">&#34;55.973&#34;</span>,   <span style="color:#e6db74">&#34;56.578&#34;</span>,   <span style="color:#e6db74">&#34;55.750&#34;</span>,   <span style="color:#e6db74">&#34;57.367&#34;</span>,   <span style="color:#e6db74">&#34;57.996&#34;</span>,   <span style="color:#e6db74">&#34;56.340&#34;</span>,   <span style="color:#e6db74">&#34;56.539&#34;</span>,   <span style="color:#e6db74">&#34;56.519&#34;</span>,   <span style="color:#e6db74">&#34;56.368&#34;</span>,   <span style="color:#e6db74">&#34;58.273&#34;</span>,   <span style="color:#e6db74">&#34;56.262&#34;</span>,   <span style="color:#e6db74">&#34;56.242&#34;</span>,   <span style="color:#e6db74">&#34;56.738&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;MF&#34;</span>: [<span style="color:#e6db74">&#34;1:04.832&#34;</span>,   <span style="color:#e6db74">&#34;56.730&#34;</span>,   <span style="color:#e6db74">&#34;56.809&#34;</span>,   <span style="color:#e6db74">&#34;58.492&#34;</span>,   <span style="color:#e6db74">&#34;56.922&#34;</span>,   <span style="color:#e6db74">&#34;57.012&#34;</span>,   <span style="color:#e6db74">&#34;56.730&#34;</span>,   <span style="color:#e6db74">&#34;57.649&#34;</span>, <span style="color:#e6db74">&#34;1:00.254&#34;</span>,   <span style="color:#e6db74">&#34;56.988&#34;</span>,   <span style="color:#e6db74">&#34;56.949&#34;</span>,   <span style="color:#e6db74">&#34;57.656&#34;</span>,   <span style="color:#e6db74">&#34;56.926&#34;</span>,   <span style="color:#e6db74">&#34;57.192&#34;</span>,   <span style="color:#e6db74">&#34;56.898&#34;</span>,   <span style="color:#e6db74">&#34;57.875&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;RM&#34;</span>: [<span style="color:#e6db74">&#34;1:05.293&#34;</span>, <span style="color:#e6db74">&#34;1:00.328&#34;</span>,   <span style="color:#e6db74">&#34;59.629&#34;</span>, <span style="color:#e6db74">&#34;1:00.051&#34;</span>,   <span style="color:#e6db74">&#34;58.464&#34;</span>,   <span style="color:#e6db74">&#34;58.551&#34;</span>,   <span style="color:#e6db74">&#34;58.313&#34;</span>,   <span style="color:#e6db74">&#34;58.441&#34;</span>,   <span style="color:#e6db74">&#34;59.285&#34;</span>,   <span style="color:#e6db74">&#34;58.844&#34;</span>,   <span style="color:#e6db74">&#34;57.625&#34;</span>,   <span style="color:#e6db74">&#34;57.641&#34;</span>,   <span style="color:#e6db74">&#34;58.043&#34;</span>,   <span style="color:#e6db74">&#34;57.961&#34;</span>,   <span style="color:#e6db74">&#34;57.957&#34;</span>,   <span style="color:#e6db74">&#34;56.828&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;DL&#34;</span>: [<span style="color:#e6db74">&#34;1:06.437&#34;</span>, <span style="color:#e6db74">&#34;1:01.700&#34;</span>,   <span style="color:#e6db74">&#34;59.628&#34;</span>,   <span style="color:#e6db74">&#34;58.184&#34;</span>,   <span style="color:#e6db74">&#34;58.012&#34;</span>, <span style="color:#e6db74">&#34;1:04.875&#34;</span>,   <span style="color:#e6db74">&#34;57.765&#34;</span>,   <span style="color:#e6db74">&#34;59.340&#34;</span>,   <span style="color:#e6db74">&#34;59.375&#34;</span>,   <span style="color:#e6db74">&#34;58.383&#34;</span>,   <span style="color:#e6db74">&#34;58.906&#34;</span>,   <span style="color:#e6db74">&#34;58.067&#34;</span>,   <span style="color:#e6db74">&#34;57.851&#34;</span>,   <span style="color:#e6db74">&#34;58.360&#34;</span>,   <span style="color:#e6db74">&#34;57.570&#34;</span>,   <span style="color:#e6db74">&#34;59.984&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;RV&#34;</span>: [<span style="color:#e6db74">&#34;1:05.672&#34;</span>, <span style="color:#e6db74">&#34;1:00.828&#34;</span>, <span style="color:#e6db74">&#34;1:06.399&#34;</span>, <span style="color:#e6db74">&#34;1:01.742&#34;</span>,   <span style="color:#e6db74">&#34;59.511&#34;</span>,   <span style="color:#e6db74">&#34;58.883&#34;</span>,   <span style="color:#e6db74">&#34;58.270&#34;</span>,   <span style="color:#e6db74">&#34;58.465&#34;</span>,   <span style="color:#e6db74">&#34;58.515&#34;</span>,   <span style="color:#e6db74">&#34;58.180&#34;</span>,   <span style="color:#e6db74">&#34;58.953&#34;</span>,   <span style="color:#e6db74">&#34;58.051&#34;</span>,   <span style="color:#e6db74">&#34;58.355&#34;</span>,   <span style="color:#e6db74">&#34;57.778&#34;</span>,   <span style="color:#e6db74">&#34;58.328&#34;</span>,   <span style="color:#e6db74">&#34;58.570&#34;</span>],  
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;EO&#34;</span>: [<span style="color:#e6db74">&#34;1:01.371&#34;</span>,   <span style="color:#e6db74">&#34;59.590&#34;</span>,   <span style="color:#e6db74">&#34;56.785&#34;</span>,   <span style="color:#e6db74">&#34;58.789&#34;</span>,   <span style="color:#e6db74">&#34;58.781&#34;</span>,   <span style="color:#e6db74">&#34;59.278&#34;</span>,   <span style="color:#e6db74">&#34;58.113&#34;</span>, <span style="color:#e6db74">&#34;1:00.621&#34;</span>,   <span style="color:#e6db74">&#34;59.742&#34;</span>, <span style="color:#e6db74">&#34;1:01.391&#34;</span>,   <span style="color:#e6db74">&#34;58.832&#34;</span>, <span style="color:#e6db74">&#34;1:01.023&#34;</span>, <span style="color:#e6db74">&#34;1:01.957&#34;</span>, <span style="color:#e6db74">&#34;1:09.274&#34;</span>, <span style="color:#e6db74">&#34;1:02.312&#34;</span>, <span style="color:#e6db74">&#34;1:03.426&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;DM&#34;</span>: [<span style="color:#e6db74">&#34;1:05.929&#34;</span>, <span style="color:#e6db74">&#34;1:01.957&#34;</span>, <span style="color:#e6db74">&#34;1:05.582&#34;</span>, <span style="color:#e6db74">&#34;1:02.762&#34;</span>, <span style="color:#e6db74">&#34;1:05.270&#34;</span>, <span style="color:#e6db74">&#34;1:03.050&#34;</span>,   <span style="color:#e6db74">&#34;59.492&#34;</span>,   <span style="color:#e6db74">&#34;59.555&#34;</span>,   <span style="color:#e6db74">&#34;58.590&#34;</span>, <span style="color:#e6db74">&#34;1:00.895&#34;</span>, <span style="color:#e6db74">&#34;1:00.113&#34;</span>,   <span style="color:#e6db74">&#34;57.988&#34;</span>,   <span style="color:#e6db74">&#34;58.785&#34;</span>,   <span style="color:#e6db74">&#34;58.055&#34;</span>,   <span style="color:#e6db74">&#34;58.723&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;JS&#34;</span>: [<span style="color:#e6db74">&#34;1:07.297&#34;</span>, <span style="color:#e6db74">&#34;1:02.656&#34;</span>, <span style="color:#e6db74">&#34;1:01.730&#34;</span>, <span style="color:#e6db74">&#34;1:00.868&#34;</span>, <span style="color:#e6db74">&#34;1:01.402&#34;</span>,   <span style="color:#e6db74">&#34;59.836&#34;</span>, <span style="color:#e6db74">&#34;1:00.004&#34;</span>, <span style="color:#e6db74">&#34;1:02.472&#34;</span>, <span style="color:#e6db74">&#34;1:00.883&#34;</span>, <span style="color:#e6db74">&#34;1:01.348&#34;</span>, <span style="color:#e6db74">&#34;1:02.402&#34;</span>, <span style="color:#e6db74">&#34;1:00.282&#34;</span>,   <span style="color:#e6db74">&#34;59.570&#34;</span>, <span style="color:#e6db74">&#34;1:00.664&#34;</span>, <span style="color:#e6db74">&#34;1:00.769&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;MC&#34;</span>: [<span style="color:#e6db74">&#34;1:17.024&#34;</span>, <span style="color:#e6db74">&#34;1:01.070&#34;</span>, <span style="color:#e6db74">&#34;1:10.985&#34;</span>, <span style="color:#e6db74">&#34;1:01.961&#34;</span>, <span style="color:#e6db74">&#34;1:02.449&#34;</span>, <span style="color:#e6db74">&#34;1:02.293&#34;</span>, <span style="color:#e6db74">&#34;1:01.140&#34;</span>,   <span style="color:#e6db74">&#34;57.891&#34;</span>,   <span style="color:#e6db74">&#34;58.156&#34;</span>,   <span style="color:#e6db74">&#34;58.270&#34;</span>,   <span style="color:#e6db74">&#34;58.160&#34;</span>,   <span style="color:#e6db74">&#34;58.238&#34;</span>,   <span style="color:#e6db74">&#34;57.113&#34;</span>, <span style="color:#e6db74">&#34;1:01.989&#34;</span>, <span style="color:#e6db74">&#34;1:09.355&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;TG&#34;</span>: [<span style="color:#e6db74">&#34;1:10.625&#34;</span>, <span style="color:#e6db74">&#34;1:05.977&#34;</span>, <span style="color:#e6db74">&#34;1:07.887&#34;</span>, <span style="color:#e6db74">&#34;1:05.199&#34;</span>, <span style="color:#e6db74">&#34;1:05.277&#34;</span>, <span style="color:#e6db74">&#34;1:03.434&#34;</span>, <span style="color:#e6db74">&#34;1:02.250&#34;</span>, <span style="color:#e6db74">&#34;1:01.648&#34;</span>, <span style="color:#e6db74">&#34;1:00.156&#34;</span>, <span style="color:#e6db74">&#34;1:01.164&#34;</span>, <span style="color:#e6db74">&#34;1:01.090&#34;</span>, <span style="color:#e6db74">&#34;1:02.098&#34;</span>, <span style="color:#e6db74">&#34;1:02.242&#34;</span>, <span style="color:#e6db74">&#34;1:00.801&#34;</span>, <span style="color:#e6db74">&#34;1:01.531&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;FR&#34;</span> :[<span style="color:#e6db74">&#34;1:05.433&#34;</span>, <span style="color:#e6db74">&#34;1:11.707&#34;</span>, <span style="color:#e6db74">&#34;1:05.246&#34;</span>, <span style="color:#e6db74">&#34;1:05.453&#34;</span>, <span style="color:#e6db74">&#34;1:04.219&#34;</span>, <span style="color:#e6db74">&#34;1:04.195&#34;</span>, <span style="color:#e6db74">&#34;1:03.840&#34;</span>, <span style="color:#e6db74">&#34;1:05.200&#34;</span>, <span style="color:#e6db74">&#34;1:01.394&#34;</span>, <span style="color:#e6db74">&#34;1:02.121&#34;</span>, <span style="color:#e6db74">&#34;1:03.754&#34;</span>, <span style="color:#e6db74">&#34;1:03.531&#34;</span>, <span style="color:#e6db74">&#34;1:03.438&#34;</span>, <span style="color:#e6db74">&#34;1:01.676&#34;</span>, <span style="color:#e6db74">&#34;1:01.734&#34;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;MT&#34;</span>: [<span style="color:#e6db74">&#34;1:11.210&#34;</span>, <span style="color:#e6db74">&#34;1:07.872&#34;</span>, <span style="color:#e6db74">&#34;1:05.664&#34;</span>, <span style="color:#e6db74">&#34;1:07.297&#34;</span>, <span style="color:#e6db74">&#34;1:03.574&#34;</span>, <span style="color:#e6db74">&#34;1:05.109&#34;</span>, <span style="color:#e6db74">&#34;1:10.774&#34;</span>, <span style="color:#e6db74">&#34;1:18.726&#34;</span>, <span style="color:#e6db74">&#34;1:14.524&#34;</span>, <span style="color:#e6db74">&#34;1:11.015&#34;</span>],
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The drivers are identified by their initials<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> rather than their full names to give them some level of anonimity.</p>
+<h3 id="converting-to-a-pandas-dataframe">
+  Converting to a Pandas dataframe
+  <a class="heading-link" href="#converting-to-a-pandas-dataframe">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>We have our raw data, but before we can start doing interesting data manipulation and visualization, we have to convert it to a dataframe.<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">parse_lap_time</span>(lap_time : str) <span style="color:#f92672">-&gt;</span> float:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Converts a lap time string (eg: 1:05.664) to seconds (eg: 65.664)&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;:&#34;</span> <span style="color:#f92672">in</span> lap_time:
+</span></span><span style="display:flex;"><span>        minutes, seconds <span style="color:#f92672">=</span> lap_time<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#34;:&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        minutes, seconds <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, lap_time
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> int(minutes) <span style="color:#f92672">*</span> <span style="color:#ae81ff">60</span> <span style="color:#f92672">+</span> float(seconds)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_data</span>() <span style="color:#f92672">-&gt;</span> pandas<span style="color:#f92672">.</span>DataFrame:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Converts the raw data from the `QUALIFYING` and `RACE` dictionaries to a pandas dataframe&#34;</span>
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> session_name, session <span style="color:#f92672">in</span> zip((<span style="color:#e6db74">&#34;QUALIFYING&#34;</span>, <span style="color:#e6db74">&#34;RACE&#34;</span>), (QUALIFYING, RACE)):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> driver, laps <span style="color:#f92672">in</span> session<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> lap_number, lap_time <span style="color:#f92672">in</span> enumerate(laps, start<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>):
+</span></span><span style="display:flex;"><span>                res<span style="color:#f92672">.</span>append({
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;Session&#34;</span>: session_name,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;Driver&#34;</span>: driver,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;Lap Number&#34;</span>: lap_number,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;Lap Time&#34;</span>: parse_lap_time(lap_time),
+</span></span><span style="display:flex;"><span>                })
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> pandas<span style="color:#f92672">.</span>DataFrame(res)
+</span></span></code></pre></div><p>Calling <code>get_data()</code> yields the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>        Session Driver  Lap Number  Lap Time
+</span></span><span style="display:flex;"><span>0    QUALIFYING     FT           1    67.125
+</span></span><span style="display:flex;"><span>1    QUALIFYING     FT           2    57.652
+</span></span><span style="display:flex;"><span>2    QUALIFYING     FT           3    56.817
+</span></span><span style="display:flex;"><span>3    QUALIFYING     FT           4    57.383
+</span></span><span style="display:flex;"><span>4    QUALIFYING     FT           5    60.082
+</span></span><span style="display:flex;"><span>..          ...    ...         ...       ...
+</span></span><span style="display:flex;"><span>229        RACE     MT           6    65.109
+</span></span><span style="display:flex;"><span>230        RACE     MT           7    70.774
+</span></span><span style="display:flex;"><span>231        RACE     MT           8    78.726
+</span></span><span style="display:flex;"><span>232        RACE     MT           9    74.524
+</span></span><span style="display:flex;"><span>233        RACE     MT          10    71.015
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[234 rows x 4 columns]
+</span></span></code></pre></div><h2 id="qualifying">
+  Qualifying
+  <a class="heading-link" href="#qualifying">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="and-pole-position-goes-to">
+  And pole position goes to&hellip;
+  <a class="heading-link" href="#and-pole-position-goes-to">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Let&rsquo;s start with the basics: what’s the starting grid?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">qualifying_standings</span>(df: pandas<span style="color:#f92672">.</span>DataFrame):
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> (
+</span></span><span style="display:flex;"><span>        df[df[<span style="color:#e6db74">&#34;Session&#34;</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;QUALIFYING&#34;</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">.</span>groupby([<span style="color:#e6db74">&#34;Driver&#34;</span>])[<span style="color:#e6db74">&#34;Lap Time&#34;</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">.</span>min()
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">.</span>sort_values()
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Driver</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># FT    56.817 &lt;-- pole position!</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># MF    57.832</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># DM    59.715</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># EO    59.805</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># RM    61.027</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># DL    61.649</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># FR    64.473</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># RV    65.187</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># MC    65.520</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># JS    66.277</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># TG    69.547</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># MT    73.414</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Name: Lap Time, dtype: float64</span>
+</span></span></code></pre></div><p><code>FT</code> qualified on pole by over a second ahead of <code>MF</code>, who in turn gapped me by 1.9 seconds&hellip; there&rsquo;s levels to this.</p>
+<h3 id="lap-time-evolution">
+  Lap time evolution
+  <a class="heading-link" href="#lap-time-evolution">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>As we got more comfortable with the karts, we were able to set faster lap times. Let&rsquo;s visualize this.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">lap_time_progression</span>(df: pandas<span style="color:#f92672">.</span>DataFrame, session: Literal[<span style="color:#e6db74">&#34;QUALIFYING&#34;</span>, <span style="color:#e6db74">&#34;RACE&#34;</span>]):
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> df[df[<span style="color:#e6db74">&#34;Session&#34;</span>] <span style="color:#f92672">==</span> session]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    seaborn<span style="color:#f92672">.</span>lineplot(res, x<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Lap Number&#34;</span>, y<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Lap Time&#34;</span>, hue<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Driver&#34;</span>, style<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Driver&#34;</span>, linewidth<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Force integer x ticks</span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>gca()<span style="color:#f92672">.</span>xaxis<span style="color:#f92672">.</span>set_major_locator(MaxNLocator(integer<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Draw horizontal grid lines</span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>grid(axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;y&#39;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>show()
+</span></span></code></pre></div><div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/KartingQualiProgression.png" alt="Karting Qualification Laptime Progression Chart"/>
+</div>
+<p>We can see that by lap 3/4 we were setting our PBs. Lap 1 was significantly worse than all the other laps not necessarily due to a lack of confidence, but because it was an outlap (i.e. the lap was started from standstill in the pit lane).</p>
+<p>“The line chart reveals a few things: <code>FT</code> is both very quick and consistent, and <code>DM</code> (me) made a lot of mistakes in lap 3. However, the need to be able to distinguish all the lines belonging to different drivers makes this chart hard to read.</p>
+<h3 id="lap-time-distribution">
+  Lap time distribution
+  <a class="heading-link" href="#lap-time-distribution">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Instead of having a line chart, we can have a swarm plot of the lap times per driver. Let&rsquo;s also take the opportunity to remove the outlap.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">lap_time_distribution</span>(df: pandas<span style="color:#f92672">.</span>DataFrame, session: Literal[<span style="color:#e6db74">&#34;QUALIFYING&#34;</span>, <span style="color:#e6db74">&#34;RACE&#34;</span>], ignore_first_lap: bool <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>):
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> df[df[<span style="color:#e6db74">&#34;Session&#34;</span>] <span style="color:#f92672">==</span> session]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ignore_first_lap:
+</span></span><span style="display:flex;"><span>        res <span style="color:#f92672">=</span> res[res[<span style="color:#e6db74">&#34;Lap Number&#34;</span>] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    seaborn<span style="color:#f92672">.</span>catplot(res, kind<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;swarm&#34;</span>, x<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Driver&#34;</span>, y<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Lap Time&#34;</span>, hue<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Lap Number&#34;</span>, s<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Draw horizontal grid lines</span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>grid(axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;y&#39;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>show()
+</span></span></code></pre></div><div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/KartingQualiDistribution.png" alt="Karting Qualification Laptime Distribution Chart"/>
+</div>
+<p>This visualization is far clearer than the line chart, and we even preserve the lap time number information with the hue of the dots!</p>
+<p>On a side note, can we take a moment to appreciate how bad my lap 3 is? 15 seconds off the pace - without exaggerating, I must have spun 3 million times.</p>
+<h2 id="race">
+  Race
+  <a class="heading-link" href="#race">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The race was three times longer than qualifying, which means the number of laps to analyse increases threefold. The unique nature of a race also means that there are more opportunities for other types of visualizations.</p>
+<h3 id="lap-time-distribution-1">
+  Lap time distribution
+  <a class="heading-link" href="#lap-time-distribution-1">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/KartingRaceDistribution.png" alt="Karting Race Laptime Distribution Chart"/>
+</div>
+<p>There is a clear distinction between the top 5, with metronomic pace, and the rest of the drivers, whose pace was a bit all over the place. There&rsquo;s another interesting detail: most of the outlier laps were set in the beginning of the race, and by the end most drivers were able to settle into a rhythm.<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup></p>
+<h3 id="race-trace">
+  Race trace
+  <a class="heading-link" href="#race-trace">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>There is a special visualization that we can use to track the gaps between the drivers, called <a href="https://multiviewer.app/docs/usage/race-trace"  class="external-link" target="_blank" rel="noopener">race trace</a>. To make use of it, we first must calculate the total race time, per lap: for example, if I my lap times are 1:03, a 1:02 and a 1:05, my total race time <em>at the end of lap 3</em> would be 3:10.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_cumulative_lap_times</span>(df: pandas<span style="color:#f92672">.</span>DataFrame) <span style="color:#f92672">-&gt;</span> pandas<span style="color:#f92672">.</span>DataFrame:
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> df[df[<span style="color:#e6db74">&#34;Session&#34;</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;RACE&#34;</span>]<span style="color:#f92672">.</span>drop(columns<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;Session&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    cumulative_times <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Calculate the cumulative sum of lap times _per driver_</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> driver <span style="color:#f92672">in</span> res[<span style="color:#e6db74">&#34;Driver&#34;</span>]<span style="color:#f92672">.</span>unique():
+</span></span><span style="display:flex;"><span>        cumulative_times<span style="color:#f92672">.</span>append(
+</span></span><span style="display:flex;"><span>            res[res[<span style="color:#e6db74">&#34;Driver&#34;</span>] <span style="color:#f92672">==</span> driver][<span style="color:#e6db74">&#34;Lap Time&#34;</span>]<span style="color:#f92672">.</span>cumsum()
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    res[<span style="color:#e6db74">&#34;Cumulative Lap Time&#34;</span>] <span style="color:#f92672">=</span> pandas<span style="color:#f92672">.</span>concat(cumulative_times)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res
+</span></span></code></pre></div><p>Plotting a graph with the <code>Cumulative Lap Time</code> column would already give us lines that reflect the gaps between drivers, but all these lines would be slope diagonally upward. Live race trace tools usually deal with this by computing an average total race time and subtracting that average from everyone&rsquo;s <code>Cumulative Lap Time</code>. We can take an easier approach and manually pick a value that makes our chart look good.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_race_trace_offsets</span>(df: pandas<span style="color:#f92672">.</span>DataFrame) <span style="color:#f92672">-&gt;</span> pandas<span style="color:#f92672">.</span>DataFrame:
+</span></span><span style="display:flex;"><span>    df[<span style="color:#e6db74">&#34;Race Trace Offset&#34;</span>] <span style="color:#f92672">=</span> df[<span style="color:#e6db74">&#34;Cumulative Lap Time&#34;</span>] <span style="color:#f92672">-</span> df[<span style="color:#e6db74">&#34;Lap Number&#34;</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">60</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> df
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     Driver  Lap Number  Lap Time  Cumulative Lap Time  Race Trace Offset</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 53      FT           1    62.441               62.441              2.441</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 54      FT           2    56.949              119.390             -0.610</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 55      FT           3    57.274              176.664             -3.336</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 56      FT           4    55.973              232.637             -7.363</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 57      FT           5    56.578              289.215            -10.785</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ..     ...         ...       ...                  ...                ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 229     MT           6    65.109              400.726             40.726</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 230     MT           7    70.774              471.500             51.500</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 231     MT           8    78.726              550.226             70.226</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 232     MT           9    74.524              624.750             84.750</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 233     MT          10    71.015              695.765             95.765</span>
+</span></span></code></pre></div><p>Now that we&rsquo;ve flattened our race trace, let&rsquo;s take a look at it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">race_trace</span>(df: pandas<span style="color:#f92672">.</span>DataFrame):
+</span></span><span style="display:flex;"><span>    seaborn<span style="color:#f92672">.</span>lineplot(df, x<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Lap Number&#34;</span>, y<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Race Trace Offset&#34;</span>, hue<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Driver&#34;</span>, style<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Driver&#34;</span>, linewidth<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Force integer x ticks</span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>gca()<span style="color:#f92672">.</span>xaxis<span style="color:#f92672">.</span>set_major_locator(MaxNLocator(integer<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Draw horizontal grid lines</span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>grid(axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;y&#39;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>show()
+</span></span></code></pre></div><div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/KartingRaceTrace.png" alt="Karting Race Trace Chart"/>
+</div>
+<p>This singular chart tells us the history of the race. There&rsquo;s so many details one can glean from it:</p>
+<ul>
+<li>By the end of the first lap, the field spread was already close to 20 seconds!</li>
+<li>The top 3 have similar pace. It&rsquo;s a shame that <code>RM</code> qualified a bit too far back: by the time he cleared <code>DL</code> there was nothing he could do.</li>
+<li>I have no doubt in my mind that <code>FT</code> could start dead last and still finish on the podium.</li>
+<li><code>EO</code> had an incredible start (he started P4 on the grid) and then gradually fell away. What happened on laps 13/14? I&rsquo;ll have to ask him when I see him.</li>
+<li><code>MC</code> had the exact opposite situation: horrendous start followed by some very decent pace.</li>
+<li>You can really see the moment where <code>MT</code> started having technical issues.</li>
+</ul>
+<h3 id="track-position">
+  Track position
+  <a class="heading-link" href="#track-position">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>It is possible to create a cleaner version of the race trace if you only care about the track position and disregard the time gaps between the drivers: instead of using the total race time to create the race trace, we will use it to order our drivers in every lap and save this order in a new column.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_track_position</span>(df: pandas<span style="color:#f92672">.</span>DataFrame):
+</span></span><span style="display:flex;"><span>    race_df <span style="color:#f92672">=</span> calculate_cumulative_lap_times(df)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># For every lap of every driver, calculate their track position</span>
+</span></span><span style="display:flex;"><span>    positions <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> lap_number <span style="color:#f92672">in</span> race_df[<span style="color:#e6db74">&#34;Lap Number&#34;</span>]<span style="color:#f92672">.</span>unique():
+</span></span><span style="display:flex;"><span>        laps <span style="color:#f92672">=</span> race_df[race_df[<span style="color:#e6db74">&#34;Lap Number&#34;</span>] <span style="color:#f92672">==</span> lap_number]<span style="color:#f92672">.</span>sort_values(by<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Cumulative Lap Time&#34;</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> position, (index, _) <span style="color:#f92672">in</span> enumerate(laps<span style="color:#f92672">.</span>iterrows(), <span style="color:#ae81ff">1</span>):
+</span></span><span style="display:flex;"><span>            positions[index] <span style="color:#f92672">=</span> position
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    race_df[<span style="color:#e6db74">&#34;Position&#34;</span>] <span style="color:#f92672">=</span> pandas<span style="color:#f92672">.</span>Series(positions)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    race_df <span style="color:#f92672">=</span> race_df[[<span style="color:#e6db74">&#34;Driver&#34;</span>,<span style="color:#e6db74">&#34;Lap Number&#34;</span>, <span style="color:#e6db74">&#34;Position&#34;</span>]] <span style="color:#75715e"># Only keep the columns we need</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add the starting grid as a fake lap 0 to make the data more complete</span>
+</span></span><span style="display:flex;"><span>    starting_positions <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> position, driver <span style="color:#f92672">in</span> enumerate(qualifying_standings(df)<span style="color:#f92672">.</span>keys(), <span style="color:#ae81ff">1</span>):
+</span></span><span style="display:flex;"><span>        starting_positions<span style="color:#f92672">.</span>append({
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;Driver&#34;</span> : driver,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;Lap Number&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;Position&#34;</span> : position,
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> pandas<span style="color:#f92672">.</span>concat([race_df, pandas<span style="color:#f92672">.</span>DataFrame(starting_positions)], ignore_index<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     Driver  Lap Number  Position</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 0       FT           1         2</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 1       FT           2         1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 2       FT           3         1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 3       FT           4         1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 4       FT           5         1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ..     ...         ...       ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 188     RV           0         8</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 189     MC           0         9</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 190     JS           0        10</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 191     TG           0        11</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 192     MT           0        12</span>
+</span></span></code></pre></div><p>Plotting the chart is quite straightforward:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">race_track_position</span>(df: pandas<span style="color:#f92672">.</span>DataFrame):
+</span></span><span style="display:flex;"><span>    seaborn<span style="color:#f92672">.</span>lineplot(df, x<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Lap Number&#34;</span>, y<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Position&#34;</span>, hue<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Driver&#34;</span>, style<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Driver&#34;</span>, linewidth<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Force integer x ticks</span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>gca()<span style="color:#f92672">.</span>xaxis<span style="color:#f92672">.</span>set_major_locator(MaxNLocator(integer<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Draw horizontal grid lines</span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>grid(axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;y&#39;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pyplot<span style="color:#f92672">.</span>show()
+</span></span></code></pre></div><div style="text-align:center">
+    <img src="https://dfamonteiro.com/images/KartingRaceTrackPosition.png" alt="Karting Race Trace Chart"/>
+</div>
+<p>Watching the race start of an F1 race is one thing&hellip; being part of a race start yourself is an entirely different experience. One thing I can tell you for sure is that I&rsquo;ll never backseat during an F1 race ever again.</p>
+<h2 id="final-notes">
+  Final notes
+  <a class="heading-link" href="#final-notes">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I hope you enjoyed reading this post. Personally, I&rsquo;m just glad I found a straightforward topic to write about, especially after struggling to perform cryptanalysis on Enigma cyphertexts<sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup>. If you are interested in the code for these data visualizations, you can find it <a href="https://github.com/dfamonteiro/blog/blob/main/karting/data.py"  class="external-link" target="_blank" rel="noopener">here</a>.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>I did manage to complete the <a href="https://gran-turismo.fandom.com/wiki/Sebastian_Vettel_X_Challenge_%28GT5%29"  class="external-link" target="_blank" rel="noopener">Sebastian Vettel X Challenge</a>, though! The folks that have played GT5 will know how tricky this challenge is.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>I&rsquo;m <code>DM</code>, for example.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>There is an interesting wrinkle here: we have two different sessions, so should we create two separate dataframes? I ended up using just a single dataframe with an additional <code>Session</code> column to indicate from which session the lap came from, but in retrospect I feel that having two separate dataframes would be the more elegant approach.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>There are two exceptions to this general trend: <code>EO</code> was losing pace hand over fist by the end of the race for some reason, and <code>MT</code> had a technical issue that led to him not being able to finish the race.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p>It&rsquo;s a shame I didn&rsquo;t manage to pull it off, I even had a great blog post title for it and everything!&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2025
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>
