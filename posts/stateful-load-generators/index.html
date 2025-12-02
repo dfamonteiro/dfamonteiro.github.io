@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  The case for stateful load generators · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="One can usually tell the importance of a certain piece of software by the amount of effort it goes into testing it. In no other place is this more true than the automotive, medical, and aerospace1 industries: the criticality of software in these contexts leads to their development having to be compliant to international safety standards such as ISO 26262 and IEC 62304, which include extensive testing and validation requirements.
+You don&rsquo;t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infraestructure can rival that of major corporations. Take SQLite, for example: it has 590 times more test code than library code! They have a whole webpage dedicated to their testing efforts:">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="The case for stateful load generators">
+  <meta name="twitter:description" content="One can usually tell the importance of a certain piece of software by the amount of effort it goes into testing it. In no other place is this more true than the automotive, medical, and aerospace1 industries: the criticality of software in these contexts leads to their development having to be compliant to international safety standards such as ISO 26262 and IEC 62304, which include extensive testing and validation requirements.
+You don’t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infraestructure can rival that of major corporations. Take SQLite, for example: it has 590 times more test code than library code! They have a whole webpage dedicated to their testing efforts:">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/stateful-load-generators/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="The case for stateful load generators">
+  <meta property="og:description" content="One can usually tell the importance of a certain piece of software by the amount of effort it goes into testing it. In no other place is this more true than the automotive, medical, and aerospace1 industries: the criticality of software in these contexts leads to their development having to be compliant to international safety standards such as ISO 26262 and IEC 62304, which include extensive testing and validation requirements.
+You don’t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infraestructure can rival that of major corporations. Take SQLite, for example: it has 590 times more test code than library code! They have a whole webpage dedicated to their testing efforts:">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-12-02T02:25:37+00:00">
+    <meta property="article:modified_time" content="2025-12-02T02:25:37+00:00">
+    <meta property="article:tag" content="Programming">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/stateful-load-generators/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.022594d625780e2edf64581b893d32cb35c11de5d88953ea4ad3c2e45451e214.css" integrity="sha256-AiWU1iV4Di7fZFgbiT0yyzXBHeXYiVPqStPC5FRR4hQ=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/stateful-load-generators/">
+              The case for stateful load generators
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2025-12-02T02:25:37Z">
+                December 2, 2025
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              16-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>One can usually tell the importance of a certain piece of software by the amount of effort it goes into testing it. In no other place is this more true than the automotive, medical, and aerospace<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> industries: the criticality of software in these contexts leads to their development having to be compliant to international safety standards such as <a href="https://www.iso.org/standard/68383.html"  class="external-link" target="_blank" rel="noopener">ISO 26262</a> and <a href="https://www.iso.org/standard/38421.html"  class="external-link" target="_blank" rel="noopener">IEC 62304</a>, which include extensive testing and validation requirements.</p>
+<p>You don&rsquo;t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infraestructure can rival that of major corporations. Take SQLite, for example: it has <strong>590 times</strong> more test code than library code! They have a whole webpage dedicated to their testing efforts:</p>
+<blockquote>
+<p>1.1. Executive Summary</p>
+<ul>
+<li>Four independently developed test harnesses</li>
+<li>100% branch test coverage in an as-deployed configuration</li>
+<li>Millions and millions of test cases</li>
+<li>Out-of-memory tests</li>
+<li>I/O error tests</li>
+<li>Crash and power loss tests</li>
+<li>Fuzz tests</li>
+<li>Boundary value tests</li>
+<li>Disabled optimization tests</li>
+<li>Regression tests</li>
+<li>Malformed database tests</li>
+<li>Extensive use of assert() and run-time checks</li>
+<li>Valgrind analysis</li>
+<li>Undefined behavior checks</li>
+<li>Checklists</li>
+</ul>
+<p><span><a href="https://sqlite.org/testing.html">- How SQLite Is Tested</a></span></p></blockquote>
+<p>While open-source projects such as <a href="https://www.linux.org/"  class="external-link" target="_blank" rel="noopener">Linux</a> and <a href="https://sqlite.org/"  class="external-link" target="_blank" rel="noopener">SQLite</a> highlight a wide variety of software testing methodologies, the reality is that most enterprise software projects typically employ only a subset of the more popular types of software testing. This leads to certain side effects: functional tests such as unit tests, integration tests and end-to-end tests are very well understood across the industry and have plenty of tooling. On the other hand, less popular types of testing (fuzzing, stress tests, etc) are less well supported and require you to go off the trodden path and invest a lot of effort to adapt them to your project&rsquo;s needs.<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></p>
+<p>Implementing less popular types of tests might be more technically challenging, but once they are up and running you&rsquo;ll start wondering how you managed to live without them. Load tests, for example, will completely reframe your perspective of a project&rsquo;s performance characteristics, and in this blog post I intend to give you new perspectives on how you can shape the design of load generators to suit your needs.</p>
+<h2 id="load-generators-a-very-brief-overview">
+  Load generators: a very brief overview
+  <a class="heading-link" href="#load-generators-a-very-brief-overview">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Generating web traffic load for websites is a solved problem: if you have a straightforward http-based backend, there are a slew of load-generating tools available for you to use<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>. These tools do far more than just mindlessly hammering an API endpoint, however! They are very much capable of having scenarios with complex user flows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C#" data-lang="C#"><span style="display:flex;"><span><span style="color:#75715e">// Example from the NBomber docs</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// https://nbomber.com/docs/nbomber/scenario#scenario-create</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> scenario = Scenario.Create(<span style="color:#e6db74">&#34;my e-commerce scenario&#34;</span>, <span style="color:#66d9ef">async</span> context =&gt;
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> Login();        
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> OpenHomePage();     
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> Logout();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> Response.Ok();        
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p>Besides the ability to handle bespoke logic, top-of-the-line load generators also come with plenty of quality of life features such as <a href="https://grafana.com/docs/k6/latest/using-k6-browser/"  class="external-link" target="_blank" rel="noopener">E2E load testing</a>, <a href="https://docs.locust.io/en/stable/custom-load-shape.html"  class="external-link" target="_blank" rel="noopener">load shaping</a>, <a href="https://grafana.com/docs/k6/latest/using-k6/metrics/"  class="external-link" target="_blank" rel="noopener">built-in metrics</a> and <a href="https://grafana.com/docs/k6/latest/results-output/web-dashboard/"  class="external-link" target="_blank" rel="noopener">dashboards</a>.</p>
+<p>However, while their documentation and feature set serves the &ldquo;e-commerce website&rdquo; use case well, what should you do when your &ldquo;users&rdquo; have a massive amount of state associated to them, which heavily influences what their next steps are? This is the problem I&rsquo;ve been reflecting on at <a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a>: structuring user behaviours that are dependent on their current state in an elegant and scalable manner, within the context of load generators.</p>
+<p>Experience with a practical problem will help us get a better feel of this challenge.</p>
+<h2 id="the-tsmc-wafer-manufacturing-scenario">
+  The TSMC wafer manufacturing scenario
+  <a class="heading-link" href="#the-tsmc-wafer-manufacturing-scenario">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s say that we are in charge of assessing the performance of a Manufacturing Execution System<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> (MES). This MES is in charge of keeping track of both the wafers and the machines in a TSMC fab, and then determining which wafers should be sent to which machine. This MES has the following entities:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Represents a WIP wafer in a fab</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Wafer</span>:
+</span></span><span style="display:flex;"><span>    name: str <span style="color:#75715e"># Unique identifier</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    flowpath: str <span style="color:#75715e"># In which step this wafer is at in its manufacturing flow</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#75715e"># Tends to have this format: &#34;flow\step&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    system_state: Enum <span style="color:#75715e"># In a given flowpath, the &#34;manufacturing state&#34; of this wafer.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># The enum above has the following states:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     - Queued: The wafer is ready to be dispatched</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     - Dispatched: The wafer has been dispatched to a specific machine</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     - InProcess: This wafer is being processed by the machine</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     - Processed: The wafer has been processed and is now ready for the next flowpath</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># The system state evolves in this manner:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     Queued -&gt; Dispatched -&gt; InProcess -&gt; Processed -&gt; Queued (new flowpath)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Represents a machine that performs a manufacturing process on a wafer</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Machine</span>:
+</span></span><span style="display:flex;"><span>    name: str <span style="color:#75715e"># Unique identifier</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ...</span>
+</span></span></code></pre></div><p>I took some inspiration from how the <a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing MES</a> does things, but please note that I&rsquo;m cutting <em>a lot</em> of corners with this scenario to make it easier to digest.<sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup></p>
+<p>With that out of the way, let&rsquo;s take a look at the MES operations we intend to stress-test:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Please pretend that these functions make http calls to an MES instance hosted somewhere</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Auxiliary functions</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">load_wafer</span>(name: str) <span style="color:#f92672">-&gt;</span> Wafer:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Loads the wafer by name from the MES database.&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">load_machine</span>(name: str) <span style="color:#f92672">-&gt;</span> Machine:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Loads the machine by name from the MES database.&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_valid_dispatch_candidates</span>(wafer: Wafer) <span style="color:#f92672">-&gt;</span> List[Machine]:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Returns a list of machines to which the wafer can be dispatched to.&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Wafer tracking operations</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Wafer</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dispatch</span>(self, machine: Machine):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;Dispatches the wafer to the specified machine. The wafer goes from Queued to Dispatched.&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">track_in</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;Begins processing of the wafer. The wafer goes from Dispatched to InProcess.&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">track_out</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;Ends processing of the wafer. The wafer goes from InProcess to Processed.&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">move_next</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;Moves the wafer to the next step of its manufacturing flow.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        The wafer goes from Processed to Queued.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        The wafer&#39;s flowpath is updated to reflect the fact the wafer is in the bext step of its flow.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pass</span>
+</span></span></code></pre></div><p>We primarily care about the performance impact of the wafer tracking operations, because they happen very frequently and perform writes on the database.</p>
+<h3 id="load-generation-details">
+  Load generation details
+  <a class="heading-link" href="#load-generation-details">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In order to ensure that our MES can cope with the full demand generated by a fab, we will have our load generator do a barebones simulation of a fab&rsquo;s wafer movements. To keep things simple, this will be our load generator scenario:</p>
+<blockquote>
+<p>The manufacturing flow our wafers will go through has the following flowpaths:</p>
+<ul>
+<li>SimpleFlow\Step1</li>
+<li>SimpleFlow\Step2</li>
+<li>&hellip;</li>
+<li>SimpleFlow\Step9</li>
+<li>SimpleFlow\Step10</li>
+</ul>
+<p>Wafers in SimpleFlow\Step1 can only be dispatched to Machine1, wafers in SimpleFlow\Step2 can only be dispatched to Machine2, etc.</p>
+<p><strong>Every second</strong>:</p>
+<ul>
+<li>A new wafer is created</li>
+<li>This newly created wafer is moved through the manufacturing flow</li>
+<li>Once it reaches the end, it&rsquo;s terminated</li>
+</ul></blockquote>
+<p>We have all the pieces of the puzzle, now it&rsquo;s time to put them together.</p>
+<h2 id="iteration-1-the-naïve-approach">
+  Iteration 1: The naïve approach
+  <a class="heading-link" href="#iteration-1-the-na%c3%afve-approach">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s try the simplest thing that comes to mind:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wafer_scenario</span>():
+</span></span><span style="display:flex;"><span>    wafer <span style="color:#f92672">=</span> create_wafer()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># SimpleFlow\Step1</span>
+</span></span><span style="display:flex;"><span>    machine1 <span style="color:#f92672">=</span> load_machine(<span style="color:#e6db74">&#34;Machine1&#34;</span>)
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>dispatch(machine1)
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_out()
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>move_next() <span style="color:#75715e"># Move to next flowpath</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># SimpleFlow\Step2</span>
+</span></span><span style="display:flex;"><span>    machine2 <span style="color:#f92672">=</span> load_machine(<span style="color:#e6db74">&#34;Machine2&#34;</span>)
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>dispatch(machine2)
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_out()
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>move_next() <span style="color:#75715e"># Move to next flowpath</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># SimpleFlow\Step9</span>
+</span></span><span style="display:flex;"><span>    machine9 <span style="color:#f92672">=</span> load_machine(<span style="color:#e6db74">&#34;Machine9&#34;</span>)
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>dispatch(machine9)
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_out()
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>move_next() <span style="color:#75715e"># Move to next flowpath</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># SimpleFlow\Step10</span>
+</span></span><span style="display:flex;"><span>    machine10 <span style="color:#f92672">=</span> load_machine(<span style="color:#e6db74">&#34;Machine10&#34;</span>)
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>dispatch(machine10)
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_out()
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># No move_next() is required in the last flowpath</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>terminate()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>run_every_second(wafer_scenario)
+</span></span></code></pre></div><p>This <em>does</em> technically work, but it doesn&rsquo;t scale at all. We&rsquo;re dealing with a very simple scenario and I&rsquo;ve already had to omit flowpaths 3 through 8, now imagine if this manufacturing flow had 1000 flowpaths!<sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup></p>
+<p>Luckily, you notice that the repetitiveness of this code can be easily addressed&hellip;</p>
+<h2 id="iteration-2-loop-based-naïve-approach">
+  Iteration 2: Loop-based naïve approach
+  <a class="heading-link" href="#iteration-2-loop-based-na%c3%afve-approach">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Taking a closer look at the code from the previous chapter, its cylical nature becomes quite obvious:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/wafer-system-state-loop.excalidraw.svg" alt="The Wafer system state loop">
+    <figcaption><b>The Wafer system state loop</b></figcaption>
+</figure>
+<p>We can refactor our code by taking advantage of this cyclicality:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>machines <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine1&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine2&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine3&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine4&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine5&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine6&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine7&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine8&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine9&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine10&#34;</span>),
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wafer_scenario</span>():
+</span></span><span style="display:flex;"><span>    wafer <span style="color:#f92672">=</span> create_wafer()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> machine <span style="color:#f92672">in</span> machines:
+</span></span><span style="display:flex;"><span>        wafer<span style="color:#f92672">.</span>dispatch(machine)
+</span></span><span style="display:flex;"><span>        wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>        wafer<span style="color:#f92672">.</span>track_out()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> machine<span style="color:#f92672">.</span>name <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;Machine10&#34;</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># No move_next() is required in the last flowpath</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            wafer<span style="color:#f92672">.</span>move_next() <span style="color:#75715e"># Move to next flowpath</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>terminate()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>run_every_second(wafer_scenario)
+</span></span></code></pre></div><p>While the <code>machines</code> list still scales linearly with the size of the manufacturing flow, this is still a marked improvement over our previous solution. In matter of fact this approach might be good enough for this scenario, as long as the load-testing requirements don&rsquo;t change!</p>
+<h2 id="a-change-of-requirements">
+  A change of requirements
+  <a class="heading-link" href="#a-change-of-requirements">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Well I just had to jinx it, didn&rsquo;t I? Let&rsquo;s see what the new requirements are:</p>
+<blockquote>
+<ul>
+<li>
+<p>On SimpleFlow\Step2, there is a 3% chance of the machine aborting the processing on a wafer (by calling <code>wafer.abort()</code>, which undoes the <code>wafer.track_in()</code> operation), due to a lack of consumables.</p>
+</li>
+<li>
+<p>SimpleFlow\Step4 is actually a quality control step that only 10% of randomly selected wafers have to perform. The other 90% can skip SimpleFlow\Step4 by calling <code>wafer.skip_flowpath()</code>.</p>
+</li>
+<li>
+<p>In SimpleFlow\Step9, during processing, a defect tends to be found in 0.7% of the wafers (<code>wafer.report_defect()</code> is called in these cases).</p>
+<ul>
+<li>If a defect is reported in SimpleFlow\Step9, when the wafer is tracked out, the MES will automatically set its flowpath back to <code>&quot;SimpleFlow\Step5&quot;</code> and the system state back to <code>Queued</code>.</li>
+</ul>
+</li>
+</ul></blockquote>
+<p>Sadly, the real world is more complicated than what a simple for-loop can handle. Let&rsquo;s see what we can do.</p>
+<h2 id="iteration-3-throw-some-if-statements-in-there">
+  Iteration 3: Throw some if-statements in there
+  <a class="heading-link" href="#iteration-3-throw-some-if-statements-in-there">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Maybe we can meet these new requirements by throwing some if-statements in the right places.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> random <span style="color:#f92672">import</span> random
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>machines <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine1&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine2&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine3&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine4&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine5&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine6&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine7&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine8&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine9&#34;</span>),
+</span></span><span style="display:flex;"><span>    load_machine(<span style="color:#e6db74">&#34;Machine10&#34;</span>),
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wafer_scenario</span>():
+</span></span><span style="display:flex;"><span>    wafer <span style="color:#f92672">=</span> create_wafer()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    flowpath_index <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> flowpath_index <span style="color:#f92672">==</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">and</span> random() <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.9</span>:
+</span></span><span style="display:flex;"><span>            wafer<span style="color:#f92672">.</span>skip_flowpath()
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">continue</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        wafer<span style="color:#f92672">.</span>dispatch(machines[flowpath_index])
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> flowpath_index <span style="color:#f92672">!=</span> <span style="color:#ae81ff">1</span>:
+</span></span><span style="display:flex;"><span>            wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>                is_to_abort <span style="color:#f92672">=</span> random() <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.03</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> is_to_abort:
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                    wafer<span style="color:#f92672">.</span>abort()
+</span></span><span style="display:flex;"><span>                    wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        is_to_record_defect <span style="color:#f92672">=</span> flowpath_index <span style="color:#f92672">==</span> <span style="color:#ae81ff">8</span> <span style="color:#f92672">and</span> random() <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.007</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> is_to_record_defect:
+</span></span><span style="display:flex;"><span>            wafer<span style="color:#f92672">.</span>report_defect()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        wafer<span style="color:#f92672">.</span>track_out()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> is_to_record_defect:
+</span></span><span style="display:flex;"><span>            flowpath_index <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">continue</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> flowpath_index <span style="color:#f92672">==</span> <span style="color:#ae81ff">9</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># No move_next() is required in the last flowpath</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            wafer<span style="color:#f92672">.</span>move_next() <span style="color:#75715e"># Move to next flowpath</span>
+</span></span><span style="display:flex;"><span>            flowpath_index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>terminate()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>run_every_second(wafer_scenario)
+</span></span></code></pre></div><p>If looking at this tangled mess of if-statements doesn&rsquo;t convince you this is a bad idea, I don&rsquo;t know what will.<sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup> Imagine if, instead of 3 extra requirements, we had 20! It&rsquo;s obvious this approach not only doesn&rsquo;t scale at all, but is also very bug-prone.<sup id="fnref:8"><a href="#fn:8" class="footnote-ref" role="doc-noteref">8</a></sup></p>
+<p>We find ourselves in a bit of a predicament. While it&rsquo;s clear that the amount of state these wafers carry is warping the way we write our code, what&rsquo;s <em>not clear</em> is how we can deal with it in a elegant manner. It&rsquo;s clear the way forward involves tackling the stateful nature of these wafers head-on. But first, let&rsquo;s take a step back and reflect on the issue at hand.</p>
+<h2 id="state-machines-to-the-rescue">
+  State machines to the rescue
+  <a class="heading-link" href="#state-machines-to-the-rescue">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>All of our wafers have state in the form of <code>(flowpath, system_state)</code>, and every time we perform a MES operation, our wafers transition to a new state&hellip; are our wafers state machines? I&rsquo;d argue that we should think of them as such: once you start embracing this way of thinking, things start falling into place.</p>
+<p>As a thought experiment, lets create a state machine that represents our current load scenario (including the extra requirements):</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/full-wafer-state-machine.excalidraw.svg" alt="The load scenario as a state machine">
+    <figcaption>
+        <b>The load scenario as a state machine</b>
+        <br> Dashed arrows represent <code>move_next()</code> state transitions
+        <br> Wafer system states are being ignored
+    </figcaption>
+</figure>
+<p>It just feels <em>right</em>, doesn&rsquo;t it?</p>
+<p>We&rsquo;ve made a breakthrough here! State machines are definitely the missing piece to our puzzle: the extra requirements are now, in a rather elegant manner, simply an extra transition with a given probability. But how should we fit the wafer&rsquo;s <code>system_state</code> in this state machine? Should we even try to merge these two pieces of state (<code>flowpath</code> and <code>system_state</code>) together?</p>
+<h3 id="the-state-machine-within-the-state-machine">
+  The state machine within the state machine
+  <a class="heading-link" href="#the-state-machine-within-the-state-machine">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>How many states does our state machine have? You might be tempted to look at the state machine above and say 10, but the correct answer would be 40:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>(<span style="color:#e6db74">&#34;SimpleFlow\Step1&#34;</span>, Queued)
+</span></span><span style="display:flex;"><span>(<span style="color:#e6db74">&#34;SimpleFlow\Step1&#34;</span>, Dispatched)
+</span></span><span style="display:flex;"><span>(<span style="color:#e6db74">&#34;SimpleFlow\Step1&#34;</span>, InProcess)
+</span></span><span style="display:flex;"><span>(<span style="color:#e6db74">&#34;SimpleFlow\Step1&#34;</span>, Processed)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ...</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#e6db74">&#34;SimpleFlow\Step10&#34;</span>, Queued)
+</span></span><span style="display:flex;"><span>(<span style="color:#e6db74">&#34;SimpleFlow\Step10&#34;</span>, Dispatched)
+</span></span><span style="display:flex;"><span>(<span style="color:#e6db74">&#34;SimpleFlow\Step10&#34;</span>, InProcess)
+</span></span><span style="display:flex;"><span>(<span style="color:#e6db74">&#34;SimpleFlow\Step10&#34;</span>, Processed)
+</span></span></code></pre></div><p>When we&rsquo;re focusing on the <code>flowpath</code> it can be easy to forget about the <code>system_state</code>, and vice-versa. Why does this happen? The answer becomes obvious once you think about it: we&rsquo;re dealing with different levels of abstraction.</p>
+<p>Take for example the &ldquo;Step 4&rdquo; state in the state machine above. That&rsquo;s not really a state <em>per se</em>: it represents instead a set of four states, all of which have <code>&quot;SimpleFlow\Step4&quot;</code> as part of them. The same goes for the <a href="#iteration-2-loop-based-na%C3%AFve-approach" >state machine earlier in the blog post</a>: these 4 states and their transitions exist within the wider context of a higher-level <code>flowpath</code>.</p>
+<p>Answering the question posed at the end of the previous chapter: does it make sense to reason about this load scenario as a gargantuan state machine with 40 nodes? No: the 10 step state machine is fine, as long as you always keep in mind that each step is actually a mini state machine.</p>
+<p>The image below should make this idea of nested state machines clearer, by highlighting the states hidden by &ldquo;Step 1&rdquo; and &ldquo;Step 2&rdquo; of the state machine in the previous chapter.</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/state-machine-abstraction.excalidraw.svg" alt="The load scenario as a state machine">
+</figure>
+<h3 id="using-state-handlers-to-structure-our-load-test-as-a-state-machine">
+  Using state handlers to structure our load test as a state machine
+  <a class="heading-link" href="#using-state-handlers-to-structure-our-load-test-as-a-state-machine">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>So we decided that structuring our scenario as a state machine is the way to go. So, how do we go about it? Our MES is in charge of keeping track of the state of the wafers, so the part we&rsquo;re responsible for are the state transitions.<sup id="fnref:9"><a href="#fn:9" class="footnote-ref" role="doc-noteref">9</a></sup> With that in mind our goal will be to answer this simple question:</p>
+<blockquote>
+<p>Given a wafer&rsquo;s current state, what transition should the wafer undertake?</p></blockquote>
+<p>To tackle this question, let me introduce the concept of a state handler:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">state_handler</span>(wafer: Wafer) <span style="color:#f92672">-&gt;</span> Tuple[str, Enum]:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># do something</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (wafer<span style="color:#f92672">.</span>flowpath, wafer<span style="color:#f92672">.</span>system_state)
+</span></span></code></pre></div><p>A state handler takes a wafer as an input, performs some action, and then returns the updated wafer state. To determine which state handler should be applied to which wafer state, a handler table is used:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>handler_table <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    (state1, handler1),
+</span></span><span style="display:flex;"><span>    (state2, handler2),
+</span></span><span style="display:flex;"><span>    (state3, handler3),
+</span></span><span style="display:flex;"><span>    (state4, handler4),
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>The handler table supports the usage of wildcards (<code>*</code>) for the flowpath, which enables handler reuse. State matches are assessed from top to bottom, meaning that if there are multiple potential matches in the handler table, the one that appears first will always take priority. This enables the possibility of having handlers that handle specific scenarios at the top of the table, while catch-all handlers would sit at the bottom.</p>
+<p>With these details in mind, a handler table for the original load scenario would look something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>handler_table <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;SimpleFlow\Step10&#34;</span>, Processed),  terminate_handler),
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 Queued),     dispatch_handler),
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 Dispatched), track_in_handler),
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 InProcess),  track_out_handler),
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 Processed),  move_next_handler),
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>By taking advantage of the wildcards, our handler table can be kept very succinct.</p>
+<h2 id="the-stateful-load-generator-pattern">
+  The stateful load generator pattern
+  <a class="heading-link" href="#the-stateful-load-generator-pattern">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Our final goal will be to rewrite our load scenario using what we learned in the <a href="#state-machines-to-the-rescue" >previous chapter</a>. Lets start with the handlers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> random <span style="color:#f92672">import</span> random
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dispatch_handler</span>(wafer: Wafer):
+</span></span><span style="display:flex;"><span>    machine <span style="color:#f92672">=</span> get_valid_dispatch_candidates(wafer)[<span style="color:#ae81ff">0</span>] <span style="color:#75715e"># Get the first machine in the list</span>
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>dispatch(machine)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (wafer<span style="color:#f92672">.</span>flowpath, wafer<span style="color:#f92672">.</span>system_state)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">track_in_handler</span>(wafer: Wafer):
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (wafer<span style="color:#f92672">.</span>flowpath, wafer<span style="color:#f92672">.</span>system_state)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">track_out_handler</span>(wafer: Wafer):
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_out()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (wafer<span style="color:#f92672">.</span>flowpath, wafer<span style="color:#f92672">.</span>system_state)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">move_next_handler</span>(wafer: Wafer):
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>move_next()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (wafer<span style="color:#f92672">.</span>flowpath, wafer<span style="color:#f92672">.</span>system_state)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">terminate_handler</span>(wafer: Wafer):
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>terminate()
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># By returning None, the goal is to not match with any row in the handler table</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># and stop the execution of handlers on this wafer</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">### Handlers for the extra requirements</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">track_in_and_maybe_abort_handler</span>(wafer: Wafer):
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> random() <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.03</span>:
+</span></span><span style="display:flex;"><span>        wafer<span style="color:#f92672">.</span>abort()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (wafer<span style="color:#f92672">.</span>flowpath, wafer<span style="color:#f92672">.</span>system_state)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dispatch_handler_or_maybe_skip_handler</span>(wafer: Wafer):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> random() <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.9</span>:
+</span></span><span style="display:flex;"><span>        wafer<span style="color:#f92672">.</span>skip_flowpath()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        dispatch_handler(wafer)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (wafer<span style="color:#f92672">.</span>flowpath, wafer<span style="color:#f92672">.</span>system_state)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">track_in_and_maybe_report_defect_handler</span>(wafer: Wafer):
+</span></span><span style="display:flex;"><span>    wafer<span style="color:#f92672">.</span>track_in()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> random() <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.007</span>:
+</span></span><span style="display:flex;"><span>        wafer<span style="color:#f92672">.</span>report_defect()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># We don&#39;t have to worry about the wafer being sent to a previous step on track-out,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># the state machine and the handler table will simply deal with it.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (wafer<span style="color:#f92672">.</span>flowpath, wafer<span style="color:#f92672">.</span>system_state)
+</span></span></code></pre></div><p>Now let&rsquo;s build our handler table:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>handler_table <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Specific handlers for the extra requirements</span>
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;SimpleFlow\Step2&#34;</span>, Dispatched),  track_in_and_maybe_abort_handler),
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;SimpleFlow\Step4&#34;</span>, Queued),      dispatch_handler_or_maybe_skip_handler),
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;SimpleFlow\Step9&#34;</span>, Dispatched),  track_in_and_maybe_report_defect_handler),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Terminate handler</span>
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;SimpleFlow\Step10&#34;</span>, Processed),  terminate_handler),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Catch-all handlers</span>
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 Queued),     dispatch_handler),
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 Dispatched), track_in_handler),
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 InProcess),  track_out_handler),
+</span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 Processed),  move_next_handler),
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>Notice the flatness of our code so far: need to apply the same handler to different flowpaths? Add another row to the handler table. Need to implement a new requirement? Write a new handler and add it to the handler table. We also get really good scalability: the source file might grow in size, but it&rsquo;s complexity will remain the same.</p>
+<p>Finally we need to write the engine that will execute our handlers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wafer_scenario</span>():
+</span></span><span style="display:flex;"><span>    wafer <span style="color:#f92672">=</span> create_wafer()
+</span></span><span style="display:flex;"><span>    wafer_state <span style="color:#f92672">=</span> (wafer<span style="color:#f92672">.</span>flowpath, wafer<span style="color:#f92672">.</span>system_state)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> wafer_state <span style="color:#f92672">!=</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> state, handler <span style="color:#f92672">in</span> handler_table:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> states_match(state, wafer_state):
+</span></span><span style="display:flex;"><span>                wafer_state <span style="color:#f92672">=</span> handler(wafer)
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># No row in the handler_table matched our state, stop execution</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>run_every_second(wafer_scenario)
+</span></span></code></pre></div><p>One interesting side-effect of having to do the upfront investment of writing the handlers and defining your handler table, is that your engine is massively simplified! Simply execute handlers on the wafer until you run out of handler matches.</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This marks the end of our journey. While I could continue pontificating on the various ways you can creatively use and design state handlers, I&rsquo;m afraid this blog post is already getting a bit too long!</p>
+<p>In my opinion, this load generator programming pattern is quite straightforward, but you have to be open to this state machine mentality. That&rsquo;s why I spent so much effort analysing my wafer load scenario through the lens of state machines: to make sure that you, dear reader, embrace this way of thinking.</p>
+<p>If you end up implementing this pattern, please do let me know how it goes - while my use-case focuses on manufacturing scenarios, I wonder how different the load generator&rsquo;s state machine would look like if we were dealing with an e-commerce website, for example. I&rsquo;ll leave that as an exercise for the reader.</p>
+<p>Hopefully I didn&rsquo;t bore you with my writing, and perhaps you have learned something new. That&rsquo;s always my goal!</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>It&rsquo;s quite hard to reboot your computer when your computer is in orbit.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>On the topic of integrating non-functional tests in a project, you might be interested in the concept of fitness functions, as popularized in the book <a href="https://www.thoughtworks.com/insights/books/building-evolutionaryarchitectures-second-edition"  class="external-link" target="_blank" rel="noopener">Building Evolutionary Architectures</a>.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p><a href="https://jmeter.apache.org/"  class="external-link" target="_blank" rel="noopener">Apache JMeter</a>, <a href="https://k6.io/"  class="external-link" target="_blank" rel="noopener">k6</a>, <a href="https://locust.io/"  class="external-link" target="_blank" rel="noopener">Locust</a> and <a href="https://nbomber.com/"  class="external-link" target="_blank" rel="noopener">NBomber</a> come to mind.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>A <em>Manufacturing Execution System</em> is a software system responsible for the bookkeeping of a factory&rsquo;s production. It is generally used in highly sophisticated industries, such as the semiconductor industry and the medical devices industry, where a high level of material tracking and control is required.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p><a href="https://xkcd.com/2501/"  class="external-link" target="_blank" rel="noopener">XKCD 2501</a> comes to mind, so lets keep things simple.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:6">
+<p>This might surprise/scare you, but manufacturing flows this big are not that unrealistic for the semiconductor industry.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:7">
+<p>While writing this iteration subchapter, I was reminded of a very funny quote I heard from work: <em>&ldquo;Could you bring this up in the next arquitecture meeting, so I can immediately shoot it down?&rdquo;</em>. That&rsquo;s how I feel about this subchapter: it&rsquo;s more about what you <em>shouldn&rsquo;t do</em>.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:8">
+<p>The first if-statement of the loop is missing a <code>flowpath_index += 1</code> line, for example.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:9">
+<p>It does make sense if you think about it: the MES operations we&rsquo;ve been calling in out load tests can be thought of as state transitions for the wafer.&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2025
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>
