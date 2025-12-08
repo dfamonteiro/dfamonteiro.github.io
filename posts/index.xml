@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 02 Dec 2025 02:25:37 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 08 Dec 2025 17:26:11 +0000</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Reviewing a year&#39;s worth of book-reading</title>
+      <link>https://dfamonteiro.com/posts/2025-books/</link>
+      <pubDate>Mon, 08 Dec 2025 17:26:11 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/2025-books/</guid>
+      <description>&lt;p&gt;As we&amp;rsquo;re nearing the end of the calendar year, I wanted to reflect on the books I&amp;rsquo;ve read in these past 12 months. And thankfully, I had the foresight of taking notes throughout the year! Yay, past me!&lt;/p&gt;&#xA;&lt;p&gt;This won&amp;rsquo;t be a normal blog post in my usual writing style, but I&amp;rsquo;ll keep it simple: the books are organized by theme&amp;hellip; that&amp;rsquo;s it.&lt;/p&gt;&#xA;&lt;p&gt;Let&amp;rsquo;s get started!&lt;/p&gt;&#xA;&lt;h2 id=&#34;software-engineering-as-a-career-path&#34;&gt;&#xD;&#xA;  Software engineering as a career path&#xD;&#xA;  &lt;a class=&#34;heading-link&#34; href=&#34;#software-engineering-as-a-career-path&#34;&gt;&#xD;&#xA;    &lt;i class=&#34;fa-solid fa-link&#34; aria-hidden=&#34;true&#34; title=&#34;Link to heading&#34;&gt;&lt;/i&gt;&#xD;&#xA;    &lt;span class=&#34;sr-only&#34;&gt;Link to heading&lt;/span&gt;&#xD;&#xA;  &lt;/a&gt;&#xD;&#xA;&lt;/h2&gt;&#xD;&#xA;&lt;h3 id=&#34;the-missing-readme-chris-riccomini--dmitriy-ryaboy&#34;&gt;&#xD;&#xA;  The Missing README (Chris Riccomini &amp;amp; Dmitriy Ryaboy)&#xD;&#xA;  &lt;a class=&#34;heading-link&#34; href=&#34;#the-missing-readme-chris-riccomini--dmitriy-ryaboy&#34;&gt;&#xD;&#xA;    &lt;i class=&#34;fa-solid fa-link&#34; aria-hidden=&#34;true&#34; title=&#34;Link to heading&#34;&gt;&lt;/i&gt;&#xD;&#xA;    &lt;span class=&#34;sr-only&#34;&gt;Link to heading&lt;/span&gt;&#xD;&#xA;  &lt;/a&gt;&#xD;&#xA;&lt;/h3&gt;&#xD;&#xA;&lt;p&gt;I was recommended this book by a work colleague, and I have to say that for junior engineers it&amp;rsquo;s a must read, but I must say that it somewhat loses its value once you have over a year of experience in this profession.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>The case for stateful load generators</title>
       <link>https://dfamonteiro.com/posts/stateful-load-generators/</link>
