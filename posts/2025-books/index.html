@@ -178,7 +178,7 @@ Software engineering as a career pathLink to headingThe Missing README (Chris 
             </span>
             <span class="reading-time">
               <i class="fa-solid fa-clock" aria-hidden="true"></i>
-              11-minute read
+              15-minute read
             </span>
           </div>
           
@@ -378,11 +378,80 @@ Software engineering as a career pathLink to headingThe Missing README (Chris 
 </ol>
 <p>It sounds straightforward at first glance but it&rsquo;s so well executed that it becomes the narrative engine of the book. It also brings with it the added benefit of grounding the contents of the book in the real-world scenarios from the fictitional company.</p>
 <p><em>Software Architecture: The Hard Parts</em> might just become my new gold standard when judging tecnical books. The best compliment I can give it is that I can&rsquo;t recommend a specific part of the book: the whole book is great and you are rewarded by reading the book from start to finish with the enjoyment of following these fictional architects while they find solutions for their conundrums. By the end of the book you&rsquo;ll be cheering them on!</p>
+<h2 id="ps-2025-12-26">
+  P.S. 2025-12-26
+  <a class="heading-link" href="#ps-2025-12-26">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This was meant to be the end of the blog post, but as it happens, I managed to squeeze in a few more books in before the end of the year! I learned a valuable lesson though: make <strong><em>absolutely sure</em></strong> that your year is truly done before you publish a &ldquo;Year in Review&rdquo; post.</p>
+<p>Without further ado, here are the books I managed to read after this blog post was originally posted.</p>
+<h3 id="the-kubernetes-book-2023-edition-nigel-poulton--pushkar-joglekar">
+  The Kubernetes Book: 2023 Edition (Nigel Poulton &amp; Pushkar Joglekar)
+  <a class="heading-link" href="#the-kubernetes-book-2023-edition-nigel-poulton--pushkar-joglekar">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>If you don&rsquo;t know anything about Kubernetes, you should read this book. If you <em>kinda</em> know Kubernetes, you should read this book anyway.</p>
+<p>Before delving into this book I already had some working knowledge of operating a Kubernetes cluster, but none related to creating new K8s resources from scratch. That has now changed after reading Poulton&rsquo;s work: he does a great job of methodically and thoroughly explaining all the fundamental concepts of this technology, while keeping a good pace throughout the book. I now feel I have a solid grasp on the fundamentals of Kubernetes.</p>
+<p>I&rsquo;d like to take a moment to compliment the way the practical sections of the book are written: while the idea is to reproduce the console commands in your computer, the book makes such an effort of including the expected command line output that these sections become perfectly readable even without a computer in front of you.</p>
+<h3 id="openshift-for-developers-a-guide-for-impatient-beginners-joshua-wood--brian-tannous">
+  OpenShift for Developers: A Guide for Impatient Beginners (Joshua Wood &amp; Brian Tannous)
+  <a class="heading-link" href="#openshift-for-developers-a-guide-for-impatient-beginners-joshua-wood--brian-tannous">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>This book mainly focuses on the OpenShift features that are exclusive to this platform (and therefore not part of Kubernetes), so I would only recommend this book to you if:</p>
+<ul>
+<li><strong>A:</strong> You are a user of this platform.</li>
+<li><strong>B:</strong> You have intentions to make heavy use of the OpenShift-exclusive functionalities.</li>
+</ul>
+<p>If you intend to treat OpenShift as a &ldquo;Kubernetes with a web frontend&rdquo;, I would recommend a <a href="#the-kubernetes-book-2023-edition-nigel-poulton--pushkar-joglekar" >standard Kubernetes book</a> instead.</p>
+<h3 id="patterns-of-enterprise-application-architecture-martin-fowler-et-al">
+  Patterns of Enterprise Application Architecture (Martin Fowler <em>et al.</em>)
+  <a class="heading-link" href="#patterns-of-enterprise-application-architecture-martin-fowler-et-al">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Where do I begin? On one hand I want to place this book on the same tier as <a href="#domain-driven-design-tackling-complexity-in-the-heart-of-software-eric-evans" >Domain-Driven Design</a> and <a href="#designing-data-intensive-applications-martin-kleppmann" >Designing Data-Intensive Applications</a>. On the other hand, sometimes you can really tell this book was written in 2002. Take this excerpt for example:</p>
+<blockquote>
+<p><strong>The Allure of Distributed Objects</strong></p>
+<p>There is a recurring presentation that I used to see two or three times a year during design reviews. Proudly
+the system architect of a new OO system lays out his plan for a new distributed object system - let&rsquo;s pretend it&rsquo;s
+a some kind of ordering system. He shows me a design that looks rather like Figure 7.1. With separate remote
+objects for customers, orders, products, and deliveries. Each one is a separate component that can be placed
+on a separate processing node.</p>
+<p>I ask, &ldquo;Why do you do this?&rdquo;</p>
+<p>&ldquo;Performance, of course,&rdquo; the architect replies, looking at me a little oddly. &ldquo;We can run each component on a
+separate box. If one component gets too busy we add extra boxes for it so we can load-balance our
+application.&rdquo; The look is now curious as if he wonders if I really know anything about real distributed object
+stuff at all.</p>
+<p>Meanwhile I&rsquo;m faced with an interesting dilemma. Do I just say out and out that this design sucks like an
+inverted hurricane and get shown the door immediately?</p></blockquote>
+<p>So this fictional architect&rsquo;s idea is to design small services that map to the domain&rsquo;s entities and can scale independently?
+<a href="https://en.wikipedia.org/wiki/Microservices">Surely that&rsquo;s never gonna catch on</a>. To be fair to the author there are plenty of good reasons to <strong><em>not</em></strong> use microservices<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>, I just wanted to highlight that there are some aspects of this book that are dated.</p>
+<p>The chapter on web presentation patterns also didn&rsquo;t age well: aside from the model-view-controller pattern, the rest of the chapter can be disregarded, as 2 decades of innovation on web development frameworks have superseded most of this chapter&rsquo;s insights.</p>
+<p>While some parts of the book aged like milk, others have aged like wine: this book is a treasure trove of insights regarding mapping database records to objects. These insights were valid in 2004, and will continue to be relevant until the end of time<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>. On a personal note, I found Martin Fowler&rsquo;s insights on the dangers of lazy loading to hit a little close to home:</p>
+<blockquote>
+<p>Another danger with Lazy Load is that it can easily cause more database accesses than you need. A good example of this ripple loading is if you fill a collection with Lazy Loads and then look at them one at a time.</p>
+<p>This will cause you to go to the database once for each object instead of reading them all in at once. I&rsquo;ve seen ripple loading cripple the performance of an application. One way to avoid it is never to have a collection of Lazy Loads but, rather make the collection itself a Lazy Load and, when you load it, load all the contents.</p></blockquote>
+<p><em>&ldquo;I&rsquo;ve seen ripple loading cripple the performance of an application.&rdquo;</em> Trust me Martin, so have I! We&rsquo;re constantly battling this performance issue at my day job.</p>
+<p>So, is this book worth reading? Absolutely! Just don&rsquo;t be afraid to skim the parts of the book that don&rsquo;t interest you. I personally skipped over the code examples because I was far more interested in the core concepts and motivations behind the book&rsquo;s patterns, for example.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
 <li id="fn:1">
 <p>This is more of a reflection of myself and my relative lack of experience in corporate enviroments, rather than a flaw in the book.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>Even in the <a href="https://en.wikipedia.org/wiki/Microservices#Criticism_and_concerns"  class="external-link" target="_blank" rel="noopener">microservices wikipedia page</a>, the list of cons is far larger than the list of pros.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>SQL will never die.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </div>
