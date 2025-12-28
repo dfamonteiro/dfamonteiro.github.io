@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tracing on Daniel&#39;s blog</title>
+    <link>https://dfamonteiro.com/tags/tracing/</link>
+    <description>Recent content in Tracing on Daniel&#39;s blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 28 Dec 2025 16:27:35 +0000</lastBuildDate>
+    <atom:link href="https://dfamonteiro.com/tags/tracing/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Working around dotnet-trace&#39;s 100 stack frame limit</title>
+      <link>https://dfamonteiro.com/posts/dotnet-trace-100-limit/</link>
+      <pubDate>Sun, 28 Dec 2025 16:27:35 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/dotnet-trace-100-limit/</guid>
+      <description>&lt;p&gt;The &lt;a href=&#34;https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dotnet-trace&lt;/a&gt; command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime&amp;rsquo;s &lt;a href=&#34;https://learn.microsoft.com/en-us/dotnet/core/diagnostics/eventpipe&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;EventPipe&lt;/a&gt; component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.&lt;/p&gt;&#xA;&lt;p&gt;It gets even better though: you can start and stop collecting traces &lt;strong&gt;&lt;em&gt;without having to restart the target application&lt;/em&gt;&lt;/strong&gt;! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

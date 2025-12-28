@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Working around dotnet-trace&#39;s 100 stack frame limit · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="The dotnet-trace command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime&rsquo;s EventPipe component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.
+It gets even better though: you can start and stop collecting traces without having to restart the target application! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Working around dotnet-trace&#39;s 100 stack frame limit">
+  <meta name="twitter:description" content="The dotnet-trace command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime’s EventPipe component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.
+It gets even better though: you can start and stop collecting traces without having to restart the target application! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/dotnet-trace-100-limit/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Working around dotnet-trace&#39;s 100 stack frame limit">
+  <meta property="og:description" content="The dotnet-trace command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime’s EventPipe component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.
+It gets even better though: you can start and stop collecting traces without having to restart the target application! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-12-28T16:27:35+00:00">
+    <meta property="article:modified_time" content="2025-12-28T16:27:35+00:00">
+    <meta property="article:tag" content="Programming">
+    <meta property="article:tag" content="Tracing">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/dotnet-trace-100-limit/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.022594d625780e2edf64581b893d32cb35c11de5d88953ea4ad3c2e45451e214.css" integrity="sha256-AiWU1iV4Di7fZFgbiT0yyzXBHeXYiVPqStPC5FRR4hQ=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/dotnet-trace-100-limit/">
+              Working around dotnet-trace&#39;s 100 stack frame limit
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2025-12-28T16:27:35Z">
+                December 28, 2025
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              13-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/tracing/">Tracing</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>The <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace"  class="external-link" target="_blank" rel="noopener">dotnet-trace</a> command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime&rsquo;s <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/eventpipe"  class="external-link" target="_blank" rel="noopener">EventPipe</a> component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.</p>
+<p>It gets even better though: you can start and stop collecting traces <strong><em>without having to restart the target application</em></strong>! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.</p>
+<p><a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a> is an example of such a company: our MES<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> runs on <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"  class="external-link" target="_blank" rel="noopener">OpenShift</a> (an enterprise Kubernetes offering) and the host of the MES, in many ways the heart of this system, is an <a href="https://dotnet.microsoft.com/en-us/apps/aspnet"  class="external-link" target="_blank" rel="noopener">ASP.NET Core</a> application running in a Kubernetes pod. So, the question lends itself: can <code>dotnet-trace</code> be used to collect tracing data in a live MES host? The answer is yes&hellip; with an asterisk.</p>
+<h2 id="the-asterisk">
+  The asterisk
+  <a class="heading-link" href="#the-asterisk">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Collecting the tracing data is relatively straightforward: you simply copy the <code>dotnet-trace</code> executable to the pod with the .NET application, collect the tracing data, and then copy the trace file to your computer. All that remains to do now is figuring out why service xyz took 5 seconds to execute by analysing the traces with your favourite trace analysis tool. <code>dotnet-trace</code> supports 3 different trace formats, but I&rsquo;d recommend that you use the Chromium format alongside the <a href="https://perfetto.dev"  class="external-link" target="_blank" rel="noopener">Perfetto</a> trace viewer to analyse your .NET traces.</p>
+<p>I&rsquo;ve done the steps in the paragraph above several times, and in almost every single trace file I found something like this:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-100-limit/fragmentation.png" alt="A screenshot of a broken trace.">
+    <figcaption>A screenshot of a broken trace.</figcaption>
+</figure>
+<p>These two discontinuities indicated by the arrows cause what was meant to be a singular span to be broken into 3 separate spans. What are these spikes<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> doing here? When we zoom in on one of these discontinuities, things get even weirder:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-100-limit/fragmentation-zoom.png" alt="A screenshot of one of the zoomed-in spikes.">
+    <figcaption>A screenshot of one of the zoomed-in spikes.</figcaption>
+</figure>
+<p>The call stack of the spike is nearly identical to what comes before and after, but for some reason the first two base function calls are missing, which pushes the spike two frames up. Looking at the tail of the call stack of these spikes will give us the final piece of the puzzle:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-100-limit/fragmentation-tail.png" alt="The two spikes are highlighted by the arrows.">
+    <figcaption>The two spikes are highlighted by the arrows.</figcaption>
+</figure>
+<p>The two spikes have the exact same height&hellip; that can&rsquo;t be a coincidence. Let&rsquo;s check the height of these spikes: <strong>it&rsquo;s exactly 100 stack frames tall</strong>. What&rsquo;s going on here?!</p>
+<h3 id="the-net-eventpipes-100-stack-frame-limit">
+  The .NET EventPipe&rsquo;s 100 stack frame limit
+  <a class="heading-link" href="#the-net-eventpipes-100-stack-frame-limit">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>It turns out that I&rsquo;m not the only person with this issue. After some digging, I found this <a href="https://github.com/dotnet/diagnostics/issues/4490"  class="external-link" target="_blank" rel="noopener">github issue</a> detailing the exact same problem with <code>dotnet-trace</code>, and after some back and forth they managed to figure out where the problem lies:</p>
+<blockquote>
+<p>Hi @JaneySprings, thank you for providing that sample. The timeframes where it seemed like base events were being omitted had deeper call stacks to the neighbors where the base events were not omitted. From offline discussion with @noahfalk, he had a suspicion that <strong>the max stack depth of 100 led to base events being trimmed in favor of newer events</strong>.</p>
+<p>After bumping that stack depth to 1000, from the speedscopes I&rsquo;ve obtained, it looks like the max stack depth of 100 is the cause for base events being omitted.</p>
+<p><span>- </span> <span><a href="https://github.com/mdh1418">@mdh1418</a></span>, <span><a href="https://github.com/dotnet/diagnostics/issues/4490#issuecomment-1939428734">12-Feb-2024</a></span></p></blockquote>
+<p>So it looks like the EventPipe component has a hardcoded limit of 100 stack frames, and if this limit is exceeded the base stack frames are truncated: this is the cause of the misalignments we saw in our trace viewer. A quick look at the <a href="https://github.com/dotnet/runtime/blob/379d100b3cc18394064a276d7610e88a2aa09b6f/src/native/eventpipe/ep-types-forward.h#L70"  class="external-link" target="_blank" rel="noopener">EventPipe&rsquo;s source code</a> confirms the existence of this limit:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-h" data-lang="h"><span style="display:flex;"><span><span style="color:#75715e">#define EP_ACTIVITY_ID_SIZE EP_GUID_SIZE
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define EP_MAX_STACK_DEPTH 100 </span><span style="color:#75715e">// &lt;---------- BINGO!!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* EventPipe Enums. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">enum</span> {
+</span></span><span style="display:flex;"><span>    EP_BUFFER_STATE_WRITABLE <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>    EP_BUFFER_STATE_READ_ONLY <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>} EventPipeBufferState;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Author&#39;s note: this code snippet has been edited for improved readability
+</span></span></span></code></pre></div><p>So, where does this leave us? We can&rsquo;t fix this issue by changing the <code>EP_MAX_STACK_DEPTH</code> as that would require rebuilding and running a custom version of the .NET runtime. But even if we could do it, why would we want to take the performance hit of raising this limit? We can fix this in post by manipulating the trace data: as long as we can detect the spikes and add the missing base stack frames, we can make these discontinuities disappear. All it takes is a little surgery on the trace file.</p>
+<h2 id="performing-surgery-on-the-trace-file">
+  Performing surgery on the trace file
+  <a class="heading-link" href="#performing-surgery-on-the-trace-file">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Before diving head-first into editing Chromium trace files, maybe we should understand what we&rsquo;re getting ourselves into first.</p>
+<h3 id="the-chromium-trace-format-a-primer">
+  The Chromium trace format: a primer
+  <a class="heading-link" href="#the-chromium-trace-format-a-primer">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The Chromium trace files generated by <code>dotnet-trace</code> are JSON files with a couple of properties, but the only one that really matters is <code>traceEvents</code>: a list of trace events that indicate either the start or the end of a function span. These events have 7 properties:</p>
+<ul>
+<li><strong>name</strong>: The name of the function span</li>
+<li><strong>cat</strong>: String with a list of comma-separated categories</li>
+<li><strong>ph</strong>: Event type. We only care about two: Begin (<code>B</code>) and End (<code>E</code>). As you might expect, each Begin event will have its matching End event</li>
+<li><strong>ts</strong>: Timestamp in microseconds</li>
+<li><strong>pid</strong>: Process ID</li>
+<li><strong>tid</strong>: Thread ID</li>
+<li><strong>sf</strong>: Stack frame ID, which references a specific stack frame in the auxiliary <code>stackFrames</code> dictionary</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#e6db74">&#34;traceEvents&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Process64 dotnet (19) Args: /opt/app/Cmf.Foundation.Services.HostService.dll -p 8080&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;cat&#34;</span>: <span style="color:#e6db74">&#34;sampleEvent&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;ph&#34;</span>: <span style="color:#e6db74">&#34;B&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;ts&#34;</span>: <span style="color:#ae81ff">580.102</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;pid&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;tid&#34;</span>: <span style="color:#ae81ff">19</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;sf&#34;</span>: <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;(Non-Activities)&#34;</span>, <span style="color:#e6db74">&#34;cat&#34;</span>: <span style="color:#e6db74">&#34;sampleEvent&#34;</span>, <span style="color:#e6db74">&#34;ph&#34;</span>: <span style="color:#e6db74">&#34;B&#34;</span>, <span style="color:#e6db74">&#34;ts&#34;</span>: <span style="color:#ae81ff">580.102</span>, <span style="color:#e6db74">&#34;pid&#34;</span>: <span style="color:#ae81ff">0</span>, <span style="color:#e6db74">&#34;tid&#34;</span>: <span style="color:#ae81ff">19</span>, <span style="color:#e6db74">&#34;sf&#34;</span>: <span style="color:#ae81ff">1</span>},
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Threads&#34;</span>,          <span style="color:#e6db74">&#34;cat&#34;</span>: <span style="color:#e6db74">&#34;sampleEvent&#34;</span>, <span style="color:#e6db74">&#34;ph&#34;</span>: <span style="color:#e6db74">&#34;B&#34;</span>, <span style="color:#e6db74">&#34;ts&#34;</span>: <span style="color:#ae81ff">580.102</span>, <span style="color:#e6db74">&#34;pid&#34;</span>: <span style="color:#ae81ff">0</span>, <span style="color:#e6db74">&#34;tid&#34;</span>: <span style="color:#ae81ff">19</span>, <span style="color:#e6db74">&#34;sf&#34;</span>: <span style="color:#ae81ff">2</span>},
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Thread (19)&#34;</span>,      <span style="color:#e6db74">&#34;cat&#34;</span>: <span style="color:#e6db74">&#34;sampleEvent&#34;</span>, <span style="color:#e6db74">&#34;ph&#34;</span>: <span style="color:#e6db74">&#34;B&#34;</span>, <span style="color:#e6db74">&#34;ts&#34;</span>: <span style="color:#ae81ff">580.102</span>, <span style="color:#e6db74">&#34;pid&#34;</span>: <span style="color:#ae81ff">0</span>, <span style="color:#e6db74">&#34;tid&#34;</span>: <span style="color:#ae81ff">19</span>, <span style="color:#e6db74">&#34;sf&#34;</span>: <span style="color:#ae81ff">3</span>},
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+</span></span></code></pre></div><p>Large trace files can easily have hundreds of thousands of these events! For more information on this trace file format, please go check <a href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview?tab=t.0"  class="external-link" target="_blank" rel="noopener">this document</a>.</p>
+<h2 id="detecting-spikes">
+  Detecting spikes
+  <a class="heading-link" href="#detecting-spikes">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><code>dotnet-trace</code> is a sampling profiler. This means that when we get a spike, we get a list of 100 stack frames all with the exact same timestamp because they were captured in the same sampling event. This technical detail makes finding spikes in our trace file quite straightforward:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">find_discontinuities</span>(trace_events : List[Dict[str, Any]]) <span style="color:#f92672">-&gt;</span> List[int]:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Finds all sequences of 100 &#34;Begin&#34; trace events that share the same timestamp
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        List[int]: List of indices that point to the start of discontinuities
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            or &#34;spikes&#34; in the list of trace events
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    candidate <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> index, event <span style="color:#f92672">in</span> enumerate(trace_events):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (event[<span style="color:#e6db74">&#34;ph&#34;</span>]) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;E&#34;</span>:
+</span></span><span style="display:flex;"><span>            candidate <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">elif</span> candidate <span style="color:#f92672">==</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>            candidate <span style="color:#f92672">=</span> (index, event[<span style="color:#e6db74">&#34;ts&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">elif</span> index <span style="color:#f92672">-</span> candidate[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">100</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># We found a spike!</span>
+</span></span><span style="display:flex;"><span>            res<span style="color:#f92672">.</span>append(candidate[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>            candidate <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">elif</span> candidate[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">!=</span> event[<span style="color:#e6db74">&#34;ts&#34;</span>]:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># If the timestamp doesn&#39;t match, reset the candidate</span>
+</span></span><span style="display:flex;"><span>            candidate <span style="color:#f92672">=</span> (index, event[<span style="color:#e6db74">&#34;ts&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res
+</span></span></code></pre></div><p>Running this function on our trace file identifies the following discontinuities in our trace file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Index: 10456, Thread: 409, Timestamp: 12.2s, Name: Microsoft.AspNetCore.RateLimiting.RateLimitingMiddleware+&lt;InvokeInternal&gt;d__11.MoveNext()
+</span></span><span style="display:flex;"><span>Index: 44076, Thread: 449, Timestamp: 7.82s, Name: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol+&lt;ProcessRequests&gt;d__238`1[System.__Canon]].MoveNext(class System.Threading.Thread)
+</span></span><span style="display:flex;"><span>Index: 44824, Thread: 449, Timestamp: 7.88s, Name: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&amp;)
+</span></span><span style="display:flex;"><span>Index: 55108, Thread: 450, Timestamp: 6.91s, Name: System.Threading.ThreadPoolWorkQueue.Dispatch()
+</span></span><span style="display:flex;"><span>Index: 62258, Thread: 450, Timestamp: 11.73s, Name: Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol+&lt;ProcessRequests&gt;d__238`1[System.__Canon].MoveNext()
+</span></span><span style="display:flex;"><span>Index: 62764, Thread: 450, Timestamp: 11.74s, Name: WebApiHostCore.Middleware.ExceptionMiddleware+&lt;Invoke&gt;d__3.MoveNext()
+</span></span><span style="display:flex;"><span>Index: 69034, Thread: 450, Timestamp: 14.67s, Name: System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(class System.Threading.Thread,class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object)
+</span></span></code></pre></div><p>The second and third lines might be familiar to you: they&rsquo;re the <a href="#the-asterisk" >two spikes</a> that led us down this rabbit hole!</p>
+<h2 id="adding-the-missing-stack-frames">
+  Adding the missing stack frames
+  <a class="heading-link" href="#adding-the-missing-stack-frames">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This is the tricky bit. Now that we have located our spikes, we need to do the following:</p>
+<ul>
+<li>Determine which stack frames are missing in the spike</li>
+<li>Insert the missing trace events in our <code>traceEvents</code> list (easier said than done)</li>
+<li>Do this without screwing up our list of indices that point to the spikes</li>
+</ul>
+<h3 id="determine-the-missing-stack-frames">
+  Determine the missing stack frames
+  <a class="heading-link" href="#determine-the-missing-stack-frames">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Much like the problem of <a href="#detecting-spikes" >programatically finding spikes</a>, this is a tricky issue that can be addressed with simple code by taking advantage of some key technical details.</p>
+<p>In order for the stack frames of the spike to show up correctly, the stack frames of the correct trace have to be closed immediately before the stack frames of the spike open. This leads to the rather convenient observation that the missing stack frames appear as <code>E</code> trace events right next to the beginning of the spike! With a closer inspection of the events of the trace file, this becomes obvious:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Notice how the name of this stack frame matches the name </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># of the stack frame that is the base of the spike.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># This means that the two stack frames in the middle</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># are the missing stack frames.</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol+</span><span style="color:#ae81ff">\u003c</span><span style="color:#e6db74">ProcessRequests</span><span style="color:#ae81ff">\u003e</span><span style="color:#e6db74">d__238`1[System.__Canon]].MoveNext(class System.Threading.Thread)&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ph&#34;</span>: <span style="color:#e6db74">&#34;E&#34;</span>,
+</span></span><span style="display:flex;"><span>},
+</span></span><span style="display:flex;"><span>{   <span style="color:#75715e"># Missing stack frame 7823421.551037414</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;System.Threading.ThreadPoolWorkQueue.Dispatch()&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ph&#34;</span>: <span style="color:#e6db74">&#34;E&#34;</span>,
+</span></span><span style="display:flex;"><span>},
+</span></span><span style="display:flex;"><span>{   <span style="color:#75715e"># Missing stack frame</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart()&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ph&#34;</span>: <span style="color:#e6db74">&#34;E&#34;</span>,
+</span></span><span style="display:flex;"><span>},
+</span></span><span style="display:flex;"><span>{   <span style="color:#75715e"># Beginning of the spike</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol+</span><span style="color:#ae81ff">\u003c</span><span style="color:#e6db74">ProcessRequests</span><span style="color:#ae81ff">\u003e</span><span style="color:#e6db74">d__238`1[System.__Canon]].MoveNext(class System.Threading.Thread)&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ph&#34;</span>: <span style="color:#e6db74">&#34;B&#34;</span>,
+</span></span><span style="display:flex;"><span>},
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Excerpt from the trace file&#39;s &#34;traceEvents&#34; property. Some fields were omitted for brevity</span>
+</span></span></code></pre></div><p>Now that we know how easy it is to get this information, getting the list of missing stack frames becomes a formality:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_missing_stack_frames</span>(index : int, trace_events : List[Dict[str, Any]]) <span style="color:#f92672">-&gt;</span> List[str]:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Returns the missing stack frames for a given spike
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        List[str]: A list of the missing stack frame names
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    spike_base_name <span style="color:#f92672">=</span> trace_events[index][<span style="color:#e6db74">&#34;name&#34;</span>]
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        index <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        current_name <span style="color:#f92672">=</span> trace_events[index][<span style="color:#e6db74">&#34;name&#34;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> current_name <span style="color:#f92672">==</span> spike_base_name:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> res
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            res<span style="color:#f92672">.</span>append(current_name)
+</span></span></code></pre></div><h3 id="insert-the-missing-stack-frames-in-the-spikes">
+  Insert the missing stack frames in the spikes
+  <a class="heading-link" href="#insert-the-missing-stack-frames-in-the-spikes">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In order to inject the missing stack frames in our spikes we need to &ldquo;wrap&rdquo; the events of the spike with some trace events of our own making. I know this is hard to visualize, so I came up with this little diagram to help you get a better feel of what the end goal is:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Before:             After:
+</span></span><span style="display:flex;"><span>(fn0 and fn1
+</span></span><span style="display:flex;"><span>are missing)        B fn0,
+</span></span><span style="display:flex;"><span>                    B fn1,
+</span></span><span style="display:flex;"><span>B fn2,              B fn2, 
+</span></span><span style="display:flex;"><span>B fn3,  --------&gt;   B fn3,           
+</span></span><span style="display:flex;"><span>E fn3,              E fn3, 
+</span></span><span style="display:flex;"><span>E fn2,              E fn2, 
+</span></span><span style="display:flex;"><span>                    E fn1,
+</span></span><span style="display:flex;"><span>                    E fn0,
+</span></span></code></pre></div><p>So, we need to add the missing <code>B</code> (Begin) trace events <em>before</em> the first spike trace event, and the missing <code>E</code> (End) trace events <em>after</em> the final spike trace event.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add_missing_stack_frames_to_spike</span>(spike_pointer : int, trace_events : List[Dict[str, Any]]) <span style="color:#f92672">-&gt;</span> int:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Adds the missing stack frames to the spike pointed by spike_pointer.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        int: The number of added trace events
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    end_index <span style="color:#f92672">=</span> find_matching_trace_event(spike_pointer, trace_events)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    begin_ts <span style="color:#f92672">=</span> trace_events[spike_pointer][<span style="color:#e6db74">&#34;ts&#34;</span>]
+</span></span><span style="display:flex;"><span>    end_ts   <span style="color:#f92672">=</span> trace_events[end_index][<span style="color:#e6db74">&#34;ts&#34;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pid <span style="color:#f92672">=</span> trace_events[spike_pointer][<span style="color:#e6db74">&#34;pid&#34;</span>]
+</span></span><span style="display:flex;"><span>    tid <span style="color:#f92672">=</span> trace_events[spike_pointer][<span style="color:#e6db74">&#34;tid&#34;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    stack_frames <span style="color:#f92672">=</span> get_missing_stack_frames(spike_pointer, trace_events)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add the Begin trace events</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> name <span style="color:#f92672">in</span> reversed(stack_frames):
+</span></span><span style="display:flex;"><span>        trace_events<span style="color:#f92672">.</span>insert(spike_pointer, {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;name&#34;</span> : name,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;ph&#34;</span> : <span style="color:#e6db74">&#34;B&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;ts&#34;</span> : begin_ts,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;pid&#34;</span> : pid,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;tid&#34;</span> : tid,
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>    end_index <span style="color:#f92672">+=</span> len(stack_frames) <span style="color:#75715e"># Update the end index to reflect the newly added events</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add the End trace events</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> name <span style="color:#f92672">in</span> reversed(stack_frames):
+</span></span><span style="display:flex;"><span>        trace_events<span style="color:#f92672">.</span>insert(end_index <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;name&#34;</span> : name,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;ph&#34;</span> : <span style="color:#e6db74">&#34;E&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;ts&#34;</span> : end_ts,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;pid&#34;</span> : pid,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;tid&#34;</span> : tid,
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>        end_index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span> <span style="color:#75715e"># Update the end index</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> len(stack_frames) <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>
+</span></span></code></pre></div><p>The trace events being created are missing the <code>cat</code> and <code>sf</code> properties. There is a good reason for this, which will become clear down the line.</p>
+<p>In order to easily find the matching <code>E</code> event for any given <code>B</code> trace event, I wrote this auxiliary function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">find_matching_trace_event</span>(index : int, trace_events : List[Dict[str, Any]]) <span style="color:#f92672">-&gt;</span> int:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Finds the matching trace event.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        int: A pointer to the matching trace event
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    depth <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> trace_events[index][<span style="color:#e6db74">&#34;ph&#34;</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;B&#34;</span>:
+</span></span><span style="display:flex;"><span>            depth <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            depth <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> depth <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> index <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><h3 id="and-dont-forget-about-keeping-the-indices-up-to-date">
+  And don&rsquo;t forget about keeping the indices up to date!
+  <a class="heading-link" href="#and-dont-forget-about-keeping-the-indices-up-to-date">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Oops, almost forgot! Calling <code>add_missing_stack_frames_to_spike()</code> leads to new trace events being added to the <code>traceEvents</code> list, which means any indices pointing to this list need to be corrected to account for this growth.</p>
+<p>In essence, when you call <code>add_missing_stack_frames_to_spike()</code> you must update the spike pointers immediately:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">fix_spikes</span>(trace_file: Dict[str, Any]):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Fix the spikes/discontinuities in the trace file&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># These pointers are guaranteed to be ordered from lowest to highest</span>
+</span></span><span style="display:flex;"><span>    spike_pointers <span style="color:#f92672">=</span> find_discontinuities(trace_file[<span style="color:#e6db74">&#34;traceEvents&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(spike_pointers)):
+</span></span><span style="display:flex;"><span>        offset <span style="color:#f92672">=</span> add_missing_stack_frames_to_spike(spike_pointers[i], trace_file[<span style="color:#e6db74">&#34;traceEvents&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Update the necessary spike pointers</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> j <span style="color:#f92672">in</span> range(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, len(spike_pointers)):
+</span></span><span style="display:flex;"><span>            spike_pointers[j] <span style="color:#f92672">+=</span> offset
+</span></span></code></pre></div><p>After all this work, where does this leave us? Let&rsquo;s see:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-100-limit/partial-fix.png" alt="The two spikes are highlighted by the arrows.">
+    <figcaption>The two spikes are highlighted by the arrows.</figcaption>
+</figure>
+<p>The spikes are no longer offset to their neighboring spans! All that remains to be done is turn these 5 spans into a single unified span.</p>
+<h2 id="stitching-together-the-function-spans">
+  Stitching together the function spans
+  <a class="heading-link" href="#stitching-together-the-function-spans">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Merging spans together is a matter of deleting (<code>E</code>, <code>B</code>) trace event pairings that sit together in the <code>traceEvents</code> list and share the same name, pid, tid, and timestamp.<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup></p>
+<p>Please note that this means that the trace events created in the previous chapter will be removed by the code below! That&rsquo;s why I didn&rsquo;t bother with replicating <em>every single field</em> when crafting these artificial trace events: their presence in the trace file would always be merely temporary.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">merge_spans</span>(trace_events : List[Dict[str, Any]]):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Merge contiguous spans that share the same name, tid, pid, and timestamp.&#34;</span>    
+</span></span><span style="display:flex;"><span>    index <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> index <span style="color:#f92672">&lt;</span> len(trace_events):
+</span></span><span style="display:flex;"><span>        current  <span style="color:#f92672">=</span> trace_events[index]
+</span></span><span style="display:flex;"><span>        previous <span style="color:#f92672">=</span> trace_events[index <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        event_types_are_correct <span style="color:#f92672">=</span> (previous[<span style="color:#e6db74">&#34;ph&#34;</span>], current[<span style="color:#e6db74">&#34;ph&#34;</span>]) <span style="color:#f92672">==</span> (<span style="color:#e6db74">&#34;E&#34;</span>, <span style="color:#e6db74">&#34;B&#34;</span>)
+</span></span><span style="display:flex;"><span>        same_name <span style="color:#f92672">=</span> current[<span style="color:#e6db74">&#34;name&#34;</span>] <span style="color:#f92672">==</span> previous[<span style="color:#e6db74">&#34;name&#34;</span>]
+</span></span><span style="display:flex;"><span>        same_tid  <span style="color:#f92672">=</span> current[<span style="color:#e6db74">&#34;tid&#34;</span>]  <span style="color:#f92672">==</span> previous[<span style="color:#e6db74">&#34;tid&#34;</span>]
+</span></span><span style="display:flex;"><span>        same_pid  <span style="color:#f92672">=</span> current[<span style="color:#e6db74">&#34;pid&#34;</span>]  <span style="color:#f92672">==</span> previous[<span style="color:#e6db74">&#34;pid&#34;</span>]
+</span></span><span style="display:flex;"><span>        timestamps_match <span style="color:#f92672">=</span> current[<span style="color:#e6db74">&#34;ts&#34;</span>] <span style="color:#f92672">-</span> previous[<span style="color:#e6db74">&#34;ts&#34;</span>] <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">50</span> <span style="color:#75715e"># Within 50 us</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> event_types_are_correct <span style="color:#f92672">and</span> same_name <span style="color:#f92672">and</span> same_tid <span style="color:#f92672">and</span> same_pid <span style="color:#f92672">and</span> timestamps_match:
+</span></span><span style="display:flex;"><span>            trace_events<span style="color:#f92672">.</span>pop(index <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>            trace_events<span style="color:#f92672">.</span>pop(index <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>            index <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">fix_spikes</span>(trace_file: Dict[str, Any]):
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>    merge_spans(trace_file[<span style="color:#e6db74">&#34;traceEvents&#34;</span>])
+</span></span></code></pre></div><p>It&rsquo;s time to take a final look at our traces:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-100-limit/fix.png" alt="No spikes to be seen!">
+    <figcaption>No spikes to be seen!</figcaption>
+</figure>
+<p><em>Et voilà!</em> As if by magic, our spikes disappear and we now have perfectly flush function spans. But you and I both know there&rsquo;s no magic here: just a lot of very careful manipulation of trace events underpinned by our understanding of how these trace events are laid out in the trace file.</p>
+<h2 id="final-notes">
+  Final notes
+  <a class="heading-link" href="#final-notes">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>To be honest, the hardest part of fixing this artifact wasn&rsquo;t the trace file manipulation<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup>, it was figuring out what the hell was going on in the first place! My first theory was that there was some async shenanigans that were causing the spikes, it was only when I decided to count the number of stack frames in a spike that the root problem was revealed.</p>
+<p>After that revelation, it was only a matter of undoing the damage caused by the .NET EventPipe&rsquo;s limit of 100 stack frames. If you&rsquo;re also struggling with this limitation of the <code>dotnet-trace</code> tool, feel free to use this <a href="https://github.com/dfamonteiro/blog/blob/main/dotnet-trace/fix_spikes.py"  class="external-link" target="_blank" rel="noopener">python script</a> that I wrote alongside this blog post. I can&rsquo;t promise that the script will work on every trace file, but after reading this blog post you know enough about its inner workings to handle any edge case you might find yourself!</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>A <em>Manufacturing Execution System</em> is a software system responsible for the bookkeeping of a factory&rsquo;s production. It is generally used in highly sophisticated industries, such as the semiconductor industry and the medical devices industry, where a high level of material tracking and control is required.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>The terms &ldquo;spike&rdquo; and &ldquo;discontinuity&rdquo; are used interchangeably in this blog post to describe the same phenomenon.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>If you are trying to replicate this script, please be careful so that you don&rsquo;t accidentally merge spans that weren&rsquo;t meant to be merged. You can use the list of spike pointers to generate a table of spike timestamps, around which it should be fine to merge trace events. Please check <a href="https://github.com/dfamonteiro/blog/tree/main/dotnet-trace"  class="external-link" target="_blank" rel="noopener">this blog&rsquo;s repository</a> for a more bullet-proof version of <code>merge_spans()</code> that takes the location of the spikes into consideration.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>I had already created trace files from scratch for a work project, maybe I&rsquo;ll write more about that in the future.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2025
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>
