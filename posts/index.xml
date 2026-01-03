@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 28 Dec 2025 16:27:35 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 03 Jan 2026 02:09:05 +0000</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Diagnosing performance issues in .NET applications with dotnet-trace and Perfetto</title>
+      <link>https://dfamonteiro.com/posts/using-dotnet-trace-with-perfetto/</link>
+      <pubDate>Sat, 03 Jan 2026 02:09:05 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/using-dotnet-trace-with-perfetto/</guid>
+      <description>&lt;p&gt;As the software industry transitioned towards more cloud-centric environments, programming languages have had to focus on treating virtualized Linux environments as first-class citizens or risk getting left behind. C# was no exception and for this language to maintain its popularity, Microsoft had to perform a &lt;a href=&#34;https://devblogs.microsoft.com/dotnet/announcing-net-core-1-0/&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;complete overhaul&lt;/a&gt; of the .NET runtime to make it cloud-ready.&lt;/p&gt;&#xA;&lt;p&gt;As part of this initiative to make .NET platform-agnostic, a &lt;a href=&#34;https://learn.microsoft.com/en-us/dotnet/core/diagnostics/tools-overview&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;supporting cast of CLI diagnostic tools&lt;/a&gt; was &lt;a href=&#34;https://devblogs.microsoft.com/dotnet/introducing-diagnostics-improvements-in-net-core-3-0&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;developed from scratch&lt;/a&gt; with the goal of uniformizing the developer experience of diagnosing C# applications across operating systems. One of these tools is &lt;code&gt;dotnet-trace&lt;/code&gt;: a tool that can be hooked into a running .NET application to collect tracing data which can then be analysed with trace viewers.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Working around dotnet-trace&#39;s 100 stack frame limit</title>
       <link>https://dfamonteiro.com/posts/dotnet-trace-100-limit/</link>

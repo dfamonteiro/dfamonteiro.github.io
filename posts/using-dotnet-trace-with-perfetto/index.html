@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Diagnosing performance issues in .NET applications with dotnet-trace and Perfetto · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="As the software industry transitioned towards more cloud-centric environments, programming languages have had to focus on treating virtualized Linux environments as first-class citizens or risk getting left behind. C# was no exception and for this language to maintain its popularity, Microsoft had to perform a complete overhaul of the .NET runtime to make it cloud-ready.
+As part of this initiative to make .NET platform-agnostic, a supporting cast of CLI diagnostic tools was developed from scratch with the goal of uniformizing the developer experience of diagnosing C# applications across operating systems. One of these tools is dotnet-trace: a tool that can be hooked into a running .NET application to collect tracing data which can then be analysed with trace viewers.">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Diagnosing performance issues in .NET applications with dotnet-trace and Perfetto">
+  <meta name="twitter:description" content="As the software industry transitioned towards more cloud-centric environments, programming languages have had to focus on treating virtualized Linux environments as first-class citizens or risk getting left behind. C# was no exception and for this language to maintain its popularity, Microsoft had to perform a complete overhaul of the .NET runtime to make it cloud-ready.
+As part of this initiative to make .NET platform-agnostic, a supporting cast of CLI diagnostic tools was developed from scratch with the goal of uniformizing the developer experience of diagnosing C# applications across operating systems. One of these tools is dotnet-trace: a tool that can be hooked into a running .NET application to collect tracing data which can then be analysed with trace viewers.">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/using-dotnet-trace-with-perfetto/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Diagnosing performance issues in .NET applications with dotnet-trace and Perfetto">
+  <meta property="og:description" content="As the software industry transitioned towards more cloud-centric environments, programming languages have had to focus on treating virtualized Linux environments as first-class citizens or risk getting left behind. C# was no exception and for this language to maintain its popularity, Microsoft had to perform a complete overhaul of the .NET runtime to make it cloud-ready.
+As part of this initiative to make .NET platform-agnostic, a supporting cast of CLI diagnostic tools was developed from scratch with the goal of uniformizing the developer experience of diagnosing C# applications across operating systems. One of these tools is dotnet-trace: a tool that can be hooked into a running .NET application to collect tracing data which can then be analysed with trace viewers.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-01-03T02:09:05+00:00">
+    <meta property="article:modified_time" content="2026-01-03T02:09:05+00:00">
+    <meta property="article:tag" content="Programming">
+    <meta property="article:tag" content="Tracing">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/using-dotnet-trace-with-perfetto/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.022594d625780e2edf64581b893d32cb35c11de5d88953ea4ad3c2e45451e214.css" integrity="sha256-AiWU1iV4Di7fZFgbiT0yyzXBHeXYiVPqStPC5FRR4hQ=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/using-dotnet-trace-with-perfetto/">
+              Diagnosing performance issues in .NET applications with dotnet-trace and Perfetto
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-01-03T02:09:05Z">
+                January 3, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              14-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/tracing/">Tracing</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>As the software industry transitioned towards more cloud-centric environments, programming languages have had to focus on treating virtualized Linux environments as first-class citizens or risk getting left behind. C# was no exception and for this language to maintain its popularity, Microsoft had to perform a <a href="https://devblogs.microsoft.com/dotnet/announcing-net-core-1-0/"  class="external-link" target="_blank" rel="noopener">complete overhaul</a> of the .NET runtime to make it cloud-ready.</p>
+<p>As part of this initiative to make .NET platform-agnostic, a <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/tools-overview"  class="external-link" target="_blank" rel="noopener">supporting cast of CLI diagnostic tools</a> was <a href="https://devblogs.microsoft.com/dotnet/introducing-diagnostics-improvements-in-net-core-3-0"  class="external-link" target="_blank" rel="noopener">developed from scratch</a> with the goal of uniformizing the developer experience of diagnosing C# applications across operating systems. One of these tools is <code>dotnet-trace</code>: a tool that can be hooked into a running .NET application to collect tracing data which can then be analysed with trace viewers.</p>
+<p>In an ongoing effort to popularize the usage of performance diagnostics tools during development at my workplace, I&rsquo;ve been <a href="../dotnet-trace-100-limit" >working out the kinks</a> of using <code>dotnet-trace</code> to analyse the performance of my company&rsquo;s multithreaded <a href="https://dotnet.microsoft.com/en-us/apps/aspnet"  class="external-link" target="_blank" rel="noopener">ASP.NET Core</a> application. I have also been testing various trace viewers to analyse <code>dotnet-trace</code> files with, and in my opinion there is no discussion to be had: <code>dotnet-trace</code> and the <a href="https://perfetto.dev/"  class="external-link" target="_blank" rel="noopener">Perfetto trace viewer</a> are a match made in heaven, especially when you have to analyse complex trace files with multiple threads!</p>
+<p>In this blog post I will show how you can use a combination of <code>dotnet-trace</code> &amp; <a href="https://perfetto.dev/"  class="external-link" target="_blank" rel="noopener">Perfetto</a> to collect traces from a running application, and then perform post-processing on those traces so that the focus is always on the parts of the call stack that matter.</p>
+<h2 id="collecting-traces-with-dotnet-trace">
+  Collecting traces with dotnet-trace
+  <a class="heading-link" href="#collecting-traces-with-dotnet-trace">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="installing-dotnet-trace">
+  Installing dotnet-trace
+  <a class="heading-link" href="#installing-dotnet-trace">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>If you don&rsquo;t have this tool already installed there are two ways of installing it:</p>
+<ol>
+<li><code>dotnet tool install --global dotnet-trace</code></li>
+<li><a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace"  class="external-link" target="_blank" rel="noopener">Download the executable from the official page</a></li>
+</ol>
+<p>Please note that the <code>dotnet-trace</code> tool needs to be in the same execution environment as the target .NET application.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<p>If you&rsquo;re running your .NET application in a locked-down docker container, it might not be possible to run <code>dotnet tool install</code>, so your only option will be to download the linux executable and move it to the container&rsquo;s filesystem by either:</p>
+<ul>
+<li>Running something like <code>docker cp dotnet-trace custom_host:/opt/app/dotnet-trace</code><sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>, or&hellip;</li>
+<li>Placing the executable in a folder that your .NET container can reach<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup></li>
+</ul>
+<h3 id="running-dotnet-trace">
+  Running dotnet-trace
+  <a class="heading-link" href="#running-dotnet-trace">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Now that <code>dotnet-trace</code> is installed, we can run it against our application. Before we start collecting traces, we need to figure out the PID of our application:</p>
+<ol>
+<li>
+<p>Log in to your container first if necessary</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>docker exec -it custom_host /bin/bash
+</span></span></code></pre></div></li>
+<li>
+<p>Run <code>dotnet-trace ps</code> to get a list of the .NET processes in the docker container</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>bash-4.4# ./dotnet-trace ps
+</span></span><span style="display:flex;"><span> 1  CmfEntrypoint  /usr/share/CmfEntrypoint/CmfEntrypoint  r=host --target-directory=/opt/app --allow-custom-certificates --distro=ubi8
+</span></span><span style="display:flex;"><span>19  dotnet         /usr/lib64/dotnet/dotnet                dotnet Cmf.Foundation.Services.HostService.dll -p 8080
+</span></span></code></pre></div></li>
+</ol>
+<p>Our application is running on PID 19. Let&rsquo;s collect some data by running <code>dotnet-trace collect</code>! The target process is determined by the <code>-p</code> flag, and <code>--format Chromium</code> determines the intended format: a <code>.chromium.json</code> file that can be read by the Perfetto trace viewer.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>bash-4.4# ./dotnet-trace collect -p 19 --format Chromium
+</span></span><span style="display:flex;"><span>No profile or providers specified, defaulting to trace profile &#39;cpu-sampling&#39;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Provider Name                           Keywords            Level               Enabled By
+</span></span><span style="display:flex;"><span>Microsoft-DotNETCore-SampleProfiler     0x0000F00000000000  Informational(4)    --profile
+</span></span><span style="display:flex;"><span>Microsoft-Windows-DotNETRuntime         0x00000014C14FCCBD  Informational(4)    --profile
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Process        : /usr/lib64/dotnet/dotnet
+</span></span><span style="display:flex;"><span>Output File    : /opt/app/dotnet_20251230_003728.nettrace
+</span></span><span style="display:flex;"><span>[00:00:00:06]   Recording trace 1.0175   (MB)
+</span></span><span style="display:flex;"><span>Press &lt;Enter&gt; or &lt;Ctrl+C&gt; to exit...
+</span></span></code></pre></div><p>Now that <code>dotnet-trace</code> is collecting data, make sure that the application is doing something interesting: click some buttons, call some APIs, run some integration tests, do whatever you see fit.</p>
+<p>When you&rsquo;re done, press Enter or Ctrl+C to stop the collection process and create a trace file. You&rsquo;ll get some output in your terminal similar to this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>Stopping the trace. This may take several minutes depending on the application being traced.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Trace completed.
+</span></span><span style="display:flex;"><span>Processing trace data file &#39;/opt/app/dotnet_20251230_003728.nettrace&#39; to create a new Chromium file &#39;/opt/app/dotnet_20251230_003728.chromium.json&#39;.
+</span></span><span style="display:flex;"><span>Conversion complete
+</span></span></code></pre></div><h3 id="retrieving-the-trace-file">
+  Retrieving the trace file
+  <a class="heading-link" href="#retrieving-the-trace-file">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>If our .NET application is running in a container, we might still need to rescue the trace file from the container&rsquo;s filesystem:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>docker cp custom_host:/opt/app/dotnet_20251230_003728.chromium.json dotnet_20251230_003728.chromium.json
+</span></span></code></pre></div><h2 id="analysing-traces-with-perfetto">
+  Analysing traces with Perfetto
+  <a class="heading-link" href="#analysing-traces-with-perfetto">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Now that we have captured our tracing data, head over to the <a href="https://ui.perfetto.dev/"  class="external-link" target="_blank" rel="noopener">Perfetto trace viewer webpage</a> and open your trace file. You should get something like this:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/perfetto-opening-view.png" alt="The Perfetto trace viewer">
+    <figcaption>The Perfetto trace viewer</figcaption>
+</figure>
+<p>The trace file that will be analysed in this blog post was captured from <a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a>&rsquo;s host, which serves as the backend for the MES<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> system sold by the company. This will naturally mean that the analysis done here will be tailored towards this application, but the techniques to be shown below can be applied to any trace file you analyse with Perfetto.</p>
+<h3 id="navigating-the-perfetto-ui">
+  <a href="https://perfetto.dev/docs/visualization/perfetto-ui"  class="external-link" target="_blank" rel="noopener">Navigating the Perfetto UI</a>
+  <a class="heading-link" href="#navigating-the-perfetto-ui">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>These are the basic controls needed to navigate this trace viewer:</p>
+<ul>
+<li>Use the scroll wheel to scroll up and down the thread list</li>
+<li>Use the WASD keys to zoom in and out (WS) and move right or left</li>
+</ul>
+<p>If you click on a trace slice, a tab called &ldquo;Current Selection&rdquo; will appear at the bottom of the screen with all the information related to this slice. If the selected slice is out of sight, you can press F to center the trace viewer on it.</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/current-selection.png" alt="The &quot;Current Selection&quot; tab with all the details of the selected slice">
+    <figcaption>The <b>“Current Selection”</b> tab with all the details of the selected slice</figcaption>
+</figure>
+<p>This is just the tip of the iceberg though: for more information on all things Perfetto, head over to their <a href="https://perfetto.dev/docs/"  class="external-link" target="_blank" rel="noopener">documentation page</a>.</p>
+<h3 id="taking-a-birds-eye-view-of-the-trace-file">
+  Taking a bird&rsquo;s eye view of the trace file
+  <a class="heading-link" href="#taking-a-birds-eye-view-of-the-trace-file">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Before diving headfirst into a service call, let&rsquo;s stay zoomed out and take stock of what&rsquo;s in this trace file.</p>
+<p>Starting from the top, the first thing I notice are about 10 threads that are sitting around doing nothing of interest.</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/nothing-interesting.png" alt="Nothing interesting is going on here">
+    <figcaption>Nothing interesting is going on here</figcaption>
+</figure>
+<h4 id="thread-302">
+  Thread 302
+  <a class="heading-link" href="#thread-302">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Actually, I&rsquo;d like to make an exception: Thread 302 is polling every 5 seconds for any new <a href="https://devblog.criticalmanufacturing.com/blog/20250429_integration_entries/"  class="external-link" target="_blank" rel="noopener">integration entries</a> queued for execution.</p>
+<figure style="padding-bottom: 2em;">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/int-entries.png" alt="The thread wakes up every 5 seconds to check for new integration entries">
+    <figcaption>The arrows point to the moments where this thread wakes up and checks for any new integration entries.</figcaption>
+</figure>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/int-entries-zoomed-in.png" alt="One of the spikes zoomed in">
+    <figcaption>
+        Zooming in on one of these moments confirms that indeed, this thread is part of the underlying host machinery that makes integration entries work!
+    </figcaption>
+</figure>
+<h4 id="the-service-call-threads">
+  The service call threads
+  <a class="heading-link" href="#the-service-call-threads">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Now that we&rsquo;ve left the boring threads behind us, the only threads remaining are the threads that execute host services, which are <strong><em>by far</em></strong> the threads we care about the most! In the same way that all roads lead to Rome, every single MES service call goes through the host. It is therefore imperative that the host doesn&rsquo;t become a bottleneck for the MES by making sure these services are fast and access the database efficiently.</p>
+<p>Let&rsquo;s now take a look at how these service threads look in the Perfetto Trace viewer:</p>
+<figure style="padding-bottom: 2em;">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/394.png" alt="Thread 394">
+    <figcaption>Thread 394</figcaption>
+</figure>
+<figure style="padding-bottom: 2em;">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/409.png" alt="Thread 409">
+    <figcaption>Thread 409</figcaption>
+</figure>
+<figure style="padding-bottom: 2em;">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/411.png" alt="Thread 411">
+    <figcaption>Thread 411</figcaption>
+</figure>
+<figure style="padding-bottom: 2em;">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/427.png" alt="Thread 427">
+    <figcaption>Thread 427</figcaption>
+</figure>
+<figure style="padding-bottom: 2em;">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/449.png" alt="Thread 449">
+    <figcaption>Thread 449</figcaption>
+</figure>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/450.png" alt="Thread 450">
+    <figcaption>Thread 450</figcaption>
+</figure>
+<p>These threads spend most of their time waiting for a service call, and once they receive an API request they execute the requested service (represented by the call stack &ldquo;towers&rdquo; in the images above) and return a response. The wider these service calls are in the trace viewer, the longer the service took to run.</p>
+<h5 id="dotnet-traces-limit-of-100-stack-frames">
+  dotnet-trace&rsquo;s limit of 100 stack frames
+  <a class="heading-link" href="#dotnet-traces-limit-of-100-stack-frames">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h5>
+<p>There is a detail in these screenshots I must point out: in some threads, the <code>System​.Threading​.PortableThreadPool+WorkerThread​.WorkerThreadStart()</code> base function goes continuously from the start to the end of the thread, but in the threads <code>409</code>, <code>449</code> and <code>450</code> you will notice that this function is broken up in the spots indicated by the arrows. There is a reason for this: <code>dotnet-trace</code> can only capture a maximum of 100 stack frames, meaning that if your call stack is more than 100 stack frames long, the oldest frames get cut to meet this limit. Thankfully this can be <a href="https://github.com/dfamonteiro/blog/blob/main/dotnet-trace/fix_spikes.py"  class="external-link" target="_blank" rel="noopener">fixed</a> but trust me, <a href="../dotnet-trace-100-limit" >figuring out a workaround for this limitation wasn&rsquo;t easy</a>.</p>
+<p>Using the script linked above is quite straightforward:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>PS C:\Users\Daniel\Desktop\github\blog\dotnet-trace&gt; python .\fix_spikes.py .\dotnet_20251230_003728.chromium.json
+</span></span><span style="display:flex;"><span>fixed_dotnet_20251230_003728.chromium.json
+</span></span></code></pre></div><h3 id="the-anatomy-of-a-host-service-call">
+  The anatomy of a host service call
+  <a class="heading-link" href="#the-anatomy-of-a-host-service-call">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>We took the 30,000-foot view in the previous section, now it&rsquo;s time to put one of these service calls under the microscope. These services&rsquo; call stacks are absolutely massive (~100 stack frames), so we&rsquo;re going to start at the base of the trace and work our way down:</p>
+<h4 id="part-1-aspnet-middleware">
+  Part 1: ASP.NET middleware
+  <a class="heading-link" href="#part-1-aspnet-middleware">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/pan1.png" alt="Picture with a column of stack frames">
+</figure>
+<p>We start off with a bang and a metric ton of ASP.NET middleware. Just from this picture we can tell that our host is configured to have the following features:</p>
+<ul>
+<li>Rate Limiting</li>
+<li>CORS</li>
+<li>Authentication</li>
+<li>Authorization</li>
+<li>Logging</li>
+<li>etc.</li>
+</ul>
+<h4 id="part-2-more-middleware--handling-of-the-http-request">
+  Part 2: More middleware &amp; handling of the HTTP request
+  <a class="heading-link" href="#part-2-more-middleware--handling-of-the-http-request">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/pan2.png" alt="Picture with a column of stack frames">
+</figure>
+<p>Going further down we get even more middleware, but perhaps more interestingly we have the first big time sink of the service call: deserializing the incoming REST JSON request (43ms).</p>
+<p>On the right side of the trace (towards the top-right of the picture) we can also see the HTTP response being created and sent back to the caller of this service. To the surprise of absolutely no one, serializing the response back to JSON is an order of magnitude quicker, clocking in at 4ms.</p>
+<h4 id="part-3-db-transaction">
+  Part 3: DB transaction
+  <a class="heading-link" href="#part-3-db-transaction">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/pan3.png" alt="Picture with a column of stack frames">
+</figure>
+<p>It&rsquo;s transaction time. The arrows indicate the time spent opening and closing this database transaction:</p>
+<ol>
+<li><code>Cmf​.Foundation​.Common​.HistoryObjectCollection​.CreateTransaction(int64, String)</code> - 4.25ms</li>
+<li><code>Cmf​.Foundation​.Common​.HistoryObjectCollection​.CloseTransaction()</code> - 4.1ms</li>
+<li><code>System​.Transactions​.TransactionScope​.Dispose()</code> - 23ms</li>
+</ol>
+<h4 id="part-4-business-logic">
+  Part 4: Business logic
+  <a class="heading-link" href="#part-4-business-logic">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/pan4.png" alt="Picture with a column of stack frames">
+</figure>
+<p>We finally know what service is being called! <code>FullUpdateObject()</code> is being called to update a Product. We can tell this by looking at the call stack:</p>
+<ul>
+<li><code>Cmf​.Services​.GenericServiceManagement​.GenericServiceController​.FullUpdateObject()</code>
+<ul>
+<li><code>Cmf​.Foundation​.[...]​.GenericServiceOrchestration​.FullUpdateObject()</code>
+<ul>
+<li>&hellip;</li>
+<li><code>Cmf​.Navigo.BusinessObjects​.Product​.Save()</code>
+<ul>
+<li>Database calls, etc</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Every host service call is structured in this manner: The service layer calls the orchestration layer, which in turn calls other services and/or operations on the required entities.</p>
+<h3 id="making-sense-of-all-these-service-call-traces">
+  Making sense of all these service call traces
+  <a class="heading-link" href="#making-sense-of-all-these-service-call-traces">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>So, to take stock of the situation: every time we want to analyse the performance of a service, we have to skip 60 stack frames of middleware just to get to the business logic. Oh, and these service traces are spread across 10 different threads, so good luck finding the service you are interested in&hellip; well isn&rsquo;t that great.</p>
+<p>Luckily for us we have an ace up our sleeve: how good is your SQL?</p>
+<h4 id="introducing-perfettosql">
+  Introducing <a href="https://perfetto.dev/docs/analysis/perfetto-sql-getting-started"  class="external-link" target="_blank" rel="noopener">PerfettoSQL</a>
+  <a class="heading-link" href="#introducing-perfettosql">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Perfetto is already pretty good if you only use it as a basic trace viewer. However, what makes it exceptional for handling massive amounts of trace data is its ability to use SQL queries to analyse your traces, and we&rsquo;re going to make full use of this capability to make our lifes easier.</p>
+<p>To access Perfetto&rsquo;s SQL editor, please select &ldquo;Query (SQL)&rdquo; in the sidebar on the left:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/query-sql.png" alt="Perfetto's SQL editor">
+    <figcaption>Perfetto's SQL editor</figcaption>
+</figure>
+<p>Absolutely everything in your trace file is queryable through PerfettoSQL, but today we will only focus on the <code>slices</code> table. In the screenshot above we executed the following query:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> slices
+</span></span></code></pre></div><p>This query will naturally return every single function slice in the trace file. Crafting a query that will only yield the service spans we&rsquo;re interested in takes a bit more nuance, but is perfectly doable:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> slices <span style="color:#66d9ef">where</span> name glob <span style="color:#e6db74">&#39;Cmf*.Services.*Controller.*&#39;</span>;
+</span></span></code></pre></div><figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/services-query-screenshot.png" alt="Screenshot of a Perfetto SQL query">
+    <figcaption>There are 121 service calls in this trace file</figcaption>
+</figure>
+<h4 id="visualizing-your-queries-with-debug-tracks">
+  Visualizing your queries with <a href="https://perfetto.dev/docs/analysis/debug-tracks"  class="external-link" target="_blank" rel="noopener">debug tracks</a>
+  <a class="heading-link" href="#visualizing-your-queries-with-debug-tracks">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>While a lot can be gleaned just from querying the trace file, we can go one step further and visualize our query results directly on the timeline alongside all the other traces by creating a <strong>debug track</strong>.</p>
+<p>Please follow the instructions below to create a debug track from a query:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/show-debug-track.png" alt="Instructions for how to create a debug track">
+    <figcaption>Switch to the <b>“Timeline”</b> view, then select the <b>“Standalone Query”</b> tab at the bottom of the screen, and finally click on the <b>“Show Debug Track”</b> button</figcaption>
+</figure>
+<p>Clicking &ldquo;Add Track&rdquo; creates the debug track and adds it to the top of your workspace, as can be seen here:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/debug-track.png" alt="Screenshot of debug track">
+    <figcaption>Notice the debug track named "Host Services"</figcaption>
+</figure>
+<p>And there we go! What was previously information spread across multiple threads of execution, is now easily accessible through this debug track. And the cherry on top is that the slices on the debug track act as links to their &ldquo;real&rdquo; counterparts: for example, by selecting the purple span in the &ldquo;Host Services&rdquo; debug track (see image above) you can reach its counterpart on Thread 450.</p>
+<h3 id="pushing-debug-tracks-to-the-limit">
+  Pushing debug tracks to the limit
+  <a class="heading-link" href="#pushing-debug-tracks-to-the-limit">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>As you will have realized, debug tracks are an incredibly powerful visualization tool: it gives you the power to shape traces to your will. Take for example this query:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> slices <span style="color:#66d9ef">where</span> name glob <span style="color:#e6db74">&#39;Cmf.*&#39;</span>;
+</span></span></code></pre></div><p>It looks simplistic at first glance, but watch what happens when we create a debug track out of it:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/cmf-asterisk.png" alt="Screenshot of debug track">
+    <figcaption>Debug track created from the query above</figcaption>
+</figure>
+<p>Just like that, we get all the business logic in a <em>single track</em>! Yes, this visualization is admittedly a bit rough around the edges, but it is amazing how much you get out of such a simple query.</p>
+<p>And it goes without saying, the more effort you put into your SQL query, the better your debug track will be. This little tweak, for example, will filter out most of the middleware slices:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> slices <span style="color:#66d9ef">where</span> name glob <span style="color:#e6db74">&#39;Cmf.*&#39;</span> <span style="color:#66d9ef">and</span> depth <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">50</span>;
+</span></span></code></pre></div><figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/cmf-asterisk-above-50.png" alt="Screenshot of debug track">
+    <figcaption>Debug track created from the query above</figcaption>
+</figure>
+<p>While this kind of works, it&rsquo;s a crude approach to a problem that requires more finesse. We must ask ourselves first: what would a perfect debug track look like?</p>
+<p>For me, the answer is obvious:</p>
+<blockquote>
+<p><strong>I want a debug track where the service slices sit at the base of the debug track, and all of the business logic of these services is included.</strong></p></blockquote>
+<h4 id="striving-for-perfection">
+  Striving for perfection
+  <a class="heading-link" href="#striving-for-perfection">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Conceptually speaking, the recipe for this &ldquo;perfect trace&rdquo; is easy to explain:</p>
+<ol>
+<li>
+<p>Take the slices from this query</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> slices <span style="color:#66d9ef">where</span> name glob <span style="color:#e6db74">&#39;Cmf.*&#39;</span>;
+</span></span></code></pre></div></li>
+<li>
+<p>And only keep the slices that are descendants of one of the slices from this query</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> slices <span style="color:#66d9ef">where</span> name glob <span style="color:#e6db74">&#39;Cmf*.Services.*Controller.*&#39;</span>;
+</span></span></code></pre></div></li>
+</ol>
+<p>Turning concepts into reality with SQL can sometimes be tricky, but today we are in luck: this can be done with a simple <code>join</code> statement and Perfetto&rsquo;s <a href="https://perfetto.dev/docs/analysis/stdlib-docs#tags"  class="external-link" target="_blank" rel="noopener"><code>slice_is_ancestor()</code></a> utility function<sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">from</span>
+</span></span><span style="display:flex;"><span>    (<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">as</span> service_id, track_id <span style="color:#66d9ef">as</span> service_track_id <span style="color:#66d9ef">from</span> slices <span style="color:#66d9ef">where</span> name glob <span style="color:#e6db74">&#39;Cmf*.Services.*Controller.*&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">join</span>
+</span></span><span style="display:flex;"><span>    (<span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> slices <span style="color:#66d9ef">where</span> name glob <span style="color:#e6db74">&#39;Cmf.*&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">on</span> track_id<span style="color:#f92672">=</span>service_track_id <span style="color:#75715e">-- Query optimization
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">where</span> slice_is_ancestor(service_id, id) <span style="color:#66d9ef">or</span> service_id <span style="color:#f92672">=</span> id;
+</span></span></code></pre></div><figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/perfect.png" alt="Screenshot of a zoomed-in debug track">
+    <figcaption>The resulting debug track created from the query above. Notice how the services are the base functions, and how all the business logic falls under them.</figcaption>
+</figure>
+<p>We can be proud of what was accomplished here: we&rsquo;ve gone from having our services spread across multiple threads and buried under a ton of middleware, to now having those same services and their business logic located on a single debug track, ready to be analysed with ease.</p>
+<h3 id="hunting-for-performance-issues">
+  Hunting for performance issues
+  <a class="heading-link" href="#hunting-for-performance-issues">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Now that the hard work of creating a good debug track is done, we can finally achieve the original goal of this blog post: finding performance issues in our .NET application. As my host application is heavily I/O bound by database calls, the performance issues I&rsquo;m hunting are related to inefficient database access patterns - think multiple small loads instead of one big batch load.</p>
+<p>These inefficient DB accesses can be easily spotted in the debug track by looking for visual repetitions. Here are a couple of examples of such patterns:</p>
+<figure style="padding-bottom: 2em;">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/rep1.png" alt="Example of a Inefficient database access pattern">
+    <figcaption><code>ConfigurationController​.FullUpdateConfig</code> is validating and saving the input configs one by one in some sort of for-loop.</figcaption>
+</figure>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-perfetto/rep2.png" alt="Example of a Inefficient database access pattern">
+    <figcaption>
+        <code>NameGenerator​.GenerateName</code> is calling <code>INameGeneratorCollection​.InternalLoad</code> and <code>NameGenerator​.InternalGenerateName</code> for every name that is generated.
+    </figcaption>
+</figure>
+<p>In both these cases, the number of database accesses is scaling linearly with the size of the input, which is very much something we wish to avoid if possible.</p>
+<h2 id="onwards-and-upwards">
+  Onwards and upwards
+  <a class="heading-link" href="#onwards-and-upwards">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Once you&rsquo;re done analysing your trace file, you should have a list of performance issues to tackle. My job here is done, but yours has just begun: good luck with addressing the performance issues of your code, I&rsquo;m rooting for you!</p>
+<p>I hope this blog post gave you enough motivation to start collecting traces on your .NET application. It&rsquo;s one thing to understand how your code is supposed to behave; it&rsquo;s another to get empirical evidence of what is actually going on at the .NET runtime level - that&rsquo;s the level of insight that <code>dotnet-trace</code> gives you.</p>
+<p>I&rsquo;d like to conclude this guide by giving some pointers to ways these trace files could be enhanced. The first thing you should be aware of is how the trace files generated by <code>dotnet-trace</code> can be enhanced by <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace#dotnet-trace-collect">selecting</a> <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/well-known-event-providers"  class="external-link" target="_blank" rel="noopener">additional event providers</a>, of which I would suggest taking a close look at <a href="https://learn.microsoft.com/en-us/sql/connect/ado-net/enable-eventsource-tracing"  class="external-link" target="_blank" rel="noopener"><code>Microsoft​.Data​.SqlClient​.EventSource</code></a>: I&rsquo;m certain that having the SQL queries directly embedded in the traces would help immensely while chasing performance issues. You might also consider directly editing the trace file to make some tweaks to existing slices, or even add completely new tracks! The sky really is the limit when it comes to these things.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>I know there are <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/diagnostics-in-containers"  class="external-link" target="_blank" rel="noopener">ways</a> to collect traces from outside of the docker container, but let&rsquo;s not complicate things.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>The name of my container is <code>custom_host</code> - replace it with your container&rsquo;s name whenever you see it.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>I personally know that <code>custom_host</code> will copy everything under <code>LocalEnvironment\BusinessTier</code>, so I just throw my <code>dotnet-trace</code> executable in there and it works like a charm!&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>A <em>Manufacturing Execution System</em> is a software system responsible for the bookkeeping of a factory&rsquo;s production. It is generally used in highly sophisticated industries, such as the semiconductor industry and the medical devices industry, where a high level of material tracking and control is required.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p>Please note that while writing this blog post I found an <a href="https://github.com/google/perfetto/issues/4207"  class="external-link" target="_blank" rel="noopener">issue</a> with <code>slice_is_ancestor()</code> which you also might encounter when using this function. My <a href="https://github.com/google/perfetto/pull/4208"  class="external-link" target="_blank" rel="noopener">PR with the bugfix</a> has already been merged, but it will take a while for the fix to reach the stable version of Perfetto.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2026
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

@@ -3,19 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://dfamonteiro.com/</loc>
-    <lastmod>2025-12-28T16:27:35+00:00</lastmod>
+    <lastmod>2026-01-03T02:09:05+00:00</lastmod>
+  </url><url>
+    <loc>https://dfamonteiro.com/posts/using-dotnet-trace-with-perfetto/</loc>
+    <lastmod>2026-01-03T02:09:05+00:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/posts/</loc>
-    <lastmod>2025-12-28T16:27:35+00:00</lastmod>
+    <lastmod>2026-01-03T02:09:05+00:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/tags/programming/</loc>
-    <lastmod>2025-12-28T16:27:35+00:00</lastmod>
+    <lastmod>2026-01-03T02:09:05+00:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/tags/</loc>
-    <lastmod>2025-12-28T16:27:35+00:00</lastmod>
+    <lastmod>2026-01-03T02:09:05+00:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/tags/tracing/</loc>
-    <lastmod>2025-12-28T16:27:35+00:00</lastmod>
+    <lastmod>2026-01-03T02:09:05+00:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/posts/dotnet-trace-100-limit/</loc>
     <lastmod>2025-12-28T16:27:35+00:00</lastmod>
