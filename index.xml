@@ -6,8 +6,15 @@
     <description>Recent content on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 03 Jan 2026 02:09:05 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 05 Jan 2026 01:03:05 +0000</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Formula Onigami - The case for Scorigamis in Formula 1</title>
+      <link>https://dfamonteiro.com/posts/formula-onigami/</link>
+      <pubDate>Mon, 05 Jan 2026 01:03:05 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/formula-onigami/</guid>
+      <description>&lt;p&gt;If you happen to be both a sports fan and slightly too addicted to youtube, you might have come across the term Scorigami - a concept invented by &lt;a href=&#34;https://bsky.app/profile/jonbois.bsky.social&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Jon Bois&lt;/a&gt; to denote &lt;a href=&#34;https://www.sbnation.com/2014/9/8/6110147/pete-carroll-seahawks-scoragami-weird-nfl-scores&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;strong&gt;&amp;ldquo;the act, and art, of producing a final score in a football game that has never happened before&amp;rdquo;&lt;/strong&gt;&lt;/a&gt;. These Scorigamis were originally just funny statistical oddities, but after &lt;a href=&#34;https://www.youtube.com/watch?v=9l5C8cGMueY&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Secret Base&amp;rsquo;s viral video essay on Scorigami&lt;/a&gt;, these unique scoring events have gained a life of their own:&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Diagnosing performance issues in .NET applications with dotnet-trace and Perfetto</title>
       <link>https://dfamonteiro.com/posts/using-dotnet-trace-with-perfetto/</link>
