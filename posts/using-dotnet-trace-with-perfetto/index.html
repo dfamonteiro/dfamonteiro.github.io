@@ -158,7 +158,7 @@ As part of this initiative to make .NET platform-agnostic, a supporting cast of 
             </span>
             <span class="reading-time">
               <i class="fa-solid fa-clock" aria-hidden="true"></i>
-              14-minute read
+              15-minute read
             </span>
           </div>
           
@@ -202,7 +202,7 @@ As part of this initiative to make .NET platform-agnostic, a supporting cast of 
 <li><a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace"  class="external-link" target="_blank" rel="noopener">Download the executable from the official page</a></li>
 </ol>
 <p>Please note that the <code>dotnet-trace</code> tool needs to be in the same execution environment as the target .NET application.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
-<p>If you&rsquo;re running your .NET application in a locked-down docker container, it might not be possible to run <code>dotnet tool install</code>, so your only option will be to download the linux executable and move it to the container&rsquo;s filesystem by either:</p>
+<p>If you&rsquo;re running your .NET application in a locked-down Docker container, it might not be possible to run <code>dotnet tool install</code>, so your only<sup id="fnref1:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> option will be to download the Linux executable and move it to the container&rsquo;s filesystem by either:</p>
 <ul>
 <li>Running something like <code>docker cp dotnet-trace custom_host:/opt/app/dotnet-trace</code><sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>, or&hellip;</li>
 <li>Placing the executable in a folder that your .NET container can reach<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup></li>
@@ -584,7 +584,7 @@ As part of this initiative to make .NET platform-agnostic, a supporting cast of 
 <hr>
 <ol>
 <li id="fn:1">
-<p>I know there are <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/diagnostics-in-containers"  class="external-link" target="_blank" rel="noopener">ways</a> to collect traces from outside of the docker container, but let&rsquo;s not complicate things.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>The big exception here is if you&rsquo;re using <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/diagnostics-in-containers#use-net-cli-tools-in-a-sidecar-container-or-from-the-host"  class="external-link" target="_blank" rel="noopener">sidecar containers</a> to run <code>dotnet-trace</code>, in which case you probably know what you&rsquo;re doing and should consider jumping straight to the <a href="#analysing-traces-with-perfetto" >Perfetto</a> section of the blog post.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:2">
 <p>The name of my container is <code>custom_host</code> - replace it with your container&rsquo;s name whenever you see it.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
