@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Embedding SQL queries in dotnet-trace-generated trace files: the Good, the Bad and the Ugly · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="A couple of weeks after I published my guide on getting the most out of dotnet-trace, I started having a nagging thought in the back of my mind: could we do even better? And by &ldquo;better&rdquo; I mean capturing information on which SQL queries are being executed by our .NET application.
+So, is it possible? Yes! Is it easy and convenient? &hellip;Not really.
+
+  The Good
+  
+    
+    Link to heading
+  
+
+If your .NET application uses something like Microsoft​.Data​.SqlClient to talk to the database, then you are in luck, because this library is capable of emitting tracing events related to your SQL queries.">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Embedding SQL queries in dotnet-trace-generated trace files: the Good, the Bad and the Ugly">
+  <meta name="twitter:description" content="A couple of weeks after I published my guide on getting the most out of dotnet-trace, I started having a nagging thought in the back of my mind: could we do even better? And by “better” I mean capturing information on which SQL queries are being executed by our .NET application.
+So, is it possible? Yes! Is it easy and convenient? …Not really.
+The GoodLink to headingIf your .NET application uses something like Microsoft​.Data​.SqlClient to talk to the database, then you are in luck, because this library is capable of emitting tracing events related to your SQL queries.">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/dotnet-trace-sql/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Embedding SQL queries in dotnet-trace-generated trace files: the Good, the Bad and the Ugly">
+  <meta property="og:description" content="A couple of weeks after I published my guide on getting the most out of dotnet-trace, I started having a nagging thought in the back of my mind: could we do even better? And by “better” I mean capturing information on which SQL queries are being executed by our .NET application.
+So, is it possible? Yes! Is it easy and convenient? …Not really.
+The GoodLink to headingIf your .NET application uses something like Microsoft​.Data​.SqlClient to talk to the database, then you are in luck, because this library is capable of emitting tracing events related to your SQL queries.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-18T01:57:17+00:00">
+    <meta property="article:modified_time" content="2026-02-18T01:57:17+00:00">
+    <meta property="article:tag" content="Programming">
+    <meta property="article:tag" content="Tracing">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/dotnet-trace-sql/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.022594d625780e2edf64581b893d32cb35c11de5d88953ea4ad3c2e45451e214.css" integrity="sha256-AiWU1iV4Di7fZFgbiT0yyzXBHeXYiVPqStPC5FRR4hQ=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/dotnet-trace-sql/">
+              Embedding SQL queries in dotnet-trace-generated trace files: the Good, the Bad and the Ugly
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-02-18T01:57:17Z">
+                February 18, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              3-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/tracing/">Tracing</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>A couple of weeks after I published my <a href="../using-dotnet-trace-with-perfetto/" >guide on getting the most out of <code>dotnet-trace</code></a>, I started having a nagging thought in the back of my mind: could we do even better? And by &ldquo;better&rdquo; I mean capturing information on which SQL queries are being executed by our .NET application.</p>
+<p>So, is it possible? Yes! Is it easy and convenient? &hellip;Not really.</p>
+<h2 id="the-good">
+  The Good
+  <a class="heading-link" href="#the-good">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>If your .NET application uses something like <a href="https://www.nuget.org/packages/Microsoft.Data.SqlClient"  class="external-link" target="_blank" rel="noopener"><code>Microsoft​.Data​.SqlClient</code></a> to talk to the database, then you are in luck, because this library is <a href="https://learn.microsoft.com/en-us/sql/connect/ado-net/enable-eventsource-tracing?view=sql-server-ver17#use-dotnet-trace-to-collect-traces"  class="external-link" target="_blank" rel="noopener">capable of emitting tracing events related to your SQL queries</a>.</p>
+<p>Collecting these SQL traces is simply a matter of ensuring the <code>Microsoft​.Data​.SqlClient​.EventSource</code> provider is also included when running <code>dotnet-trace collect</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>dotnet-trace collect -p 135 --providers Microsoft.Data.SqlClient.EventSource:1:5,Microsoft-Windows-DotNETRuntime:0x100003801D:4,Microsoft-DotNETCore-SampleProfiler:0xF00000000000:4
+</span></span></code></pre></div><p>Analysing the resulting <code>.nettrace</code> file with <a href="https://github.com/microsoft/perfview"  class="external-link" target="_blank" rel="noopener">PerfView</a> indeed confirms that we&rsquo;ve captured the SQL Queries:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-sql/perfview.png" alt="PerfView visualization of a Microsoft​.Data​.SqlClient event">
+    <figcaption>PerfView visualization of a <code>Microsoft​.Data​.SqlClient</code> event</figcaption>
+</figure>
+<h2 id="the-bad">
+  The Bad
+  <a class="heading-link" href="#the-bad">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>We know that our SQL queries are present in the <code>.nettrace</code> file. Can we convert this file into a Chromium trace file, so that we can use <a href="https://perfetto.dev/"  class="external-link" target="_blank" rel="noopener">Perfetto</a> to analyse it?</p>
+<p>Sadly, the answer is no: for some reason, you miss out on the SQL queries when converting <code>.nettrace</code> to <code>.chromium.json</code> files.</p>
+<h2 id="the-ugly">
+  The Ugly
+  <a class="heading-link" href="#the-ugly">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>But it gets worse! Not only do you <strong><em>not</em></strong> get the SQL queries in your trace files, but you also are greeted with these incredibly annoying &ldquo;Activity BeginExecute&rdquo; slices that do absolutely nothing other than cluttering your traces.</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-sql/bad.png" alt="Visualization of a broken trace">
+    <figcaption>These "Activity BeginExecute" slices are the bane of my existence</figcaption>
+</figure>
+<h2 id="the-fix">
+  The Fix
+  <a class="heading-link" href="#the-fix">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I can live with these ugly &ldquo;Activity BeginExecute&rdquo; slices<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>, but we have to find a way to embed the SQL query data in our chromium traces.</p>
+<p>After some digging, I discovered that <code>dotnet-trace</code> delegates the nuances of converting formats to the <a href="https://www.nuget.org/packages/Microsoft.Diagnostics.Tracing.TraceEvent"  class="external-link" target="_blank" rel="noopener"><code>Microsoft​.Diagnostics​.Tracing​.TraceEvent</code></a> dependency. Using this package seems to be the recommended way of dealing with <code>.nettrace</code> files, so I decided not to reinvent the wheel and took advantage of this package to create a script that adds the missing SQL events to my trace files.</p>
+<p>I will spare you the implementation details, but if you are interested in running this yourself, you can <a href="https://github.com/dfamonteiro/blog/blob/main/dotnet-trace/NetTraceConverter/AddSqlEvents.cs"  class="external-link" target="_blank" rel="noopener">download the code here</a>.</p>
+<p>Usage example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>dotnet run AddSqlEvents.cs --nettrace-file .\dotnet_20260121_100330.nettrace --chromium-trace-file .\dotnet_20260121_100330.chromium.json --output test.chromium.json
+</span></span></code></pre></div><p>When you open your newly generated trace file, you will now have your precious SQL queries available to be analysed!</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-sql/sql.png" alt="Visualization of a broken trace">
+    <figcaption>The <code>Material​​.Save()</code> function call has a matching "SQL Query" span, which contains information regarding which SQL was executed: in this case, it was the <code>[CoreDataModel].[P_GeneratedMaterialUpdate1200]</code> procedure.</figcaption>
+</figure>
+<h2 id="the-end">
+  The End
+  <a class="heading-link" href="#the-end">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>So it&rsquo;s possible to embed SQL query data in your <code>dotnet-trace</code>-generated traces, but given the ordeal one has to go through to make this information available in <a href="https://perfetto.dev/"  class="external-link" target="_blank" rel="noopener">Perfetto</a>, I doubt many people will take advantage of this. Even for me, the person who wrote a script to fix this problem, this is way too much work!</p>
+<p>At least I can take solace in the fact that I demonstrated that it can be done, even if it isn&rsquo;t easy. Who knows, maybe this blog post will give someone the motivation to make this work seamlessly out of the box. If you are that someone, I will be cheering you on!</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>You can use <a href="../using-dotnet-trace-with-perfetto/#introducing-perfettosql" >Perfetto to filter these slices if necessary</a>.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2026
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

@@ -6,8 +6,15 @@
     <description>Recent content on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 05 Jan 2026 01:03:05 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 18 Feb 2026 01:57:17 +0000</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Embedding SQL queries in dotnet-trace-generated trace files: the Good, the Bad and the Ugly</title>
+      <link>https://dfamonteiro.com/posts/dotnet-trace-sql/</link>
+      <pubDate>Wed, 18 Feb 2026 01:57:17 +0000</pubDate>
+      <guid>https://dfamonteiro.com/posts/dotnet-trace-sql/</guid>
+      <description>&lt;p&gt;A couple of weeks after I published my &lt;a href=&#34;../using-dotnet-trace-with-perfetto/&#34; &gt;guide on getting the most out of &lt;code&gt;dotnet-trace&lt;/code&gt;&lt;/a&gt;, I started having a nagging thought in the back of my mind: could we do even better? And by &amp;ldquo;better&amp;rdquo; I mean capturing information on which SQL queries are being executed by our .NET application.&lt;/p&gt;&#xA;&lt;p&gt;So, is it possible? Yes! Is it easy and convenient? &amp;hellip;Not really.&lt;/p&gt;&#xA;&lt;h2 id=&#34;the-good&#34;&gt;&#xD;&#xA;  The Good&#xD;&#xA;  &lt;a class=&#34;heading-link&#34; href=&#34;#the-good&#34;&gt;&#xD;&#xA;    &lt;i class=&#34;fa-solid fa-link&#34; aria-hidden=&#34;true&#34; title=&#34;Link to heading&#34;&gt;&lt;/i&gt;&#xD;&#xA;    &lt;span class=&#34;sr-only&#34;&gt;Link to heading&lt;/span&gt;&#xD;&#xA;  &lt;/a&gt;&#xD;&#xA;&lt;/h2&gt;&#xD;&#xA;&lt;p&gt;If your .NET application uses something like &lt;a href=&#34;https://www.nuget.org/packages/Microsoft.Data.SqlClient&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;Microsoft​.Data​.SqlClient&lt;/code&gt;&lt;/a&gt; to talk to the database, then you are in luck, because this library is &lt;a href=&#34;https://learn.microsoft.com/en-us/sql/connect/ado-net/enable-eventsource-tracing?view=sql-server-ver17#use-dotnet-trace-to-collect-traces&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;capable of emitting tracing events related to your SQL queries&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Formula Onigami - The case for Scorigamis in Formula 1</title>
       <link>https://dfamonteiro.com/posts/formula-onigami/</link>
