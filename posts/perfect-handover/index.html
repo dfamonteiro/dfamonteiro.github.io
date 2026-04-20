@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Crafting a Zero-Capacity Multi-Producer-Multi-Consumer queue in async C# · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="In recent times, I have been putting some thought into designing a load generator that simulates queued-based manufacturing processes - think car assembly lines or SMT lines. A key detail about these types of setups is that they&rsquo;re susceptible to traffic jams: if a station at the end of the line breaks, the entire line backs up until the problem is fixed.
+The intrinsically linear nature of these manufacturing setups creates dependencies between the materials in the line: panel #345436 can only enter the next machine if panel #345437 has finished processing, which in turn needs panel #345438 to clear the conveyor belt&hellip; you get the point.1">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Crafting a Zero-Capacity Multi-Producer-Multi-Consumer queue in async C#">
+  <meta name="twitter:description" content="In recent times, I have been putting some thought into designing a load generator that simulates queued-based manufacturing processes - think car assembly lines or SMT lines. A key detail about these types of setups is that they’re susceptible to traffic jams: if a station at the end of the line breaks, the entire line backs up until the problem is fixed.
+The intrinsically linear nature of these manufacturing setups creates dependencies between the materials in the line: panel #345436 can only enter the next machine if panel #345437 has finished processing, which in turn needs panel #345438 to clear the conveyor belt… you get the point.1">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/perfect-handover/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Crafting a Zero-Capacity Multi-Producer-Multi-Consumer queue in async C#">
+  <meta property="og:description" content="In recent times, I have been putting some thought into designing a load generator that simulates queued-based manufacturing processes - think car assembly lines or SMT lines. A key detail about these types of setups is that they’re susceptible to traffic jams: if a station at the end of the line breaks, the entire line backs up until the problem is fixed.
+The intrinsically linear nature of these manufacturing setups creates dependencies between the materials in the line: panel #345436 can only enter the next machine if panel #345437 has finished processing, which in turn needs panel #345438 to clear the conveyor belt… you get the point.1">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-04-20T00:30:12+00:00">
+    <meta property="article:modified_time" content="2026-04-20T00:30:12+00:00">
+    <meta property="article:tag" content="Programming">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/perfect-handover/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.5e94c1acf7aa2066035cf2764ae3e4fe39db101d68b870f919966100d51fb861.css" integrity="sha256-XpTBrPeqIGYDXPJ2SuPk/jnbEB1ouHD5GZZhANUfuGE=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/perfect-handover/">
+              Crafting a Zero-Capacity Multi-Producer-Multi-Consumer queue in async C#
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-04-20T00:30:12Z">
+                April 20, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              14-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      
+
+
+      <div class="post-content">
+        
+        <p>In recent times, I have been putting some thought into designing a load generator that simulates queued-based manufacturing processes - think car <a href="https://en.wikipedia.org/wiki/Assembly_line"  class="external-link" target="_blank" rel="noopener">assembly lines</a> or <a href="https://en.wikipedia.org/wiki/Surface-mount_technology"  class="external-link" target="_blank" rel="noopener">SMT lines</a>. A key detail about these types of setups is that they&rsquo;re susceptible to traffic jams: if a station at the end of the line breaks, the entire line backs up until the problem is fixed.</p>
+<p>The intrinsically linear nature of these manufacturing setups creates dependencies between the materials in the line: panel #345436 can only enter the next machine if panel #345437 has finished processing, which in turn needs panel #345438 to clear the conveyor belt&hellip; you get the point.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<p>Simulating these lines with a <a href="../stateful-load-generators" >stateful load generator approach</a> will not work because it handles each panel independently - one would need to layer an absolutely obscene amount of synchronization code<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> on top to make the panels behave in a way that somewhat resembles a real-world SMT line. It&rsquo;s just not feasible.</p>
+<p>We need a new approach.</p>
+<h2 id="the-case-for-a-machine-centered-load-generator">
+  The case for a machine-centered load generator
+  <a class="heading-link" href="#the-case-for-a-machine-centered-load-generator">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Instead of having a panel-centric load generator, we should have a load generator that is focused on the machines that handle the panels. Each resource would then be handled by its own dedicated thread which would be tasked with simulating the machine&rsquo;s behaviour: receiving new panels, &ldquo;processing&rdquo; them, and sending them to the next machine.<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> With this approach, each machine can independently enforce its own constraints by refusing to perform any given operation if its internal conditions are not met.</p>
+<p>This is a good idea in principle&hellip; as long as we figure out how we are going to transfer materials. In other words, how should a <em>handover</em> of a panel from resource A to resource B occur?</p>
+<h2 id="the-handover-problem-statement">
+  The handover problem statement
+  <a class="heading-link" href="#the-handover-problem-statement">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Given two machines A and B running on independent threads, if the following conditions are met:</p>
+<ol>
+<li>Machine A wishes to send a material by calling <code>send()</code>.</li>
+<li>Machine B wishes to receive a material by calling <code>receive()</code>.</li>
+</ol>
+<p>The panel should be transferred from machine A to Machine B, and both <code>send()</code> and <code>receive()</code> should return <code>true</code> when the transfer is completed.</p>
+<p>The functions <code>send()</code> and <code>receive()</code> should also be <a href="https://en.wikipedia.org/wiki/Atomicity_%28database_systems%29"  class="external-link" target="_blank" rel="noopener">atomic</a>, <a href="https://en.wikipedia.org/wiki/Thread_safety"  class="external-link" target="_blank" rel="noopener">thread-safe</a> and able to support timeouts.</p>
+<h3 id="some-reflections">
+  Some reflections
+  <a class="heading-link" href="#some-reflections">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Our handover challenge is fundamentally a synchronization problem involving two independent threads - we should take inspiration from the field of concurrent programming and define a wishlist of properties that our conceptual data structure will need to have:</p>
+<ul>
+<li>Is a zero-capacity queue (i.e. the sender blocks until the receiver is ready to receive).</li>
+<li>Supports multiple producers and multiple consumers (i.e. thread-safe).</li>
+<li>Supports timeouts.</li>
+<li>Is written in async C# (because, well&hellip; I need it to be written in async C#).</li>
+</ul>
+<h2 id="the-solution-an-order-book-protected-by-a-mutex">
+  The solution: an <a href="https://en.wikipedia.org/wiki/Order_book"  class="external-link" target="_blank" rel="noopener">order book</a> protected by a mutex
+  <a class="heading-link" href="#the-solution-an-order-book-protected-by-a-mutex">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>What does it mean when Machine A calls <code>send()</code>? Does it mean that there&rsquo;s a 100% guarantee that the panel will be sent? No. It means that Machine A <strong><em>is interested</em></strong> in sending the panel, and if there&rsquo;s matching interest from the other side, a trade will happen&hellip; hold on, is this a stock market? Our <code>send()</code> calls are the equivalent of sell orders and our <code>receive()</code> calls represent buy orders!</p>
+<p>Whenever there&rsquo;s an available <code>receive()</code> order and an available <code>send()</code> order, they are matched, removed from the &ldquo;order book&rdquo; and the panel is transferred.</p>
+<p>The remainder of this blog post will focus on implementing this data structure, which I will name <code>ZeroQueue</code>:</p>
+<h3 id="the-core-data-structures">
+  The core data structures
+  <a class="heading-link" href="#the-core-data-structures">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Our <code>ZeroQueue</code> class will have three properties: the <strong>Send Orders</strong>, the <strong>Receive Orders</strong>, and a mutex that guards the access to the 2 previously mentioned properties:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ZeroQueue</span>&lt;T&gt;
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Pending send orders</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> List&lt;SendOrder&lt;T&gt;&gt; SendOrders = <span style="color:#66d9ef">new</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Pending receive orders</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> List&lt;ReceiveOrder&gt; ReceiveOrders = <span style="color:#66d9ef">new</span>();
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Mutex that protects accesses to the SendOrders and ReceiveOrders fields.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> SemaphoreSlim QueueLock = <span style="color:#66d9ef">new</span> SemaphoreSlim(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The <code>SendOrder</code> and <code>ReceiveOrder</code> structs have the following fields:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// Represents a Task&#39;s intention of sending a Panel</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SendOrder</span>&lt;T&gt;
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Unique Id for this order</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    required <span style="color:#66d9ef">public</span> Guid Id;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// If set, it means that this Send Order is reserved</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// for the Receiver Task whose Id equals ReservedReceiverId.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    required <span style="color:#66d9ef">public</span> Guid? ReservedReceiverId;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// The panel to be sent to the next machine.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    required <span style="color:#66d9ef">public</span> T Entity;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Signal mechanism to wake up the Task behind this order once a match is found</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    required <span style="color:#66d9ef">public</span> TaskCompletionSource&lt;<span style="color:#66d9ef">bool</span>&gt; Notification;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// Represents a Task&#39;s intention of receiving a Panel</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ReceiveOrder</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Unique Id for this order</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    required <span style="color:#66d9ef">public</span> Guid Id;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Signal mechanism to wake up the Task behind this order once a match is found</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    required <span style="color:#66d9ef">public</span> TaskCompletionSource&lt;<span style="color:#66d9ef">bool</span>&gt; Notification;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>These two structs are pretty self-explanatory, with perhaps the exception of the <code>SendOrder</code>&rsquo;s <code>ReservedReceiverId</code> field: the reason for that field&rsquo;s existence is to <a href="#race-condition-between-two-receive-tasks" >prevent a race condition</a>.</p>
+<h3 id="utility-methods">
+  Utility methods
+  <a class="heading-link" href="#utility-methods">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>To keep the main algorithms as lean as possible, I wrote these small utility functions that help us manipulate <code>SendOrders</code> and <code>ReceiveOrders</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Remove order from &lt;see cref=&#34;ReceiveOrders&#34;/&gt; and cancel the associated Task, if it exists.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// This function must only be called if &lt;see cref=&#34;QueueLock&#34;/&gt; is acquired.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> RemoveReceiveOrder(Guid guid)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i = <span style="color:#ae81ff">0</span>; i &lt; ReceiveOrders.Count; i++)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (ReceiveOrders[i].Id == guid)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Cancel the notification task. Doing this is important to avoid having &#34;zombie&#34; tasks filling our memory.</span>
+</span></span><span style="display:flex;"><span>                ReceiveOrders[i].Notification.SetCanceled(); <span style="color:#75715e">// No one should be awaiting this Task, so calling SetCancelled() should pose no problem.</span>
+</span></span><span style="display:flex;"><span>                ReceiveOrders.RemoveAt(i);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// If no match found, throw exception</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Exception(<span style="color:#e6db74">$&#34;No Receive Order with id {guid} was found.&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Remove order from &lt;see cref=&#34;SendOrders&#34;/&gt; and cancel the associated Task, if it exists.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// This function must only be called if &lt;see cref=&#34;QueueLock&#34;/&gt; is acquired.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> RemoveSendOrder(Guid guid)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i = <span style="color:#ae81ff">0</span>; i &lt; SendOrders.Count; i++)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (SendOrders[i].Id == guid)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Cancel the notification task. Doing this is important to avoid having &#34;zombie&#34; tasks filling our memory.</span>
+</span></span><span style="display:flex;"><span>                SendOrders[i].Notification.SetCanceled(); <span style="color:#75715e">// No one should be awaiting this Task, so calling SetCancelled() should pose no problem.</span>
+</span></span><span style="display:flex;"><span>                SendOrders.RemoveAt(i);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// If no match found, throw exception</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Exception(<span style="color:#e6db74">$&#34;No Send Order with id {guid} was found.&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>Please note that in the two tasks above, we&rsquo;re cancelling the <code>Notification</code> task completion source to prevent leaking tasks to memory. It is entirely possible that the GC will perform this cleanup for us, but I&rsquo;m not taking any chances here.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Returns the index of the first send order that matches the reservedReceiverId.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Returns null if no match is found.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int?</span> FindSendOrderByReservedId(Guid? reservedReceiverId)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i = <span style="color:#ae81ff">0</span>; i &lt; SendOrders.Count; i++)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (SendOrders[i].ReservedReceiverId == reservedReceiverId)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> i;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Fallback</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><h3 id="the-trysendasync-method">
+  The <strong>TrySendAsync()</strong> method
+  <a class="heading-link" href="#the-trysendasync-method">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The logic behind this method goes as follows:</p>
+<ol>
+<li>Acquire the <code>QueueLock</code> and do the following:
+<ul>
+<li>If there&rsquo;s a <code>ReceiveOrder</code> available, trigger its notification mechanism, capture its <code>Id</code> and remove it from the <code>ReceiveOrders</code> list.</li>
+<li>Create our <code>SendOrder</code>.
+<ul>
+<li>If we found a <code>ReceiveOrder</code> in the previous step, set our <code>ReservedReceiverId</code> to the <code>Id</code> of that <code>ReceiveOrder</code>.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Attempts to send the panel to the next machine.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;returns&gt;true if the handover of the panel is successful, false if a timeout or cancellation is triggered.&lt;/returns&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">async</span> Task&lt;<span style="color:#66d9ef">bool</span>&gt; TrySendAsync(T panel, TimeSpan timeout, CancellationToken cancellationToken)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        Guid orderId = Guid.NewGuid();
+</span></span><span style="display:flex;"><span>        Guid? receiverId = <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>        TaskCompletionSource&lt;<span style="color:#66d9ef">bool</span>&gt; notification = <span style="color:#66d9ef">new</span>(TaskCreationOptions.RunContinuationsAsynchronously);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> QueueLock.WaitAsync();
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// If there&#39;s a receive order waiting for a new send order, wake it up and remove that receive order!</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (ReceiveOrders.Count &gt; <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            receiverId = ReceiveOrders[<span style="color:#ae81ff">0</span>].Id;
+</span></span><span style="display:flex;"><span>            ReceiveOrders[<span style="color:#ae81ff">0</span>].Notification.SetResult(<span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>            ReceiveOrders.RemoveAt(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Add a new send order to the list</span>
+</span></span><span style="display:flex;"><span>        SendOrders.Add(<span style="color:#66d9ef">new</span> SendOrder&lt;T&gt;
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            Id = orderId,
+</span></span><span style="display:flex;"><span>            ReservedReceiverId = receiverId,
+</span></span><span style="display:flex;"><span>            Entity = panel,
+</span></span><span style="display:flex;"><span>            Notification = notification,
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>        QueueLock.Release();
+</span></span></code></pre></div><ol start="2">
+<li>Wait until either the notification of our <code>SendOrder</code> is triggered, or the timeout is triggered.
+<ul>
+<li>If there was a <code>ReceiveOrder</code> available in step 1, <strong>we will disregard the timeout</strong> - the reason for this is that we know that the receiver has been signaled and expects our <code>SendOrder</code> to be present. We can only guarantee that our <code>SendOrder</code> will be there if we ensure that a timeout <strong>will not be triggered</strong> <em>before</em> the receiver has fetched our <code>SendOrder</code>. We do this by setting the timeout to <code>Timeout.InfiniteTimeSpan</code>.</li>
+</ul>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>        <span style="color:#75715e">// We&#39;re creating this combinedCts so that we can terminate the sleepTask</span>
+</span></span><span style="display:flex;"><span>        CancellationTokenSource cancelSleep = <span style="color:#66d9ef">new</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">using</span> var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelSleep.Token);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Task&lt;<span style="color:#66d9ef">bool</span>&gt; notificationTask = notification.Task;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// If receiverId != null, we know that we&#39;ve woken up a receiver task that will be looking for our send order.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// In this scenario, we need to avoid a potential situation where the sleepTask triggers before the notificationTask,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// which would lead to the unintended removal of our SendOrder... which the receiver task expects to exist.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// We avoid this problem by setting the timeout to infinite.</span>
+</span></span><span style="display:flex;"><span>        Task sleepTask = Task.Delay(receiverId == <span style="color:#66d9ef">null</span> ? timeout : Timeout.InfiniteTimeSpan, combinedCts.Token);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Wait until something happens to one of these two tasks</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> Task.WhenAny(notificationTask, sleepTask);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Cancel the sleep task, if it&#39;s not already finished</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// We have to do this to avoid having a memory leak (this sleepTask is not garbage-collected when we exit the function).</span>
+</span></span><span style="display:flex;"><span>        cancelSleep.Cancel();
+</span></span></code></pre></div><ol start="3">
+<li>Check the status of our notification task
+<ul>
+<li>If our notification triggered, return true - the panel was transferred successfully.</li>
+<li>Otherwise, acquire the <code>QueueLock</code> and do the following:
+<ul>
+<li>Check again if our notification triggered (we perform this check twice to prevent a race condition).</li>
+<li>If it wasn&rsquo;t triggered, that means that the timeout task was triggered instead. Therefore, we should remove our <code>SendOrder</code> and return false.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (notificationTask.IsCompletedSuccessfully)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// A receiver task triggered our notification task, removed our send order, and returned the panel.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// The panel has been handed over successfully, we&#39;re done here!</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#75715e">// The sleep task completed</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">await</span> QueueLock.WaitAsync(); <span style="color:#75715e">// By holding the lock we ensure that we have exclusive access to our own notificationTask.</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (notificationTask.IsCompletedSuccessfully) <span style="color:#75715e">// The notification task was triggered immediately after the sleep task.</span>
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// A receiver task triggered our notification task, removed our send order, and returned the panel.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// The panel has been handed over successfully, we&#39;re done here!</span>
+</span></span><span style="display:flex;"><span>                QueueLock.Release();
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// The notification task was not triggered, which means that our send order still needs to be cleaned up.</span>
+</span></span><span style="display:flex;"><span>                RemoveSendOrder(orderId);
+</span></span><span style="display:flex;"><span>                QueueLock.Release();
+</span></span><span style="display:flex;"><span>                cancellationToken.ThrowIfCancellationRequested(); <span style="color:#75715e">// Propagate the cancellation if necessary.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><h3 id="the-tryreceiveasync-method">
+  The <strong>TryReceiveAsync()</strong> method
+  <a class="heading-link" href="#the-tryreceiveasync-method">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>This method will naturally be the counterpart to the <a href="#the-trysendasync-method" ><code>TrySendAsync()</code> method</a>. This is how it works:</p>
+<ol>
+<li>Acquire the <code>QueueLock</code> and do the following:
+<ul>
+<li>If there&rsquo;s a <code>SendOrder</code> with <code>ReservedReceiverId</code> set to <code>null</code> available, trigger its notification mechanism, remove it from the <code>SendOrders</code> list and return the panel from the <code>SendOrder</code>. We&rsquo;re done here!</li>
+<li>Otherwise, create our <code>ReceiveOrder</code>.</li>
+</ul>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Attempts to receive a panel from the previous machine.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;returns&gt;true &amp; the panel if the handover is successful, false if a timeout or cancellation is triggered.&lt;/returns&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">async</span> Task&lt;(<span style="color:#66d9ef">bool</span> Success, T? Panel)&gt; TryReceiveAsync(TimeSpan timeout, CancellationToken cancellationToken)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        Guid orderId = Guid.NewGuid();
+</span></span><span style="display:flex;"><span>        TaskCompletionSource&lt;<span style="color:#66d9ef">bool</span>&gt; notification = <span style="color:#66d9ef">new</span>(TaskCreationOptions.RunContinuationsAsynchronously);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> QueueLock.WaitAsync();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int?</span> matchIndex = FindSendOrderByReservedId(<span style="color:#66d9ef">null</span>); <span style="color:#75715e">// Looking for a SendOrder with a null ReservedReceiverId</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (matchIndex != <span style="color:#66d9ef">null</span>) <span style="color:#75715e">// There&#39;s an unmatched SendOrder waiting for us</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// If there&#39;s a send order already waiting there, we can immediately return that send order&#39;s panel.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">var</span> res = (<span style="color:#66d9ef">true</span>, SendOrders[(<span style="color:#66d9ef">int</span>)matchIndex].Entity);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            SendOrders[(<span style="color:#66d9ef">int</span>)matchIndex].Notification.SetResult(<span style="color:#66d9ef">true</span>); <span style="color:#75715e">// Notify the sender.</span>
+</span></span><span style="display:flex;"><span>            SendOrders.RemoveAt((<span style="color:#66d9ef">int</span>)matchIndex); <span style="color:#75715e">// Remove the send order.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            QueueLock.Release();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> res;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#75715e">// There&#39;s no send order available for us to take, so let&#39;s create a receive order and wait for an update</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Add a new receive order to the list</span>
+</span></span><span style="display:flex;"><span>            ReceiveOrders.Add(<span style="color:#66d9ef">new</span> ReceiveOrder
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                Id = orderId,
+</span></span><span style="display:flex;"><span>                Notification = notification
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>            QueueLock.Release();
+</span></span><span style="display:flex;"><span>        }
+</span></span></code></pre></div><ol start="2">
+<li>Wait until either the notification task of our <code>ReceiveOrder</code> is triggered, or the timeout is triggered.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>        <span style="color:#75715e">// We&#39;re creating this combinedCts so that we can terminate the sleepTask</span>
+</span></span><span style="display:flex;"><span>        CancellationTokenSource cancelSleep = <span style="color:#66d9ef">new</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">using</span> var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cancelSleep.Token);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Task&lt;<span style="color:#66d9ef">bool</span>&gt; notificationTask = notification.Task;
+</span></span><span style="display:flex;"><span>        Task sleepTask = Task.Delay(timeout, combinedCts.Token);
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Wait until something happens to one of these two tasks</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> Task.WhenAny(notificationTask, sleepTask);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Cancel the sleep task, if it&#39;s not already finished</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// We have to do this to avoid having a memory leak (this sleepTask is not garbage-collected when we exit the function).</span>
+</span></span><span style="display:flex;"><span>        cancelSleep.Cancel();
+</span></span></code></pre></div><ol start="3">
+<li>Acquire the <code>QueueLock</code> and do the following:
+<ul>
+<li>If our notification task triggered, that means there&rsquo;s a <code>SendOrder</code> reserved for us - we need to find it, trigger its notification mechanism, remove it from the <code>SendOrders</code> list and return the panel from the <code>SendOrder</code>!</li>
+<li>Otherwise, that means that the timeout task was triggered instead. Therefore, we should remove our <code>ReceiveOrder</code> and return false.</li>
+</ul>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>        <span style="color:#75715e">// By holding the lock we ensure that we have exclusive access to our own notificationTask.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> QueueLock.WaitAsync(); 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (notificationTask.IsCompletedSuccessfully)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// We&#39;re guaranteed to have a SendOrder reserved for us</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> sendOrderIndex = (<span style="color:#66d9ef">int</span>)FindSendOrderByReservedId(orderId)!;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">var</span> res = (<span style="color:#66d9ef">true</span>, SendOrders[sendOrderIndex].Entity);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            SendOrders[sendOrderIndex].Notification.SetResult(<span style="color:#66d9ef">true</span>); <span style="color:#75715e">// Notify the sender.</span>
+</span></span><span style="display:flex;"><span>            SendOrders.RemoveAt(sendOrderIndex); <span style="color:#75715e">// Remove the send order.</span>
+</span></span><span style="display:flex;"><span>            QueueLock.Release();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> res;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#75715e">// The sleep task completed</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            RemoveReceiveOrder(orderId);
+</span></span><span style="display:flex;"><span>            QueueLock.Release();
+</span></span><span style="display:flex;"><span>            cancellationToken.ThrowIfCancellationRequested(); <span style="color:#75715e">// Propagate the cancellation if necessary.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> (<span style="color:#66d9ef">false</span>, <span style="color:#66d9ef">default</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><h2 id="visualizing-trysendasync-and-tryreceiveasync">
+  Visualizing <strong>TrySendAsync()</strong> and <strong>TryReceiveAsync()</strong>
+  <a class="heading-link" href="#visualizing-trysendasync-and-tryreceiveasync">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Reading the code is one thing, but what would really help us understand these methods is some visualizations of them working. I&rsquo;ve found <a href="https://en.wikipedia.org/wiki/Sequence_diagram"  class="external-link" target="_blank" rel="noopener">sequence diagrams</a> to be pretty useful for this purpose:</p>
+<h3 id="trysendasync-first-followed-by-tryreceiveasync">
+  <strong>TrySendAsync()</strong> first, followed by <strong>TryReceiveAsync()</strong>
+  <a class="heading-link" href="#trysendasync-first-followed-by-tryreceiveasync">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><img src="https://dfamonteiro.com/images/perfect-handover/SendReceive.excalidraw.svg" alt="&ldquo;Sequence diagram of TrySendAsync() first, followed by TryReceiveAsync()&rdquo;"></p>
+<h3 id="tryreceiveasync-first-followed-by-trysendasync">
+  <strong>TryReceiveAsync()</strong> first, followed by <strong>TrySendAsync()</strong>
+  <a class="heading-link" href="#tryreceiveasync-first-followed-by-trysendasync">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><img src="https://dfamonteiro.com/images/perfect-handover/ReceiveSend.excalidraw.svg" alt="&ldquo;Sequence diagram of TryReceiveAsync() first, followed by TrySendAsync()&rdquo;"></p>
+<p>The boxes with dashed lines indicate who holds the <code>QueueLock</code>. The <code>1.</code> <code>2.</code> <code>3.</code> annotations refer to the algorithm explanations from the previous chapter.</p>
+<h2 id="convincing-yourself-that-the-code-actually-works">
+  Convincing yourself that the code actually works
+  <a class="heading-link" href="#convincing-yourself-that-the-code-actually-works">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Writing multithreaded code is not that hard - what&rsquo;s difficult is making sure that the code works under all circumstances! This requires you to think of every possible deadlock scenario, every possible race condition and ensuring that they are all accounted for.<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup></p>
+<p>With this in mind, let&rsquo;s consider some potentially problematic scenarios:</p>
+<h3 id="notification--timeout-race-conditions">
+  Notification &amp; timeout race conditions
+  <a class="heading-link" href="#notification--timeout-race-conditions">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In both <code>TrySendAsync</code> and <code>TryReceiveAsync</code>, we wait for one of these two tasks to complete:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#75715e">// Wait until something happens to one of these two tasks</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">await</span> Task.WhenAny(notificationTask, sleepTask);
+</span></span></code></pre></div><p>What happens if they both complete <strong><em>at the same time</em></strong>? Or one immediately after the other? We handle this race condition by acquiring the <code>QueueLock</code>: doing this prevents the state of <code>notificationTask</code> from changing (because you need to hold the <code>QueueLock</code> to trigger a change in <code>notificationTask</code>).</p>
+<p>Now that we know that <code>notificationTask</code> will not change, we can check its state without fear of it changing under our feet.</p>
+<h3 id="race-condition-between-two-receive-tasks">
+  Race condition between two receive tasks
+  <a class="heading-link" href="#race-condition-between-two-receive-tasks">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>There&rsquo;s another more complex scenario that also merits attention. Imagine this sequence of events with receivers <strong>R1</strong>, <strong>R2</strong>, and sender <strong>S1</strong>:</p>
+<ol>
+<li><strong>R1</strong> calls <code>TryReceiveAsync()</code>. As there is no matching <code>SendOrder</code>, <strong>R1</strong> creates a <code>ReceiveOrder</code> and waits for a notification.</li>
+<li><strong>S1</strong> calls <code>TrySendAsync()</code>. <strong>R1</strong>&rsquo;s notification is triggered, and <strong>S1</strong> creates a <code>SendOrder</code> for <strong>R1</strong> to consume.</li>
+<li><strong>R2</strong> calls <code>TryReceiveAsync()</code>, beats <strong>R1</strong> to the <code>QueueLock</code>, sees that <strong>S1</strong>&rsquo;s <code>SendOrder</code> is available and takes it!</li>
+<li><strong>S1</strong> receives a notification, meaning that its <code>SendOrder</code> has been consumed. Job done.</li>
+<li><strong>R1</strong> finally acquires the lock expecting a <code>SendOrder</code> to exist, but <strong>it discovers that <code>SendOrders</code> is completely empty</strong>!</li>
+</ol>
+<p>The problem here is that even though <strong>S1</strong> creates a <code>SendOrder</code> with the expectation that the receiver that triggered its notification will consume it, there&rsquo;s nothing that prevents a random receiver task from &ldquo;sneaking in&rdquo; and stealing this <code>SendOrder</code> that was meant for someone else.</p>
+<p>The fix for this stealing issue is a dedicated <code>ReservedReceiverId</code> field in the <code>SendOrder</code> struct that <em>reserves</em> this <code>SendOrder</code> for a specific <code>ReceiveOrder</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SendOrder</span>&lt;T&gt;
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// If set, it means that this Send Order is reserved for the Receiver Task whose Id equals ReservedReceiverId.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span>    required <span style="color:#66d9ef">public</span> Guid? ReservedReceiverId;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...</span>
+</span></span></code></pre></div><p>This is also why we don&rsquo;t simply fetch the first <code>SendOrder</code> in the <code>SendOrders</code> list in the <code>TryReceiveAsync()</code> method: we instead look for a <code>SendOrder</code> with a null <code>ReservedReceiverId</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">async</span> Task&lt;(<span style="color:#66d9ef">bool</span> Success, T? Panel)&gt; TryReceiveAsync(TimeSpan timeout, CancellationToken cancellationToken)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    Guid orderId = Guid.NewGuid();
+</span></span><span style="display:flex;"><span>    TaskCompletionSource&lt;<span style="color:#66d9ef">bool</span>&gt; notification = <span style="color:#66d9ef">new</span>(TaskCreationOptions.RunContinuationsAsynchronously);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> QueueLock.WaitAsync();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int?</span> matchIndex = FindSendOrderByReservedId(<span style="color:#66d9ef">null</span>); <span style="color:#75715e">// &lt;--- Looking for a SendOrder with a null ReservedReceiverId</span>
+</span></span></code></pre></div><h2 id="final-notes">
+  Final notes
+  <a class="heading-link" href="#final-notes">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>You can find the code related to this blog post <a href="https://github.com/dfamonteiro/blog/blob/main/Handover/ZeroQueue.cs"  class="external-link" target="_blank" rel="noopener">here</a>.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>This concept is called &ldquo;Back Pressure&rdquo; in software engineering.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>Think mutexes, semaphores, etc.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>You can think of this as a manufacturing simulation-oriented <a href="https://en.wikipedia.org/wiki/Actor_model"  class="external-link" target="_blank" rel="noopener">Actor Model</a>.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>There are formal methods for validating concurrent algorithms, but in this blog post we will be taking a much more informal approach to making sure that our algorithm works.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2026
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
