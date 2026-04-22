@@ -319,7 +319,7 @@ The intrinsically linear nature of these manufacturing setups creates dependenci
 </span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Cancel the notification task. Doing this is important to avoid having &#34;zombie&#34; tasks filling our memory.</span>
 </span></span><span style="display:flex;"><span>                ReceiveOrders[i].Notification.SetCanceled(); <span style="color:#75715e">// No one should be awaiting this Task, so calling SetCancelled() should pose no problem.</span>
 </span></span><span style="display:flex;"><span>                ReceiveOrders.RemoveAt(i);
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>        <span style="color:#75715e">// If no match found, throw exception</span>
@@ -338,7 +338,7 @@ The intrinsically linear nature of these manufacturing setups creates dependenci
 </span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Cancel the notification task. Doing this is important to avoid having &#34;zombie&#34; tasks filling our memory.</span>
 </span></span><span style="display:flex;"><span>                SendOrders[i].Notification.SetCanceled(); <span style="color:#75715e">// No one should be awaiting this Task, so calling SetCancelled() should pose no problem.</span>
 </span></span><span style="display:flex;"><span>                SendOrders.RemoveAt(i);
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>        <span style="color:#75715e">// If no match found, throw exception</span>
