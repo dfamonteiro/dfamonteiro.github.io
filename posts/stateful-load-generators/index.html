@@ -14,7 +14,7 @@
 
 <meta name="author" content="Daniel Monteiro">
 <meta name="description" content="One can usually tell the importance of a certain piece of software by the amount of effort it goes into testing it. In no other place is this more true than the automotive, medical, and aerospace1 industries: the criticality of software in these contexts leads to their development having to be compliant to international safety standards such as ISO 26262 and IEC 62304, which include extensive testing and validation requirements.
-You don&rsquo;t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infraestructure can rival that of major corporations. Take SQLite, for example: it has 590 times more test code than library code! They have a whole webpage dedicated to their testing efforts:">
+You don&rsquo;t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infrastructure can rival that of major corporations. Take SQLite, for example: it has 590 times more test code than library code! They have a whole webpage dedicated to their testing efforts:">
 <meta name="keywords" content="blog,developer,personal,engineering">
 
 
@@ -22,13 +22,13 @@ You don&rsquo;t have to be Airbus to take testing seriously, though. There are o
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="The case for stateful load generators">
   <meta name="twitter:description" content="One can usually tell the importance of a certain piece of software by the amount of effort it goes into testing it. In no other place is this more true than the automotive, medical, and aerospace1 industries: the criticality of software in these contexts leads to their development having to be compliant to international safety standards such as ISO 26262 and IEC 62304, which include extensive testing and validation requirements.
-You don’t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infraestructure can rival that of major corporations. Take SQLite, for example: it has 590 times more test code than library code! They have a whole webpage dedicated to their testing efforts:">
+You don’t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infrastructure can rival that of major corporations. Take SQLite, for example: it has 590 times more test code than library code! They have a whole webpage dedicated to their testing efforts:">
 
 <meta property="og:url" content="https://dfamonteiro.com/posts/stateful-load-generators/">
   <meta property="og:site_name" content="Daniel&#39;s blog">
   <meta property="og:title" content="The case for stateful load generators">
   <meta property="og:description" content="One can usually tell the importance of a certain piece of software by the amount of effort it goes into testing it. In no other place is this more true than the automotive, medical, and aerospace1 industries: the criticality of software in these contexts leads to their development having to be compliant to international safety standards such as ISO 26262 and IEC 62304, which include extensive testing and validation requirements.
-You don’t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infraestructure can rival that of major corporations. Take SQLite, for example: it has 590 times more test code than library code! They have a whole webpage dedicated to their testing efforts:">
+You don’t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infrastructure can rival that of major corporations. Take SQLite, for example: it has 590 times more test code than library code! They have a whole webpage dedicated to their testing efforts:">
   <meta property="og:locale" content="en">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -178,7 +178,7 @@ You don’t have to be Airbus to take testing seriously, though. There are open-
       <div class="post-content">
         
         <p>One can usually tell the importance of a certain piece of software by the amount of effort it goes into testing it. In no other place is this more true than the automotive, medical, and aerospace<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> industries: the criticality of software in these contexts leads to their development having to be compliant to international safety standards such as <a href="https://www.iso.org/standard/68383.html"  class="external-link" target="_blank" rel="noopener">ISO 26262</a> and <a href="https://www.iso.org/standard/38421.html"  class="external-link" target="_blank" rel="noopener">IEC 62304</a>, which include extensive testing and validation requirements.</p>
-<p>You don&rsquo;t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infraestructure can rival that of major corporations. Take SQLite, for example: it has <strong>590 times</strong> more test code than library code! They have a whole webpage dedicated to their testing efforts:</p>
+<p>You don&rsquo;t have to be Airbus to take testing seriously, though. There are open-source projects out there whose testing infrastructure can rival that of major corporations. Take SQLite, for example: it has <strong>590 times</strong> more test code than library code! They have a whole webpage dedicated to their testing efforts:</p>
 <blockquote>
 <p>1.1. Executive Summary</p>
 <ul>
@@ -370,7 +370,7 @@ You don’t have to be Airbus to take testing seriously, though. There are open-
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>Taking a closer look at the code from the previous chapter, its cylical nature becomes quite obvious:</p>
+<p>Taking a closer look at the code from the previous chapter, its cyclical nature becomes quite obvious:</p>
 <figure>
     <img src="https://dfamonteiro.com/images/wafer-system-state-loop.excalidraw.svg" alt="The Wafer system state loop">
     <figcaption><b>The Wafer system state loop</b></figcaption>
@@ -526,7 +526,7 @@ You don’t have to be Airbus to take testing seriously, though. There are open-
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>It&rsquo;s time to go all-in on this state machine ideia:</p>
+<p>It&rsquo;s time to go all-in on this state machine idea:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> random <span style="color:#f92672">import</span> random
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wafer_scenario</span>():
@@ -724,7 +724,7 @@ You don’t have to be Airbus to take testing seriously, though. There are open-
 </span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 InProcess),  track_out_handler),
 </span></span><span style="display:flex;"><span>    ((<span style="color:#e6db74">&#34;*&#34;</span>,                 Processed),  move_next_handler),
 </span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>Notice the flatness of our code so far: need to apply the same handler to different flowpaths? Add another row to the handler table. Need to implement a new requirement? Write a new handler and add it to the handler table. We also get really good scalability: the source file might grow in size, but it&rsquo;s complexity will remain the same. The handlers can even be moved to a separate file to keep things better organized.</p>
+</span></span></code></pre></div><p>Notice the flatness of our code so far: need to apply the same handler to different flowpaths? Add another row to the handler table. Need to implement a new requirement? Write a new handler and add it to the handler table. We also get really good scalability: the source file might grow in size, but its complexity will remain the same. The handlers can even be moved to a separate file to keep things better organized.</p>
 <p>Finally we need to write the engine that will execute our handlers:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wafer_scenario</span>():
 </span></span><span style="display:flex;"><span>    wafer <span style="color:#f92672">=</span> create_wafer()
@@ -774,7 +774,7 @@ You don’t have to be Airbus to take testing seriously, though. There are open-
 <p>This might surprise/scare you, but manufacturing flows this big are not that unrealistic for the semiconductor industry.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:7">
-<p>While writing this iteration subchapter, I was reminded of a very funny quote I heard from work: <em>&ldquo;Could you bring this up in the next arquitecture meeting, so I can immediately shoot it down?&rdquo;</em>. That&rsquo;s how I feel about this subchapter: it&rsquo;s more about what you <em>shouldn&rsquo;t do</em>.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>While writing this iteration subchapter, I was reminded of a very funny quote I heard from work: <em>&ldquo;Could you bring this up in the next architecture meeting, so I can immediately shoot it down?&rdquo;</em>. That&rsquo;s how I feel about this subchapter: it&rsquo;s more about what you <em>shouldn&rsquo;t do</em>.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:8">
 <p>The first if-statement of the loop is missing a <code>flowpath_index += 1</code> line, for example.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -783,7 +783,7 @@ You don’t have to be Airbus to take testing seriously, though. There are open-
 <p>This concept of nested state machines is not new: they are called <strong><em>Hierarchical State Machines</em></strong> and are popularly used in the game development industry.&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:10">
-<p>It does make sense if you think about it: the MES operations we&rsquo;ve been calling in out load tests can be thought of as state transitions for the wafer.&#160;<a href="#fnref:10" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>It does make sense if you think about it: the MES operations we&rsquo;ve been calling in our load tests can be thought of as state transitions for the wafer.&#160;<a href="#fnref:10" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </div>
