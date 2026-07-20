@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  John Ousterhout&#39;s &#34;A Philosophy of Software Design&#34; is a must-read book · Daniel&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="Software engineers are not a fungible commodity. Two people could be the same age, graduate from the same course, have the exact same work experience, have the exact same life experience&hellip; and one of them writes much more elegant code than the other. How does this happen? Do some people just have an innate ability to write better structured code than others? Can this be taught?
+What is the name of this intangible quality that some engineers have and some don&rsquo;t?">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="John Ousterhout&#39;s &#34;A Philosophy of Software Design&#34; is a must-read book">
+  <meta name="twitter:description" content="Software engineers are not a fungible commodity. Two people could be the same age, graduate from the same course, have the exact same work experience, have the exact same life experience… and one of them writes much more elegant code than the other. How does this happen? Do some people just have an innate ability to write better structured code than others? Can this be taught?
+What is the name of this intangible quality that some engineers have and some don’t?">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/philosophy-of-code-design/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="John Ousterhout&#39;s &#34;A Philosophy of Software Design&#34; is a must-read book">
+  <meta property="og:description" content="Software engineers are not a fungible commodity. Two people could be the same age, graduate from the same course, have the exact same work experience, have the exact same life experience… and one of them writes much more elegant code than the other. How does this happen? Do some people just have an innate ability to write better structured code than others? Can this be taught?
+What is the name of this intangible quality that some engineers have and some don’t?">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-07-19T18:23:07+01:00">
+    <meta property="article:modified_time" content="2026-07-19T18:23:07+01:00">
+    <meta property="article:tag" content="Programming">
+    <meta property="article:tag" content="Books">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/philosophy-of-code-design/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.5e94c1acf7aa2066035cf2764ae3e4fe39db101d68b870f919966100d51fb861.css" integrity="sha256-XpTBrPeqIGYDXPJ2SuPk/jnbEB1ouHD5GZZhANUfuGE=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/philosophy-of-code-design/">
+              John Ousterhout&#39;s &#34;A Philosophy of Software Design&#34; is a must-read book
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-07-19T18:23:07&#43;01:00">
+                July 19, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/books/">Books</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      
+
+
+      <div class="post-content">
+        
+        <p>Software engineers are not a fungible commodity. Two people could be the same age, graduate from the same course, have the exact same work experience, have the exact same life experience&hellip; and one of them writes much more elegant code than the other. How does this happen? Do some people just have an innate ability to write better structured code than others? Can this be taught?</p>
+<p>What is the name of this intangible quality that some engineers have and some don&rsquo;t?</p>
+<p>It&rsquo;s called <strong>taste</strong>.</p>
+<h2 id="defining-taste">
+  Defining taste
+  <a class="heading-link" href="#defining-taste">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>You won&rsquo;t find a <a href="https://en.wikipedia.org/wiki/Taste_%28disambiguation%29"  class="external-link" target="_blank" rel="noopener">wikipedia</a> page for taste in the way it is described here - this idea of &ldquo;taste&rdquo; is frankly more part of programming folklore than anything else.</p>
+<p>Nevertheless, there are some who have tried to define taste - to several degrees of formality:</p>
+<h3 id="linus-torvalds-take">
+  Linus Torvalds&rsquo; take
+  <a class="heading-link" href="#linus-torvalds-take">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>From this <a href="https://www.tag1.com/blog/interview-linus-torvalds-linux-and-git/"  class="external-link" target="_blank" rel="noopener">interview</a>:</p>
+<blockquote>
+<p>But it&rsquo;s not like I handed the project off to the first random person to show up. I did maintain Git for a few months, and the thing that made me ask Junio if he wanted to be the maintainer is that very-hard-to-describe notion of &ldquo;good taste&rdquo;. I don&rsquo;t really have a better description for it: <strong>programming is about solving technical problems, but how you solve them, and how you think about them is important too, and it&rsquo;s one of those things you start to recognize over time: certain people have that &ldquo;good taste&rdquo; thing and pick the &ldquo;right&rdquo; solution.</strong></p>
+<p>I don&rsquo;t want to claim that programming is an art, because it really is mostly just about &ldquo;good engineering&rdquo;. I&rsquo;m a big believer in Thomas Edison&rsquo;s &ldquo;one percent inspiration and ninety-nine percent perspiration&rdquo; mantra: it&rsquo;s almost all about the little details and the everyday grunt-work. But there is that occasional &ldquo;inspiration&rdquo; part, <strong>that &ldquo;good taste&rdquo; thing that is about more than just solving some problem - solving it cleanly and nicely and yes, even beautifully.</strong></p>
+<p>And Junio had that &ldquo;good taste&rdquo;.</p>
+<p>[&hellip;]</p>
+<p>Btw, this whole &ldquo;good taste&rdquo; thing and finding people who have it, and trusting them - that&rsquo;s very much not just about Git. It&rsquo;s very much the history of Linux too. Unlike Git, Linux is obviously a project that I still do actively maintain, but very much like Git, it&rsquo;s also a project with lots of other people involved, and I think one of the big successes of Linux is having literally hundreds of maintainers around, all with that hard-to-define &ldquo;good taste&rdquo;, and all people who maintain parts of the kernel.</p></blockquote>
+<h3 id="mitchell-hashimotos-take">
+  Mitchell Hashimoto&rsquo;s take
+  <a class="heading-link" href="#mitchell-hashimotos-take">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>From this <a href="https://x.com/mitchellh/article/2070665127331037290"  class="external-link" target="_blank" rel="noopener">article</a>:</p>
+<blockquote>
+<p>“Taste” is the ability to consistently make high-quality qualitative judgments where no objective metric exists. It’s the creation of something that feels right intuitively, with no real justifiable way to measure that. But when you do it, people feel it.</p>
+<p>A person with “good taste” is someone who can do this repeatedly, consistently. The funny thing about taste is that it’s hard to create, but its result is very easy to copy. Once someone makes a tasteful decision, others can imitate it almost immediately.</p>
+<p>This is usually an argument against the existence of taste: “look how easy I can copy your work!” And yet, you couldn’t create the work without first having someone to copy it from. One has taste, the other doesn’t.</p>
+<p>There have always been people with consistently good taste. But taste is coming up more regularly than ever before. It is becoming a critical differentiator.</p></blockquote>
+<h3 id="my-take">
+  My take
+  <a class="heading-link" href="#my-take">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Taste is the ability to tell whether a piece of code <strong><em>feels</em></strong> right. In the same way that physics systems trend towards a state of low entropy, taste is a driving force within you that makes you reshape your software abstractions until they reach their natural <em>minima</em>.</p>
+<p>Your ability to tell whether code feels right or not will naturally be dependent on your areas of expertise as a software engineer. Take me, the writer of this blog post, as an example: while I can detect potential issues in backend code almost subconsciously, the best I can do with frontend code is say &ldquo;it looks ok&rdquo;.</p>
+<p>Taste is relevant at any level of abstraction: in the same manner you can have elegant code, you can also have an elegant software architecture.</p>
+<p>As a final note (and this more of a personal conjecture), taste appears to be intertwined with other positive attributes that are important to software engineering, such as proactiveness, attention to detail, high personal quality standards and clear technical vision.</p>
+<h2 id="taste-is-about-to-become-really-freaking-important">
+  Taste is about to become really freaking important
+  <a class="heading-link" href="#taste-is-about-to-become-really-freaking-important">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>You might be wondering why I am pontificating on this concept of &ldquo;taste&rdquo; in a blog post that is meant to be recommending a book. This is why: coding agents (and by extension LLMs) are reshaping the skillset required to be a competent software engineer.</p>
+<p>What does it mean to live in a world where the cost of writing code is a mere fraction of what it used to be?<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> It means that all other aspects of your role as a software engineer become more important by proxy. To be more specific, <strong>your ability to review the code written by your coding agent is going to become absolutely critical</strong>. If you don&rsquo;t have this skill, you risk turning your codebase into an incomprehensible vibecoded mess.</p>
+<p>So in short&hellip; you need to have <em>taste</em>.</p>
+<h2 id="can-you-improve-your-taste-in-software-design-john-ousterhout-believes-you-can">
+  Can you improve your taste in software design? John Ousterhout believes you can
+  <a class="heading-link" href="#can-you-improve-your-taste-in-software-design-john-ousterhout-believes-you-can">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>All of this to say that you should read John Ousterhout&rsquo;s <a href="https://www.goodreads.com/en/book/show/39996759-a-philosophy-of-software-design"  class="external-link" target="_blank" rel="noopener"><em>A Philosophy of Software Design</em></a>, which speaks at length about how software systems should be designed and how to manage complexity in software design. When I first read this book, I was taken aback by how much of my personal philosophy of how code should be structured is reflected in the author&rsquo;s words. If there&rsquo;s any way to improve your taste, it&rsquo;s by reading this book.</p>
+<p>Chapter 3 alone makes it a worthwhile read: <strong>Working Code Isn&rsquo;t Enough</strong>. The first edition of this book was originally published in 2018 <em>and yet</em> this specific chapter couldn&rsquo;t have been better targeted for this agentic era we&rsquo;re diving into headfirst - it&rsquo;s almost like the author knows what he&rsquo;s talking about!</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>I&rsquo;m not making any claims on whether or not we already live in this reality. Some of us probably already do, though. As always, <a href="https://en.wikiquote.org/wiki/William_Gibson"  class="external-link" target="_blank" rel="noopener">the future is already here - it&rsquo;s just not very evenly distributed</a>.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2026
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

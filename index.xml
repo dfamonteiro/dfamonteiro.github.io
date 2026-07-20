@@ -6,8 +6,15 @@
     <description>Recent content on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 20 Apr 2026 00:30:12 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 19 Jul 2026 18:23:07 +0100</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>John Ousterhout&#39;s &#34;A Philosophy of Software Design&#34; is a must-read book</title>
+      <link>https://dfamonteiro.com/posts/philosophy-of-code-design/</link>
+      <pubDate>Sun, 19 Jul 2026 18:23:07 +0100</pubDate>
+      <guid>https://dfamonteiro.com/posts/philosophy-of-code-design/</guid>
+      <description>&lt;p&gt;Software engineers are not a fungible commodity. Two people could be the same age, graduate from the same course, have the exact same work experience, have the exact same life experience&amp;hellip; and one of them writes much more elegant code than the other. How does this happen? Do some people just have an innate ability to write better structured code than others? Can this be taught?&lt;/p&gt;&#xA;&lt;p&gt;What is the name of this intangible quality that some engineers have and some don&amp;rsquo;t?&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Crafting a Zero-Capacity Multi-Producer-Multi-Consumer queue in async C#</title>
       <link>https://dfamonteiro.com/posts/perfect-handover/</link>
