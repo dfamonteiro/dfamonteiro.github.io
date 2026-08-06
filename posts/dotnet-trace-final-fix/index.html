@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Fixing dotnet-trace&#39;s 100 stack frame limit once and for all · Daniel Monteiro&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="I&rsquo;ve had enough of workarounds for dotnet-trace&rsquo;s limit of 100 stack frames.
+Just to recap from my previous misadventures, if you attach dotnet-trace to your application and your application has, for example, a call stack 120 calls deep, the &ldquo;root&rdquo; 20 stack frames get cut from the call stack that dotnet-trace receives, and you end up with completely unusable traces like these:
+
+    
+    A screenshot of a broken trace.
+
+This isn&rsquo;t any random trace: it comes from me guiding a work colleague through using dotnet-trace, and the grand result is this abominable rectangle that looks more like a spectrogram than an actual trace visualization!">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Fixing dotnet-trace&#39;s 100 stack frame limit once and for all">
+  <meta name="twitter:description" content="I’ve had enough of workarounds for dotnet-trace’s limit of 100 stack frames.
+Just to recap from my previous misadventures, if you attach dotnet-trace to your application and your application has, for example, a call stack 120 calls deep, the “root” 20 stack frames get cut from the call stack that dotnet-trace receives, and you end up with completely unusable traces like these:
+A screenshot of a broken trace.This isn’t any random trace: it comes from me guiding a work colleague through using dotnet-trace, and the grand result is this abominable rectangle that looks more like a spectrogram than an actual trace visualization!">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/dotnet-trace-final-fix/">
+  <meta property="og:site_name" content="Daniel Monteiro&#39;s blog">
+  <meta property="og:title" content="Fixing dotnet-trace&#39;s 100 stack frame limit once and for all">
+  <meta property="og:description" content="I’ve had enough of workarounds for dotnet-trace’s limit of 100 stack frames.
+Just to recap from my previous misadventures, if you attach dotnet-trace to your application and your application has, for example, a call stack 120 calls deep, the “root” 20 stack frames get cut from the call stack that dotnet-trace receives, and you end up with completely unusable traces like these:
+A screenshot of a broken trace.This isn’t any random trace: it comes from me guiding a work colleague through using dotnet-trace, and the grand result is this abominable rectangle that looks more like a spectrogram than an actual trace visualization!">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-08-05T22:00:11+01:00">
+    <meta property="article:modified_time" content="2026-08-05T22:00:11+01:00">
+    <meta property="article:tag" content="Programming">
+    <meta property="article:tag" content="Tracing">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/dotnet-trace-final-fix/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.5e94c1acf7aa2066035cf2764ae3e4fe39db101d68b870f919966100d51fb861.css" integrity="sha256-XpTBrPeqIGYDXPJ2SuPk/jnbEB1ouHD5GZZhANUfuGE=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel Monteiro&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/dotnet-trace-final-fix/">
+              Fixing dotnet-trace&#39;s 100 stack frame limit once and for all
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-08-05T22:00:11&#43;01:00">
+                August 5, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              9-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/tracing/">Tracing</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      
+
+
+      <div class="post-content">
+        
+        <p>I&rsquo;ve had enough of workarounds for <code>dotnet-trace</code>&rsquo;s limit of 100 stack frames.</p>
+<p>Just to recap from my <a href="../dotnet-trace-100-limit" >previous misadventures</a>, if you attach <code>dotnet-trace</code> to your application and your application has, for example, a call stack 120 calls deep, the &ldquo;root&rdquo; 20 stack frames get cut from the call stack that <code>dotnet-trace</code> receives, and you end up with completely unusable traces like these:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/colleague-trace.png" alt="A screenshot of a broken trace.">
+    <figcaption>A screenshot of a broken trace.</figcaption>
+</figure>
+<p>This isn&rsquo;t any random trace: it comes from me guiding a work colleague through <a href="../using-dotnet-trace-with-perfetto" >using <code>dotnet-trace</code></a>, and the grand result is this abominable rectangle that looks more like a <a href="https://en.wikipedia.org/wiki/Spectrogram"  class="external-link" target="_blank" rel="noopener">spectrogram</a> than an actual trace visualization!</p>
+<p>I was a bit disheartened after this experience: I can write all the guides in the world about <a href="../using-dotnet-trace-with-perfetto" >how to use <code>dotnet-trace</code></a>, but if a person&rsquo;s first experience with using <code>dotnet-trace</code> results in <em>this</em>, then it will all be for naught.</p>
+<h2 id="we-have-to-fix-this-at-the-source">
+  We have to fix this at the source
+  <a class="heading-link" href="#we-have-to-fix-this-at-the-source">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>You can&rsquo;t fix this in post. I know this because <a href="../dotnet-trace-100-limit" >I tried that approach before</a>, and the conclusion I reached was that asking the user to do any post-processing step will just discourage them from using this tool. This leaves us with only one final option: fixing <code>dotnet-trace</code> itself.</p>
+<p>Thankfully, this is easier than it may appear at first glance: the one method you need to modify is this static <code>Convert</code> method one under <a href="https://github.com/dotnet/diagnostics/blob/main/src/Tools/dotnet-trace/TraceFileFormatConverter.cs"  class="external-link" target="_blank" rel="noopener"><code>src/Tools/dotnet-trace/TraceFileFormatConverter.cs</code></a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> Convert(TraceFileFormat format, <span style="color:#66d9ef">string</span> fileToConvert, <span style="color:#66d9ef">string</span> outputFilename, <span style="color:#66d9ef">bool</span> continueOnError = <span style="color:#66d9ef">false</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">string</span> etlxFilePath = TraceLog.CreateFromEventPipeDataFile(fileToConvert, <span style="color:#66d9ef">null</span>, <span style="color:#66d9ef">new</span> TraceLogOptions() { ContinueOnError = continueOnError });
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> (SymbolReader symbolReader = <span style="color:#66d9ef">new</span>(TextWriter.Null) { SymbolPath = SymbolPath.MicrosoftSymbolServerPath })
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> (TraceLog eventLog = <span style="color:#66d9ef">new</span>(etlxFilePath))
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        MutableTraceEventStackSource stackSource = <span style="color:#66d9ef">new</span>(eventLog)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            OnlyManagedCodeStacks = <span style="color:#66d9ef">true</span> <span style="color:#75715e">// EventPipe currently only has managed code stacks.</span>
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        SampleProfilerThreadTimeComputer computer = <span style="color:#66d9ef">new</span>(eventLog, symbolReader)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            IncludeEventSourceEvents = <span style="color:#66d9ef">false</span> <span style="color:#75715e">// SpeedScope handles only CPU samples, events are not supported</span>
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>        computer.GenerateThreadTimeStacks(stackSource);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">switch</span> (format)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> TraceFileFormat.Speedscope:
+</span></span><span style="display:flex;"><span>                SpeedScopeStackSourceWriter.WriteStackViewAsJson(stackSource, outputFilename);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> TraceFileFormat.Chromium:
+</span></span><span style="display:flex;"><span>                ChromiumStackSourceWriter.WriteStackViewAsJson(stackSource, outputFilename, compress: <span style="color:#66d9ef">false</span>);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">default</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// we should never get here</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> DiagnosticToolException(<span style="color:#e6db74">$&#34;Invalid TraceFileFormat \&#34;</span>{format}<span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">&#34;&#34;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (File.Exists(etlxFilePath))
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        File.Delete(etlxFilePath);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>dotnet-trace</code> implements the conversion to the <a href="https://www.speedscope.app/"  class="external-link" target="_blank" rel="noopener">speedscope</a> and <a href="https://perfetto.dev/"  class="external-link" target="_blank" rel="noopener">chromium</a> formats by essentially <a href="https://github.com/microsoft/perfview/blob/f3ec1b38a6d7535e4f878510e5041f9da7d0fdb6/src/TraceEvent/Stacks/ChromiumStackSourceWriter.cs#L12"  class="external-link" target="_blank" rel="noopener">delegating that responsibility to the <code>perfview</code> project</a>. We will replace the contents of this method and implement this conversion ourselves in this blog post.</p>
+<p>This will be done in classic <a href="https://en.wikipedia.org/wiki/Extract,_transform,_load"  class="external-link" target="_blank" rel="noopener">ETL</a> fashion: <strong>Extract</strong>, <strong>Transform</strong> and <strong>Load</strong>.</p>
+<h3 id="extract">
+  Extract
+  <a class="heading-link" href="#extract">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In this initial step we extract all the relevant data into a mapping of threads to lists of trace samples. This will be the main data structure we will be operating on.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> Convert(TraceFileFormat format, <span style="color:#66d9ef">string</span> fileToConvert, <span style="color:#66d9ef">string</span> outputFilename, <span style="color:#66d9ef">bool</span> continueOnError = <span style="color:#66d9ef">false</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">string</span> etlxFilePath = TraceLog.CreateFromEventPipeDataFile(fileToConvert, <span style="color:#66d9ef">null</span>, <span style="color:#66d9ef">new</span> TraceLogOptions() { ContinueOnError = continueOnError });
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Retrieve the call stacks from the file</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// threadId -&gt; List of (timestamp, frames)</span>
+</span></span><span style="display:flex;"><span>    Dictionary&lt;<span style="color:#66d9ef">int</span>, List&lt;CallstackSample&gt;&gt; callStacks = GetCallstacks(etlxFilePath);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (File.Exists(etlxFilePath))
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        File.Delete(etlxFilePath);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// Represents a singular call stack from a thread, sampled at a given TimestampMs.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">record</span> <span style="color:#a6e22e">CallstackSample</span>(<span style="color:#66d9ef">double</span> TimestampMs, List&lt;<span style="color:#66d9ef">string</span>&gt; StackTrace);
+</span></span></code></pre></div><h3 id="transform">
+  Transform
+  <a class="heading-link" href="#transform">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Now it&rsquo;s time to put our surgeon&rsquo;s gloves on and start manipulating our call stacks. If a potentially truncated call stack is detected, the following is done:</p>
+<ol>
+<li>Compare the base stack frame against all the stack frames of the previous sample. The idea is that while call <code>abc()</code> might be the root frame of our truncated call stack, it might in reality be frame #10 and the actual first 10 frames were suppressed.</li>
+<li>Compare the matches and select the one that better aligns with the previous call stack - the candidate with the most overlap wins.</li>
+<li>Insert the missing stack frames - the call stack should be correct now.</li>
+</ol>
+<p>I recognize it might be difficult to understand the algorithm just from this synopsis, so I cooked up a visualization just for you:</p>
+<figure>
+    <video controls autoplay loop muted width="100%">
+        <source src="https://dfamonteiro.com/images/dotnet-trace-final-fix/Scene-1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <figcaption>Visualization of the <code>FixCallStacks</code> algorithm.</figcaption>
+</figure>
+<p>And here&rsquo;s the corresponding code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// Fixes the call stacks truncated by the EventPipe&#39;s 100 stack frame limit.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> FixCallStacks(Dictionary&lt;<span style="color:#66d9ef">int</span>, List&lt;CallstackSample&gt;&gt; threadMap)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">foreach</span> ((<span style="color:#66d9ef">int</span> threadId, <span style="color:#66d9ef">var</span> samples) <span style="color:#66d9ef">in</span> threadMap)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> sampleIndex = <span style="color:#ae81ff">1</span>; sampleIndex &lt; samples.Count; sampleIndex++)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">var</span> previous = samples[sampleIndex - <span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">var</span> current = samples[sampleIndex];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (current.StackTrace.Count &lt; <span style="color:#ae81ff">100</span>)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// We aren&#39;t exceeding the stack frame limit here,</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// therefore we don&#39;t need to fix anything.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (previous.StackTrace[<span style="color:#ae81ff">0</span>] != current.StackTrace[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Get list of stack traces from `previous` that matches the `current` base frame</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">var</span> candidates = <span style="color:#66d9ef">new</span> List&lt;<span style="color:#66d9ef">int</span>&gt;();
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i = <span style="color:#ae81ff">0</span>; i &lt; previous.StackTrace.Count; i++)
+</span></span><span style="display:flex;"><span>                {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> (previous.StackTrace[i] == current.StackTrace[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>                    {
+</span></span><span style="display:flex;"><span>                        candidates.Add(i);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (candidates.Count == <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>                {
+</span></span><span style="display:flex;"><span>                    <span style="color:#75715e">// If there&#39;s no matching stack frame from `previous`,</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#75715e">// there&#39;s nothing we can do</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Select the best candidate match from the list of candidates.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// The best candidate match is the one with the most call stack overlap</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// between `previous` and `current`</span>
+</span></span><span style="display:flex;"><span>                (<span style="color:#66d9ef">int</span> Index, <span style="color:#66d9ef">int</span> Overlap) bestCandidate = (-<span style="color:#ae81ff">1</span>, -<span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">foreach</span> (<span style="color:#66d9ef">int</span> candidateIndex <span style="color:#66d9ef">in</span> candidates)
+</span></span><span style="display:flex;"><span>                {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">int</span> overlap = <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">while</span> (previous.StackTrace[candidateIndex + overlap] == current.StackTrace[overlap])
+</span></span><span style="display:flex;"><span>                    {
+</span></span><span style="display:flex;"><span>                        <span style="color:#75715e">// For as long as the stack frames keep matching, keep increasing the overlap</span>
+</span></span><span style="display:flex;"><span>                        overlap++;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">if</span> (candidateIndex + overlap == previous.StackTrace.Count || overlap == current.StackTrace.Count)
+</span></span><span style="display:flex;"><span>                        {
+</span></span><span style="display:flex;"><span>                            <span style="color:#75715e">// We have an index out of bounds, so we have to stop</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>                        }
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> (overlap &gt; bestCandidate.Overlap)
+</span></span><span style="display:flex;"><span>                    {
+</span></span><span style="display:flex;"><span>                        bestCandidate = (candidateIndex, overlap);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Insert the missing stack frames</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> prevIndex = <span style="color:#ae81ff">0</span>; prevIndex &lt; bestCandidate.Index; prevIndex++)
+</span></span><span style="display:flex;"><span>                {
+</span></span><span style="display:flex;"><span>                    current.StackTrace.Insert(prevIndex, previous.StackTrace[prevIndex]);
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="load">
+  Load
+  <a class="heading-link" href="#load">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The final step is to convert our <code>callStacks</code> data structure into our preferred trace format. The code behind this serialization is not that interesting, so I decided to outsource the implementation of <code>SpeedscopeWriter</code> and <code>ChromiumWriter</code> to Gemini.</p>
+<p>This is the final state of the <code>Convert</code> method:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> Convert(TraceFileFormat format, <span style="color:#66d9ef">string</span> fileToConvert, <span style="color:#66d9ef">string</span> outputFilename, <span style="color:#66d9ef">bool</span> continueOnError = <span style="color:#66d9ef">false</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">string</span> etlxFilePath = TraceLog.CreateFromEventPipeDataFile(fileToConvert, <span style="color:#66d9ef">null</span>, <span style="color:#66d9ef">new</span> TraceLogOptions() { ContinueOnError = continueOnError });
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Retrieve the call stacks from the file</span>
+</span></span><span style="display:flex;"><span>    Dictionary&lt;<span style="color:#66d9ef">int</span>, List&lt;CallstackSample&gt;&gt; callStacks = GetCallstacks(etlxFilePath);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Fix the callstacks</span>
+</span></span><span style="display:flex;"><span>    FixCallStacks(callStacks);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (File.Exists(etlxFilePath))
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        File.Delete(etlxFilePath);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span> (format)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> TraceFileFormat.Speedscope:
+</span></span><span style="display:flex;"><span>            SpeedscopeWriter.Convert(outputFilename, callStacks);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> TraceFileFormat.Chromium:
+</span></span><span style="display:flex;"><span>            ChromiumWriter.Convert(outputFilename, callStacks);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">default</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// we should never get here</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Exception(<span style="color:#e6db74">$&#34;Invalid TraceFileFormat \&#34;</span>{format}<span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">&#34;&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="so-does-it-work">
+  So&hellip; does it work?
+  <a class="heading-link" href="#so-does-it-work">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>After all this work, have we done it? Let&rsquo;s start with a simple test: a broken trace from <a href="https://github.com/dotnet/diagnostics/issues/4490#issuecomment-1939428734"  class="external-link" target="_blank" rel="noopener">this github issue</a>, which happens to be one of the first mentions of this limitation that I discovered:</p>
+<div class="juxtapose" data-startingposition="80%" data-showlabels="true">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/github-diff-a.png" data-label="Before" alt="before" />
+    <img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/github-diff-b.png" data-label="After"  alt="after" />
+</div>
+<p>So far so good! But this trace is child&rsquo;s play compared to some traces I&rsquo;ve collected at <a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a>, where the host of the system can compile C# code on-demand <strong><em>while serving a request</em></strong><sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>! This is a call stack that can easily go 200-300 frames deep, and is definitely the ultimate challenge for the adjustments we made to <code>dotnet-trace</code> in this blog post.</p>
+<h2 id="so-does-it-really-work">
+  So&hellip; does it <em>really</em> work?
+  <a class="heading-link" href="#so-does-it-really-work">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s run our tweaked <code>Convert</code> method against a trace from a <a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a> MES host and see what happens:</p>
+<style>
+  /* 1. Make the thin vertical center line black */
+  .black-slider .jx-controller {
+      background-color: #000000 !important;
+  }
+
+  /* 2. Make the handle container background transparent/black */
+  .black-slider .jx-control {
+      background-color: #000000 !important;
+  }
+
+  /* 3. Turn the left and right arrow triangles black */
+  .black-slider .jx-arrow.jx-left {
+      border-right-color: #000000 !important;
+  }
+  .black-slider .jx-arrow.jx-right {
+      border-left-color: #000000 !important;
+  }
+</style>
+<div class="juxtapose black-slider" data-startingposition="50%" data-showlabels="true">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/cm-1-a.png" data-label="Before" alt="before" />
+    <img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/cm-1-b.png" data-label="After" alt="after" />
+</div>
+<p>The quality of the trace has improved significantly, but we&rsquo;re not there yet. If we zoom in, we can still find disruptions:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/disruptions.png" alt="A screenshot of a broken trace.">
+    <figcaption>A screenshot of a break in our trace.</figcaption>
+</figure>
+<p>This is happening because the <code>ForceCompleteMemberByLocation</code> function call can not be found in the previous trace, and therefore we hit this code path in <code>FixCallStacks</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (candidates.Count == <span style="color:#ae81ff">0</span>) <span style="color:#75715e">// &lt;==== No matches! ====</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// If there&#39;s no matching stack frame from `previous`,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// there&#39;s nothing we can do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">continue</span>; 
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>I honestly thought this <code>if (candidates.Count == 0)</code> edge case would never be triggered. I mean, who on earth goes 100 function calls deep within a single millisecond?! The Roslyn compiler apparently.</p>
+<p>I have an idea on how to fix this, but it&rsquo;s not pretty.</p>
+<h3 id="the-observability-gods-demand-a-blood-sacrifice">
+  The observability gods demand a blood sacrifice
+  <a class="heading-link" href="#the-observability-gods-demand-a-blood-sacrifice">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>I&rsquo;m going to do something truly sacrilegious&hellip; I&rsquo;m going to just delete the samples that can&rsquo;t be rescued:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (candidates.Count == <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// If there&#39;s no matching stack frame from `previous`, delete this sample.</span>
+</span></span><span style="display:flex;"><span>    samples.RemoveAt(sampleIndex);
+</span></span><span style="display:flex;"><span>    sampleIndex--;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Yes, I know, pure heresy. But you can&rsquo;t argue against results:</p>
+<div class="juxtapose" data-startingposition="50%" data-showlabels="true">
+    <img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/cm-2-a.png" data-label="Before" alt="before" />
+    <img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/cm-2-b.png" data-label="After"  alt="after" />
+</div>
+<p>And what is the price to pay for these perfect traces? 69 samples out of 2194244, or 0.003%. I&rsquo;ll take that deal any day of the week.</p>
+<h2 id="putting-everything-together">
+  Putting everything together
+  <a class="heading-link" href="#putting-everything-together">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The only task remaining is going through the bureaucracy of forking <a href="https://github.com/dotnet/diagnostics"  class="external-link" target="_blank" rel="noopener">dotnet/diagnostics</a>, introducing our changes, and compiling our very own customized <code>dotnet-trace</code>.</p>
+<p>In order to be able to distinguish between the canonical <code>dotnet-trace</code> and my own version, I renamed my own version of this tool to <code>daniel-trace</code>&hellip; I couldn&rsquo;t come up with a better name, sorry.</p>
+<p><img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/daniel-trace.png" alt="&ldquo;Command line image of daniel-trace being executed&rdquo;"></p>
+<h3 id="give-it-a-go">
+  Give it a go!
+  <a class="heading-link" href="#give-it-a-go">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>You can install <code>daniel-trace</code> by downloading the relevant executable:</p>
+<ul>
+<li>Windows: <a href="https://github.com/dfamonteiro/daniel-trace/releases/download/daniel-trace-1/daniel-trace.exe"  class="external-link" target="_blank" rel="noopener">x64</a></li>
+<li>Linux: <a href="https://github.com/dfamonteiro/daniel-trace/releases/download/daniel-trace-1/daniel-trace"  class="external-link" target="_blank" rel="noopener">x64</a></li>
+</ul>
+<p>If you are running another architecture (Arm, etc.) it should be easy enough to compile the project yourself - here&rsquo;s the link to my <a href="https://github.com/dfamonteiro/daniel-trace"  class="external-link" target="_blank" rel="noopener">fork</a> of the <a href="https://github.com/dotnet/diagnostics"  class="external-link" target="_blank" rel="noopener">dotnet/diagnostics</a> repository.</p>
+<h3 id="usage">
+  Usage
+  <a class="heading-link" href="#usage">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><code>daniel-trace</code> is a drop-in replacement of <code>dotnet-trace</code> - just change the name and you should be good to go:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>PS C:\Users\Daniel\Desktop\github\blog\dotnet-trace-final-fix&gt; .\daniel-trace.exe convert .\dotnet_20260727_184408.nettrace --format Chromium          
+</span></span><span style="display:flex;"><span>Processing trace data file &#39;C:\Users\Daniel\Desktop\github\blog\dotnet-trace-final-fix\dotnet_20260727_184408.nettrace&#39; to create a new Chromium file &#39;C:\Users\Daniel\Desktop\github\blog\dotnet-trace-final-fix\dotnet_20260727_184408.chromium.json&#39;.
+</span></span><span style="display:flex;"><span>69 samples out of 2195227 could not be recovered and have been deleted (0.003%)
+</span></span><span style="display:flex;"><span>    Thread 269 (7): 51.514s-51.524s
+</span></span><span style="display:flex;"><span>    Thread 313 (1): 12.130s
+</span></span><span style="display:flex;"><span>    Thread 330 (45): 17.697s-17.705s, 72.990s-72.999s, 74.921s-74.932s, 75.620s-75.661s, 76.705s-76.712s, 79.055s-79.057s
+</span></span><span style="display:flex;"><span>    Thread 363 (16): 58.786s, 60.525s-60.546s, 60.992s-60.999s
+</span></span><span style="display:flex;"><span>Conversion complete
+</span></span><span style="display:flex;"><span>PS C:\Users\Daniel\Desktop\github\blog\dotnet-trace-final-fix&gt;
+</span></span></code></pre></div><p>Have fun analysing traces!</p>
+<h3 id="oh-and-one-more-thing">
+  Oh, and one more thing&hellip;<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>
+  <a class="heading-link" href="#oh-and-one-more-thing">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Besides the improvements mentioned earlier in this blog post, I also took the opportunity to add a couple of optional flags to the <code>collect</code> and <code>convert</code> commands:</p>
+<ul>
+<li><code>--first-span</code>: Remove spans from the call stack starting from the root until a span that matches the filter is found. Supports unix-style wildcards.</li>
+<li><code>--span-filter</code>: Remove spans from the call stack that don&rsquo;t match the filter. Supports unix-style wildcards.</li>
+</ul>
+<p>With these two optional arguments, you can perform very fine-grained filtering directly with <code>daniel-trace</code> instead of having to <a href="../using-dotnet-trace-with-perfetto#analysing-traces-with-perfetto" >do it in the Perfetto trace viewer</a>.</p>
+<h4 id="a-quick-example">
+  A quick example
+  <a class="heading-link" href="#a-quick-example">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>To collect and filter traces from the <a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a> host, you would run something similar to this command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>daniel-trace collect -p 123 --format Chromium --first-span &#34;Cmf*.Services.*Controller.*&#34; --span-filter &#34;Cmf*&#34;
+</span></span></code></pre></div><p>And you&rsquo;d get the following trace out of the box:</p>
+<p><img src="https://dfamonteiro.com/images/dotnet-trace-final-fix/final-trace.png" alt="&ldquo;Image of a very elegant and well-filtered trace&rdquo;"></p>
+<p>That&rsquo;s about as good as it gets!</p>
+<!-- Juxtapose CSS -->
+<link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">
+<!-- Juxtapose JS -->
+<script src="https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js"></script>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>There are very good extensibility-related reasons for doing this - I will leave this link <a href="https://help.criticalmanufacturing.com/userguide/administration/dee_actions/"  class="external-link" target="_blank" rel="noopener">here</a> for more info.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>Pretend I&rsquo;m wearing a <a href="https://www.youtube.com/watch?v=cO-2NAl7Sm0"  class="external-link" target="_blank" rel="noopener">black turtleneck</a> while you read this final chapter.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2026
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

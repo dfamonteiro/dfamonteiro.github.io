@@ -6,8 +6,15 @@
     <description>Recent content in Tracing on Daniel Monteiro&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 18 Feb 2026 01:57:17 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 05 Aug 2026 22:00:11 +0100</lastBuildDate>
     <atom:link href="https://dfamonteiro.com/tags/tracing/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Fixing dotnet-trace&#39;s 100 stack frame limit once and for all</title>
+      <link>https://dfamonteiro.com/posts/dotnet-trace-final-fix/</link>
+      <pubDate>Wed, 05 Aug 2026 22:00:11 +0100</pubDate>
+      <guid>https://dfamonteiro.com/posts/dotnet-trace-final-fix/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;ve had enough of workarounds for &lt;code&gt;dotnet-trace&lt;/code&gt;&amp;rsquo;s limit of 100 stack frames.&lt;/p&gt;&#xA;&lt;p&gt;Just to recap from my &lt;a href=&#34;../dotnet-trace-100-limit&#34; &gt;previous misadventures&lt;/a&gt;, if you attach &lt;code&gt;dotnet-trace&lt;/code&gt; to your application and your application has, for example, a call stack 120 calls deep, the &amp;ldquo;root&amp;rdquo; 20 stack frames get cut from the call stack that &lt;code&gt;dotnet-trace&lt;/code&gt; receives, and you end up with completely unusable traces like these:&lt;/p&gt;&#xA;&lt;figure&gt;&#xD;&#xA;    &lt;img src=&#34;https://dfamonteiro.com/images/dotnet-trace-final-fix/colleague-trace.png&#34; alt=&#34;A screenshot of a broken trace.&#34;&gt;&#xD;&#xA;    &lt;figcaption&gt;A screenshot of a broken trace.&lt;/figcaption&gt;&#xD;&#xA;&lt;/figure&gt;&#xD;&#xA;&lt;p&gt;This isn&amp;rsquo;t any random trace: it comes from me guiding a work colleague through &lt;a href=&#34;../using-dotnet-trace-with-perfetto&#34; &gt;using &lt;code&gt;dotnet-trace&lt;/code&gt;&lt;/a&gt;, and the grand result is this abominable rectangle that looks more like a &lt;a href=&#34;https://en.wikipedia.org/wiki/Spectrogram&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;spectrogram&lt;/a&gt; than an actual trace visualization!&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Embedding SQL queries in dotnet-trace-generated trace files: the Good, the Bad and the Ugly</title>
       <link>https://dfamonteiro.com/posts/dotnet-trace-sql/</link>
