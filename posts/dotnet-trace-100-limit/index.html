@@ -3,7 +3,7 @@
 
 <head>
   <title>
-  Working around dotnet-trace&#39;s 100 stack frame limit · Daniel&#39;s blog
+  Working around dotnet-trace&#39;s 100 stack frame limit · Daniel Monteiro&#39;s blog
 </title>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +13,8 @@
 
 
 <meta name="author" content="Daniel Monteiro">
-<meta name="description" content="The dotnet-trace command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime&rsquo;s EventPipe component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.
+<meta name="description" content="2026-08-05 update: The workaround detailed in this blog post has been superseded by a bespoke version of dotnet-trace I developed that directly addresses this issue at the source.
+The dotnet-trace command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime&rsquo;s EventPipe component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.
 It gets even better though: you can start and stop collecting traces without having to restart the target application! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.">
 <meta name="keywords" content="blog,developer,personal,engineering">
 
@@ -21,13 +22,15 @@ It gets even better though: you can start and stop collecting traces without hav
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Working around dotnet-trace&#39;s 100 stack frame limit">
-  <meta name="twitter:description" content="The dotnet-trace command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime’s EventPipe component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.
+  <meta name="twitter:description" content="2026-08-05 update: The workaround detailed in this blog post has been superseded by a bespoke version of dotnet-trace I developed that directly addresses this issue at the source.
+The dotnet-trace command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime’s EventPipe component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.
 It gets even better though: you can start and stop collecting traces without having to restart the target application! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.">
 
 <meta property="og:url" content="https://dfamonteiro.com/posts/dotnet-trace-100-limit/">
-  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:site_name" content="Daniel Monteiro&#39;s blog">
   <meta property="og:title" content="Working around dotnet-trace&#39;s 100 stack frame limit">
-  <meta property="og:description" content="The dotnet-trace command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime’s EventPipe component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.
+  <meta property="og:description" content="2026-08-05 update: The workaround detailed in this blog post has been superseded by a bespoke version of dotnet-trace I developed that directly addresses this issue at the source.
+The dotnet-trace command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime’s EventPipe component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.
 It gets even better though: you can start and stop collecting traces without having to restart the target application! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.">
   <meta property="og:locale" content="en">
   <meta property="og:type" content="article">
@@ -110,7 +113,7 @@ It gets even better though: you can start and stop collecting traces without hav
   <section class="container">
     
     <a class="navigation-title" href="https://dfamonteiro.com/">
-      Daniel&#39;s blog
+      Daniel Monteiro&#39;s blog
     </a>
     
     
@@ -182,7 +185,8 @@ It gets even better though: you can start and stop collecting traces without hav
 
       <div class="post-content">
         
-        <p>The <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace"  class="external-link" target="_blank" rel="noopener">dotnet-trace</a> command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime&rsquo;s <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/eventpipe"  class="external-link" target="_blank" rel="noopener">EventPipe</a> component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.</p>
+        <p><strong>2026-08-05 update:</strong> The workaround detailed in this blog post has been superseded by a bespoke version of <a href="../dotnet-trace-final-fix" ><code>dotnet-trace</code> I developed that directly addresses this issue at the source</a>.</p>
+<p>The <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace"  class="external-link" target="_blank" rel="noopener">dotnet-trace</a> command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime&rsquo;s <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/eventpipe"  class="external-link" target="_blank" rel="noopener">EventPipe</a> component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.</p>
 <p>It gets even better though: you can start and stop collecting traces <strong><em>without having to restart the target application</em></strong>! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.</p>
 <p><a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a> is an example of such a company: our MES<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> runs on <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"  class="external-link" target="_blank" rel="noopener">OpenShift</a> (an enterprise Kubernetes offering) and the host of the MES, in many ways the heart of this system, is an <a href="https://dotnet.microsoft.com/en-us/apps/aspnet"  class="external-link" target="_blank" rel="noopener">ASP.NET Core</a> application running in a Kubernetes pod. So, the question lends itself: can <code>dotnet-trace</code> be used to collect tracing data in a live MES host? The answer is yes&hellip; with an asterisk.</p>
 <h2 id="the-asterisk">

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Daniel&#39;s blog</title>
+    <title>Posts on Daniel Monteiro&#39;s blog</title>
     <link>https://dfamonteiro.com/posts/</link>
-    <description>Recent content in Posts on Daniel&#39;s blog</description>
+    <description>Recent content in Posts on Daniel Monteiro&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
     <lastBuildDate>Sun, 19 Jul 2026 18:23:07 +0100</lastBuildDate>
@@ -48,7 +48,7 @@
       <link>https://dfamonteiro.com/posts/dotnet-trace-100-limit/</link>
       <pubDate>Sun, 28 Dec 2025 16:27:35 +0000</pubDate>
       <guid>https://dfamonteiro.com/posts/dotnet-trace-100-limit/</guid>
-      <description>&lt;p&gt;The &lt;a href=&#34;https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dotnet-trace&lt;/a&gt; command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime&amp;rsquo;s &lt;a href=&#34;https://learn.microsoft.com/en-us/dotnet/core/diagnostics/eventpipe&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;EventPipe&lt;/a&gt; component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.&lt;/p&gt;&#xA;&lt;p&gt;It gets even better though: you can start and stop collecting traces &lt;strong&gt;&lt;em&gt;without having to restart the target application&lt;/em&gt;&lt;/strong&gt;! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.&lt;/p&gt;</description>
+      <description>&lt;p&gt;&lt;strong&gt;2026-08-05 update:&lt;/strong&gt; The workaround detailed in this blog post has been superseded by a bespoke version of &lt;a href=&#34;../dotnet-trace-final-fix&#34; &gt;&lt;code&gt;dotnet-trace&lt;/code&gt; I developed that directly addresses this issue at the source&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;p&gt;The &lt;a href=&#34;https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dotnet-trace&lt;/a&gt; command line tool is a rather neat piece of technology: by taking advantage of the .NET runtime&amp;rsquo;s &lt;a href=&#34;https://learn.microsoft.com/en-us/dotnet/core/diagnostics/eventpipe&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;EventPipe&lt;/a&gt; component, it is able to collect tracing data in a way that is both consistent and agnostic to the underlying operating system.&lt;/p&gt;&#xA;&lt;p&gt;It gets even better though: you can start and stop collecting traces &lt;strong&gt;&lt;em&gt;without having to restart the target application&lt;/em&gt;&lt;/strong&gt;! This makes it a particularly useful tool for analysing performance issues in long-running containerized .NET applications, a common need in companies that run their workloads in Kubernetes clusters.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Reviewing a year&#39;s worth of book reading</title>

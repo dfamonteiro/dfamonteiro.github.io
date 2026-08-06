@@ -3,7 +3,7 @@
 
 <head>
   <title>
-  Diagnosing performance issues in .NET applications with dotnet-trace and Perfetto · Daniel&#39;s blog
+  Diagnosing performance issues in .NET applications with dotnet-trace and Perfetto · Daniel Monteiro&#39;s blog
 </title>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +25,7 @@ As part of this initiative to make .NET platform-agnostic, a supporting cast of 
 As part of this initiative to make .NET platform-agnostic, a supporting cast of CLI diagnostic tools was developed from scratch with the goal of uniformizing the developer experience of diagnosing C# applications across operating systems. One of these tools is dotnet-trace: a tool that can be hooked into a running .NET application to collect tracing data which can then be analysed with trace viewers.">
 
 <meta property="og:url" content="https://dfamonteiro.com/posts/using-dotnet-trace-with-perfetto/">
-  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:site_name" content="Daniel Monteiro&#39;s blog">
   <meta property="og:title" content="Diagnosing performance issues in .NET applications with dotnet-trace and Perfetto">
   <meta property="og:description" content="As the software industry transitioned towards more cloud-centric environments, programming languages have had to focus on treating virtualized Linux environments as first-class citizens or risk getting left behind. C# was no exception and for this language to maintain its popularity, Microsoft had to perform a complete overhaul of the .NET runtime to make it cloud-ready.
 As part of this initiative to make .NET platform-agnostic, a supporting cast of CLI diagnostic tools was developed from scratch with the goal of uniformizing the developer experience of diagnosing C# applications across operating systems. One of these tools is dotnet-trace: a tool that can be hooked into a running .NET application to collect tracing data which can then be analysed with trace viewers.">
@@ -110,7 +110,7 @@ As part of this initiative to make .NET platform-agnostic, a supporting cast of 
   <section class="container">
     
     <a class="navigation-title" href="https://dfamonteiro.com/">
-      Daniel&#39;s blog
+      Daniel Monteiro&#39;s blog
     </a>
     
     
@@ -366,7 +366,8 @@ As part of this initiative to make .NET platform-agnostic, a supporting cast of 
 <p>Using the script linked above is quite straightforward:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>PS C:\Users\Daniel\Desktop\github\blog\dotnet-trace&gt; python .\fix_spikes.py .\dotnet_20251230_003728.chromium.json
 </span></span><span style="display:flex;"><span>fixed_dotnet_20251230_003728.chromium.json
-</span></span></code></pre></div><h3 id="the-anatomy-of-a-host-service-call">
+</span></span></code></pre></div><p><strong>2026-08-05 update:</strong> If you are hitting this limitation, <a href="../dotnet-trace-final-fix" >consider using <code>daniel-trace</code> instead of <code>dotnet-trace</code></a>.</p>
+<h3 id="the-anatomy-of-a-host-service-call">
   The anatomy of a host service call
   <a class="heading-link" href="#the-anatomy-of-a-host-service-call">
     <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
