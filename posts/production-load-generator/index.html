@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Introducing the Production Load Generator: test your MES by simulating the entire factory · Daniel Monteiro&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="Do you happen to have a spare factory laying around? Probably not, I assume.
+Sadly, we also don&rsquo;t have a spare factory at Critical Manufacturing, which poses some issues for us: how do we ensure that our MES1 will work as expected at the factory, before actually deploying our MES in said factory? This is not a problem solved by standard functional testing - functional tests do help by validating that features work as expected, but what will happen when the factory is producing at full capacity, putting the MES under maximum stress?">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Introducing the Production Load Generator: test your MES by simulating the entire factory">
+  <meta name="twitter:description" content="Do you happen to have a spare factory laying around? Probably not, I assume.
+Sadly, we also don’t have a spare factory at Critical Manufacturing, which poses some issues for us: how do we ensure that our MES1 will work as expected at the factory, before actually deploying our MES in said factory? This is not a problem solved by standard functional testing - functional tests do help by validating that features work as expected, but what will happen when the factory is producing at full capacity, putting the MES under maximum stress?">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/production-load-generator/">
+  <meta property="og:site_name" content="Daniel Monteiro&#39;s blog">
+  <meta property="og:title" content="Introducing the Production Load Generator: test your MES by simulating the entire factory">
+  <meta property="og:description" content="Do you happen to have a spare factory laying around? Probably not, I assume.
+Sadly, we also don’t have a spare factory at Critical Manufacturing, which poses some issues for us: how do we ensure that our MES1 will work as expected at the factory, before actually deploying our MES in said factory? This is not a problem solved by standard functional testing - functional tests do help by validating that features work as expected, but what will happen when the factory is producing at full capacity, putting the MES under maximum stress?">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-09-03T00:44:09+01:00">
+    <meta property="article:modified_time" content="2026-09-03T00:44:09+01:00">
+    <meta property="article:tag" content="Programming">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/production-load-generator/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.5e94c1acf7aa2066035cf2764ae3e4fe39db101d68b870f919966100d51fb861.css" integrity="sha256-XpTBrPeqIGYDXPJ2SuPk/jnbEB1ouHD5GZZhANUfuGE=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel Monteiro&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/production-load-generator/">
+              Introducing the Production Load Generator: test your MES by simulating the entire factory
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-09-03T00:44:09&#43;01:00">
+                September 3, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              12-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      
+
+
+      <div class="post-content">
+        
+        <p>Do you happen to have a spare factory laying around? Probably not, I assume.</p>
+<p>Sadly, we also don&rsquo;t have a spare factory at <a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a>, which poses some issues for us: how do we ensure that our MES<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> will work as expected at the factory, <em>before actually deploying</em> our MES in said factory? This is not a problem solved by standard functional testing - functional tests do help by validating that features work as expected, but what will happen when the factory is producing at full capacity, putting the MES under maximum stress?</p>
+<p>This is an especially pertinent problem in the electronics industry: a very nasty mix of high production volumes combined with onerous traceability and quality tracking requirements will bring your MES to its knees if you are not careful! It is therefore critical for projects in this industry to understand how their MES customizations behave under very high loads, because that&rsquo;s the harsh reality in which the system will operate, day in and day out.</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/production-load-generator/qualitel.png" alt="A screenshot of a broken trace.">
+    <figcaption>A factory with (at least) 3 SMT lines. You are reading this blog post with a screen powered by electronic circuit boards - those boards came from a manufacturing line of this kind.<br>(image source: <a href="https://www.qualitel.com/what-is-smt-manufacturing/">Qualitel</a>)</figcaption>
+</figure>
+<p>So, how do you prove that your MES system will handle the expected production rate of a factory, without actually running the MES in production? The solution: <strong>test the performance of your MES system against a simulated factory</strong>.</p>
+<p>Only one problem though&hellip; how do you simulate a factory?</p>
+<h2 id="introducing-the-production-load-generator">
+  Introducing the Production Load Generator
+  <a class="heading-link" href="#introducing-the-production-load-generator">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The Production Load Generator project (more informally known as &ldquo;PLG&rdquo;) is a tool that stress-tests an MES system <strong>by simulating the factory that the MES system is being built for</strong>, hence the name: it&rsquo;s a <strong>Load Generator</strong> that replicates the <strong>Production Load</strong> of a factory in our MES.</p>
+<p>The goal of the Production Load Generator is simple: <strong>make it as easy as possible for MES customization teams to simulate their customer&rsquo;s factories</strong>, so that performance issues that previously would only show up in production now appear far earlier in the project&rsquo;s lifecycle. The easier the PLG is to use, the more likely teams are to adopt this tool, so a lot of care and attention was put into the PLG&rsquo;s overall developer experience.</p>
+<p>The Production Load Generator is equal parts a load generator and a factory simulator, which makes it very useful for other purposes within <a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a>, such as showcasing features of the MES that can only be assessed properly when the MES is running around the clock (for example, our reports and dashboards).</p>
+<p>Now that you get the broad strokes of what the Production Load Generator is meant to be, let&rsquo;s see how it works in practice.</p>
+<h2 id="so-how-does-it-work">
+  So&hellip; how does it work?
+  <a class="heading-link" href="#so-how-does-it-work">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The first thing you should know about the PLG is that it&rsquo;s not a load generator application that works out-of-the-box.<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> It is instead an async C# project that provides you with the tools you need to write your load tests (<em>a la</em> <a href="https://k6.io/"  class="external-link" target="_blank" rel="noopener">K6</a> or <a href="https://nbomber.com/"  class="external-link" target="_blank" rel="noopener">NBomber</a>). You are responsible for setting up the business logic, and the PLG is responsible for executing your business logic in a way that accurately represents a factory&rsquo;s production flow.</p>
+<h3 id="getting-started">
+  Getting started
+  <a class="heading-link" href="#getting-started">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In order to help users of the Production Load Generator getting started with creating scenarios, we provide a <code>LoadScenarioRunner</code> class that acts as the entry point of the application. This class is responsible for connecting to a specific MES environment and running the specified load scenario against that environment.<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Program</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">async</span> Task Main(<span style="color:#66d9ef">string</span>[] args)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">new</span> LoadScenarioRunner()
+</span></span><span style="display:flex;"><span>            .AddLoadScenarios([
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> FirstLoadScenario() <span style="color:#75715e">// Add your load scenarios here</span>
+</span></span><span style="display:flex;"><span>            ])
+</span></span><span style="display:flex;"><span>            .SetDefaultConfiguration() <span style="color:#75715e">// Load the appsettings.json file and the env variables</span>
+</span></span><span style="display:flex;"><span>            .RunAsync();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Which load scenario is executed, for how long, and against which MES environment is determined by the <code>appsettings.json</code> file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;TargetEnvironment&#34;</span>: <span style="color:#e6db74">&#34;Local&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;ScenarioToRun&#34;</span>: <span style="color:#e6db74">&#34;First load scenario&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;ScenarioDuration&#34;</span>: <span style="color:#e6db74">&#34;00:01:00&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Environments&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;Local&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;HostAddress&#34;</span>: <span style="color:#e6db74">&#34;localhost:80&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;ClientTenantName&#34;</span>: <span style="color:#e6db74">&#34;IndustryTemplates&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;IsUsingLoadBalancer&#34;</span>: <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;UseSSL&#34;</span>: <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;SecurityPortalClientId&#34;</span>: <span style="color:#e6db74">&#34;MES&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;SecurityPortalBaseAddress&#34;</span>: <span style="color:#e6db74">&#34;http://localhost/SecurityPortal/&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;SecurityPortalAccessToken&#34;</span>: <span style="color:#e6db74">&#34;[Your PAT]&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Culture&#34;</span>: <span style="color:#e6db74">&#34;en-US&#34;</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="creating-a-load-scenario">
+  Creating a load scenario
+  <a class="heading-link" href="#creating-a-load-scenario">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Creating a new load scenario is as easy as creating a new class that implements the PLG&rsquo;s <code>ILoadScenario</code> interface:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FirstLoadScenario</span> : ILoadScenario
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">string</span> ScenarioName =&gt; <span style="color:#e6db74">&#34;First load scenario&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Sets up the load scenario.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">async</span> Task SetupAsync(IConfiguration configuration)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Runs the load scenario.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">async</span> Task RunAsync(CancellationToken cancellationToken)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Cleanup called after the load scenario execution.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">async</span> Task TeardownAsync()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The methods in this class should be pretty self-explanatory: you setup your load generators and the MES in <code>SetupAsync</code>, run the load generators in <code>RunAsync</code> until the <code>cancellationToken</code> is triggered, and finally revert all MES configurations to their original state in <code>TeardownAsync</code>.</p>
+<hr>
+<p>Everything that I&rsquo;ve shown so far is just generic infrastructure for running load tests in a standardized manner and doesn&rsquo;t differ that much from other publicly available load generators. It is nevertheless a necessary foundation on top of which the PLG&rsquo;s load generators run on.</p>
+<p>These load generator classes are the reason for the PLG&rsquo;s existence: they are <em>excellent</em> at simulating manufacturing processes, and are what makes the Production Load Generator uniquely suited for <a href="https://www.criticalmanufacturing.com/"  class="external-link" target="_blank" rel="noopener">Critical Manufacturing</a>&rsquo;s factory simulation needs:</p>
+<h3 id="the-productionloadgenerator-class">
+  The ProductionLoadGenerator class
+  <a class="heading-link" href="#the-productionloadgenerator-class">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>This eponymous load generator works by treating the materials processed by the factory as independent concurrent state machines whose state represents their manufacturing progress, and are able to transition between states by executing MES services.</p>
+<p>Users are able to define a state machine for the material by defining <strong>handlers</strong> which map a particular state to an action. For example, the following state handler table:</p>
+<p>$$\begin{array}{ll} \hline \mathbf{State\ Pattern} &amp; \mathbf{Action} \\ \hline \mathtt{\ast @Queued} &amp; \mathtt{dispatch()} \\ \mathtt{\ast @Dispatched} &amp; \mathtt{track\_in()} \\ \mathtt{\ast @InProcess} &amp; \mathtt{track\_out()} \\ \mathtt{\ast @Processed} &amp; \mathtt{move\_next()} \\ \hline \end{array}$$</p>
+<p>Would yield the following state machine:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/wafer-system-state-loop.excalidraw.svg" alt="The Wafer system state loop">
+    <figcaption>A very simple state machine.</figcaption>
+</figure>
+<p>In practice, writing the actual code requires a bit more business logic, but the core idea remains unchanged:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">async</span> Task RunAsync()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    ProductionLoadGenerator loadGenerator = <span style="color:#66d9ef">new</span> ProductionLoadGenerator()
+</span></span><span style="display:flex;"><span>        .AddHandler(<span style="color:#66d9ef">new</span> Handler
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            Name = <span style="color:#e6db74">&#34;Queued Handler&#34;</span>,
+</span></span><span style="display:flex;"><span>            StatePattern = <span style="color:#e6db74">&#34;*@Queued&#34;</span>,
+</span></span><span style="display:flex;"><span>            Handle = <span style="color:#66d9ef">async</span> input =&gt;
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Find a resource to dispatch our material to</span>
+</span></span><span style="display:flex;"><span>                Resource dispatchResource = <span style="color:#66d9ef">await</span> input.Entity.GetResourceForDispatchAsync();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Dispatch our material</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">await</span> input.Entity.DispatchAsync(dispatchResource);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Return the new material state.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// This string will be used by the PLG to find a new handler for the material.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> input.Entity.State();
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>        .AddHandler(<span style="color:#66d9ef">new</span> Handler
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            Name = <span style="color:#e6db74">&#34;Dispatched Handler&#34;</span>,
+</span></span><span style="display:flex;"><span>            StatePattern = <span style="color:#e6db74">&#34;*@Dispatched&#34;</span>,
+</span></span><span style="display:flex;"><span>            Handle = <span style="color:#66d9ef">async</span> input =&gt;
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">await</span> input.Entity.TrackInAsync();
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> input.Entity.State();
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>        .AddHandler(<span style="color:#66d9ef">new</span> Handler
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            Name = <span style="color:#e6db74">&#34;InProcess Handler&#34;</span>,
+</span></span><span style="display:flex;"><span>            StatePattern = <span style="color:#e6db74">&#34;*@InProcess&#34;</span>,
+</span></span><span style="display:flex;"><span>            Handle = <span style="color:#66d9ef">async</span> input =&gt;
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">await</span> input.Entity.TrackOutAsync();
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> input.Entity.State();
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>        .AddHandler(<span style="color:#66d9ef">new</span> Handler
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            Name = <span style="color:#e6db74">&#34;Processed Handler&#34;</span>,
+</span></span><span style="display:flex;"><span>            StatePattern = <span style="color:#e6db74">&#34;*@Processed&#34;</span>,
+</span></span><span style="display:flex;"><span>            Handle = <span style="color:#66d9ef">async</span> input =&gt;
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">await</span> input.Entity.ComplexMoveNextAsync();
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> input.Entity.State();
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>It&rsquo;s understandably difficult to get an intuition for how this load generator works just from reading this short sinopsys. If you are looking for more details on the inner workings and motivations behind this load generator, I suggest reading this <a href="https://dfamonteiro.com/posts/stateful-load-generators/" >blog post</a> which delves deep into this state machine-based load generator concept.</p>
+<h3 id="the-lineloadgenerator-class">
+  The LineLoadGenerator class
+  <a class="heading-link" href="#the-lineloadgenerator-class">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>While the <code>ProductionLoadGenerator</code> is an incredibly versatile simulator, it struggles with modelling queue-based manufacturing processes, such as SMT Lines and car assembly lines. The <code>LineLoadGenerator</code> is a load generator designed exactly for this purpose: <strong>simulating manufacturing lines</strong>.</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/production-load-generator/assembly-line.png" alt="The Wafer system state loop">
+    <figcaption>A Boeing 787 assembly line in North Charleston, South Carolina. Issues at one of the assembly stations can result in cascading delays for every airframe that is blocked by lack of progress at the disrupted station. In other words: you have a traffic jam until the bottleneck is fixed.<br>(image source: <a href="https://www.seattletimes.com/business/boeing-aerospace/parts-delays-force-boeing-to-slow-787-jet-assembly-line-in-s-c/">The Seattle Times</a>)</figcaption>
+</figure>
+<p>The <code>LineLoadGenerator</code> has two core components: the <code>LineEquipment</code> class which represents a singular machine with inputs and outputs, and the <code>LineLoadGenerator</code> which is responsible for piecing and wiring these <code>LineEquipment</code> objects together like they&rsquo;re lego blocks.</p>
+<h4 id="lineequipment">
+  LineEquipment
+  <a class="heading-link" href="#lineequipment">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>The <code>LineEquipment</code> class is the core building block of the <code>LineLoadGenerator</code>: it represents an individual piece of equipment in a manufacturing line: a conveyor belt, a P&amp;P machine, an SMT oven, etc. It has three core properties: the <strong>name</strong>, the <strong>number of inputs</strong> and the <strong>number of outputs</strong>.</p>
+<p>The <code>LineEquipment</code> is an <strong>abstract class</strong>, meaning that you are expected to create subclasses that inherit from <code>LineEquipment</code> and implements the <code>RunAsync</code> method. This method governs the behaviour of the line equipment you are trying to emulate and is expected to run for the duration of the load test.</p>
+<p>Here is example of how a <code>LineEquipment</code> subclass looks like in practice:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// Represents a generic MES resource that receives a panel from the input, </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// tracks the panel in and out in the MES, and sends the panel to the next line equipment.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MESResource</span> : LineEquipment
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> MESResource(<span style="color:#66d9ef">string</span> name) : <span style="color:#66d9ef">base</span>(name) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">async</span> Task RunAsync(CancellationToken cancellationToken)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        Resource resource = <span style="color:#66d9ef">await</span> GenericGetsScenarioAsync.GetObjectByNameAsync&lt;Resource&gt;(Name);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (<span style="color:#66d9ef">true</span>)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            Material panel = <span style="color:#66d9ef">await</span> ReceiveAsync(cancellationToken);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">await</span> resource.LoadAsync();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">await</span> panel.ComplexTrackInAsync(resource);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">await</span> resource.LoadAsync();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">await</span> panel.ComplexTrackOutMaterialAsync();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">await</span> SendAsync(panel, cancellationToken);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Pay close attention to the <code>ReceiveAsync</code> and <code>SendAsync</code> methods in the example above: this is how the simulated machine interacts with the outside world<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> - by receiving panels from its inputs, and once &ldquo;processing&rdquo; is done, sending the panels via its outputs.<sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> To what these inputs and outputs are connected, the simulated equipment doesn&rsquo;t know (nor should it) - the linking of the <code>LineEquipment</code>&rsquo;s inputs and outputs falls under the <code>LineLoadGenerator</code>&rsquo;s purview.</p>
+<hr>
+<p>You might be wondering: and what about IoT? And what if I also want to to stress-test the <a href="https://www.criticalmanufacturing.com/mes-for-industry-4-0/connect-iot/"  class="external-link" target="_blank" rel="noopener">ConnectIoT</a> layer as part of my load tests? Can I get my <code>LineEquipment</code> objects to communicate via IoT protocols?</p>
+<p>The answer is <strong>yes</strong>. By leveraging the IoT plugins of our <code>IoTTestOrchestrator</code> framework (detailed at length in this <a href="https://j-roque.com/posts/20250516-testinglowcode/"  class="external-link" target="_blank" rel="noopener">blog post</a> by my colleague &amp; IoT expert <a href="https://www.linkedin.com/in/j-roque/"  class="external-link" target="_blank" rel="noopener">João Roque</a>), you can get your <code>LineEquipment</code> to talk via whatever IoT protocol you wish.</p>
+<p>Here&rsquo;s an example of a simulated machine that communicates via the <a href="https://www.the-hermes-standard.info/"  class="external-link" target="_blank" rel="noopener">Hermes Protocol</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">async</span> Task RunAsync(CancellationToken cancellationToken)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (!cancellationToken.IsCancellationRequested)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        Material panel = <span style="color:#66d9ef">await</span> ReceiveAsync(cancellationToken);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Send BoardArrived Hermes message</span>
+</span></span><span style="display:flex;"><span>        HermesPlugin!.SendMessage(<span style="color:#66d9ef">new</span> BoardArrived
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            MachineId = Name,
+</span></span><span style="display:flex;"><span>            UpstreamLaneId = <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>            SlotId = <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>            BoardTransfer = BoardArrivalTransferType.Transferred,
+</span></span><span style="display:flex;"><span>            BoardId = panel.Name,
+</span></span><span style="display:flex;"><span>            FailedBoard = FailedBoardType.UnknownQuality,
+</span></span><span style="display:flex;"><span>            FlippedBoard = FlippedBoardType.TopSideUp,
+</span></span><span style="display:flex;"><span>            BoardIdCreatedBy = <span style="color:#e6db74">&#34;UpstreamMachine1&#34;</span>,
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Simulate cycle time</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> LoadGenerator!.Delay(CycleTime, cancellationToken);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Send BoardDeparted Hermes message</span>
+</span></span><span style="display:flex;"><span>        HermesPlugin!.SendMessage(<span style="color:#66d9ef">new</span> BoardDeparted
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            MachineId = Name,
+</span></span><span style="display:flex;"><span>            DownstreamLaneId = <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>            MagazineId = <span style="color:#e6db74">&#34;magazineId&#34;</span> + DateTime.Now.ToString(<span style="color:#e6db74">&#34;HHmmssffff&#34;</span>),
+</span></span><span style="display:flex;"><span>            BoardTransfer = BoardDepartureTransferType.Removed,
+</span></span><span style="display:flex;"><span>            BoardId = panel.Name,
+</span></span><span style="display:flex;"><span>            BoardIdCreatedBy = <span style="color:#e6db74">&#34;UpstreamMachine1&#34;</span>,
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> SendAsync(panel, cancellationToken);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Simulate the equipment getting ready for receiving the next panel</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> LoadGenerator!.Delay(InterCycleTime, cancellationToken);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="lineloadgenerator">
+  LineLoadGenerator
+  <a class="heading-link" href="#lineloadgenerator">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>The <code>LineLoadGenerator</code> class is where the the <code>LineEquipment</code> building blocks are linked together into simulated manufacturing lines.</p>
+<p>The following <code>LineLoadGenerator</code> code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>LineLoadGenerator SMTLine = <span style="color:#66d9ef">new</span> LineLoadGenerator()
+</span></span><span style="display:flex;"><span>    .SetName(<span style="color:#e6db74">&#34;SMT Line&#34;</span>)
+</span></span><span style="display:flex;"><span>    .AddEquipment(<span style="color:#66d9ef">new</span> MESResource(<span style="color:#e6db74">&#34;PRT01&#34;</span>))
+</span></span><span style="display:flex;"><span>    .AddEquipment(<span style="color:#66d9ef">new</span> MESResource(<span style="color:#e6db74">&#34;SPI01&#34;</span>))
+</span></span><span style="display:flex;"><span>    .AddEquipment(<span style="color:#66d9ef">new</span> MESResource(<span style="color:#e6db74">&#34;PnP01&#34;</span>))
+</span></span><span style="display:flex;"><span>    .AddEquipment(<span style="color:#66d9ef">new</span> MESResource(<span style="color:#e6db74">&#34;PnP02&#34;</span>))
+</span></span><span style="display:flex;"><span>    .AddEquipment(<span style="color:#66d9ef">new</span> MESResource(<span style="color:#e6db74">&#34;PnP03&#34;</span>))
+</span></span><span style="display:flex;"><span>    .AddEquipment(<span style="color:#66d9ef">new</span> MESResource(<span style="color:#e6db74">&#34;OVN01&#34;</span>))
+</span></span><span style="display:flex;"><span>    .AddEquipment(<span style="color:#66d9ef">new</span> MESResource(<span style="color:#e6db74">&#34;AOI01&#34;</span>));
+</span></span></code></pre></div><p>Would result in the following manufacturing line:</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/production-load-generator/BasicSMTLineDiagram.excalidraw.png" alt="A very simple simulated SMT line">
+    <figcaption>A very simple simulated SMT line.</figcaption>
+</figure>
+<p>Notice how all the <code>LineEquipment</code> are linked for you - by default, the newly added simulated equipment is automatically connected to the equipment at the end of the line. Sometimes you can have nice things!</p>
+<p>As a final note, it&rsquo;s important to point out that the <code>LineLoadGenerator</code> is not limited to only single-lane SMT lanes - it&rsquo;s more than capable of simulating dual-lane setups and can even handle factories that mix and match single-lane and dual-lane equipment.</p>
+<h2 id="early-results-look-promising">
+  Early results look promising
+  <a class="heading-link" href="#early-results-look-promising">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The Production Load Generator has already been used by some teams to validate some performance-critical scenarios, and so far the feedback I&rsquo;ve gotten by my colleagues is that it&rsquo;s pretty intuitive to use, which is a massive relief! One of the goals of the PLG is to make load tests against our MES dramatically easier to perform - mission completed, it seems.</p>
+<p>I terms of performance, the PLG has proven to be so effective at stress-testing the MES that teams are becoming limited by our internal development infrastructure - to the point that requests for dedicated database hardware are now being made to open the door for bigger load tests. This request for more hardware is completely understandable, though&hellip; if you want to simulate a factory with 40 SMT lines running concurrently, there&rsquo;s no going around it: <a href="https://www.youtube.com/watch?v=2I91DJZKRxs"  class="external-link" target="_blank" rel="noopener">you&rsquo;re gonna need a bigger boat</a>.</p>
+<figure>
+    <img src="https://dfamonteiro.com/images/production-load-generator/bigger-boat.png" alt="A shark named PLG attacking a boat named MES">
+    <figcaption>Extremely accurate visualization of the PLG stress-testing our MES.</figcaption>
+</figure>
+<p>And last but not least, we need to discuss how teams are collecting performance data from their load tests. While the PLG is capable of logging every HTTP request it makes (via the <code>HttpClient</code>&rsquo;s <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/distributed-tracing-builtin-activities#http-client-request"  class="external-link" target="_blank" rel="noopener">ActivitySource</a>), teams prefer to lean on our MES&rsquo;s excellent <a href="https://www.criticalmanufacturing.com/observability/"  class="external-link" target="_blank" rel="noopener">observability</a> dashboards. One key advantage on leaning on the MES itself for monitoring its performance, is that the techniques used to analyse the performance of the MES during the load test are directly transferrable to analysing the performance of the MES in production.</p>
+<h2 id="final-thoughts">
+  Final thoughts
+  <a class="heading-link" href="#final-thoughts">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>It&rsquo;s very rare to be given the opportunity to start a completely a new project from scratch, and I couldn&rsquo;t be happier with how the Production Load Generator is flourishing. To get this far it took a lot of effort from a lot of people, to whom I&rsquo;m eternally grateful:</p>
+<ul>
+<li>I&rsquo;d like to thank <a href="https://www.linkedin.com/in/oscarmartins/"  class="external-link" target="_blank" rel="noopener">Óscar Martins</a> for the political sponsorship and <a href="https://www.linkedin.com/in/miguelangelotorres/"  class="external-link" target="_blank" rel="noopener">Miguel Torres</a> for the technical sponsorship &amp; guidance.</li>
+<li>I&rsquo;d like to thank <a href="https://www.linkedin.com/in/fabioreis23/"  class="external-link" target="_blank" rel="noopener">Fábio Reis</a> for promoting this tool to other parts of the company.</li>
+<li>I&rsquo;d like to thank the entire Electronics Template team for their contributions to the PLG. In no particular order, thank you to <a href="https://www.linkedin.com/in/eduardoliv/"  class="external-link" target="_blank" rel="noopener">Eduardo Oliveira</a>, <a href="https://www.linkedin.com/in/fl%C3%A1vio-rodrigues-63505110b/"  class="external-link" target="_blank" rel="noopener">Flávio Rodrigues</a>, <a href="https://www.linkedin.com/in/erik-alejandro-olalde-barba-b062251ab/"  class="external-link" target="_blank" rel="noopener">Erik Barba</a>, <a href="https://www.linkedin.com/in/robertramgar/"  class="external-link" target="_blank" rel="noopener">Roberto García</a>, Oscar Trejo, <a href="https://www.linkedin.com/in/isaac-mateus-b30240207/"  class="external-link" target="_blank" rel="noopener">Isaac Mateus</a>, <a href="https://www.linkedin.com/in/daniel-pereira-902905153/"  class="external-link" target="_blank" rel="noopener">Daniel Pereira</a>, and <a href="https://www.linkedin.com/in/pedrolimas/"  class="external-link" target="_blank" rel="noopener">Pedro Limas</a>.</li>
+<li>I would like to thank <a href="https://www.linkedin.com/in/diogo-paredes/"  class="external-link" target="_blank" rel="noopener">Diogo Paredes</a>, <a href="https://www.linkedin.com/in/eliana-vieira-553710100/"  class="external-link" target="_blank" rel="noopener">Eliana Vieira</a> and <a href="https://www.linkedin.com/in/gon%C3%A7alo-dias/"  class="external-link" target="_blank" rel="noopener">Gonçalo Dias</a> for taking a chance on this project, with a special thank you to <a href="https://www.linkedin.com/in/francisco-azevedo-48bb0b16b/"  class="external-link" target="_blank" rel="noopener">Francisco Azevedo</a> for his extensive feedback.</li>
+</ul>
+<p>And finally, I would like to thank you for reading my blog post!</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>A <em>Manufacturing Execution System</em> is a software system responsible for the bookkeeping of a factory&rsquo;s production. It is generally used in highly sophisticated industries, such as the semiconductor industry and the medical devices industry, where a high level of material tracking and control is required.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>But you can absolutely develop a load generator application backed by the PLG if you want!&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>Providing this component also comes with another advantage: standardization across projects of how load scenarios are defined, configured, and run.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>It may help to think of the <code>LineLoadGenerator</code> as an implementation of the <a href="https://en.wikipedia.org/wiki/Actor_model"  class="external-link" target="_blank" rel="noopener">actor model</a>, with the <code>LineEquipment</code> objects being actors that can only communicate with a limited set of other actors by sending or receiving materials.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p>And in case you&rsquo;re wondering, a <code>SendAsync</code> call only returns when matched by a <code>ReceiveAsync</code> call from the upstream machine. This handover mechanism is backed by a zero-capacity MPMC queue which is detailed in a <a href="https://dfamonteiro.com/posts/perfect-handover/" >previous blog post</a>.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2026
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
