@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  One observability metric to rule them all · Daniel Monteiro&#39;s blog
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Daniel Monteiro">
+<meta name="description" content="I was talking with some colleagues regarding their load-testing efforts, when an interesting question came up during the conversation:
+
+How do we determine which services deserve the most optimization engineering effort?1
+To solve this riddle, we need a source of performance data: server logs, traces, etc - thankfully, the product I work on has OpenTelemetry support and therefore we have reams of observability data stored in ClickHouse, so it&rsquo;s really a matter of crafting the right query. But which one?">
+<meta name="keywords" content="blog,developer,personal,engineering">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="One observability metric to rule them all">
+  <meta name="twitter:description" content="I was talking with some colleagues regarding their load-testing efforts, when an interesting question came up during the conversation:
+How do we determine which services deserve the most optimization engineering effort?1
+To solve this riddle, we need a source of performance data: server logs, traces, etc - thankfully, the product I work on has OpenTelemetry support and therefore we have reams of observability data stored in ClickHouse, so it’s really a matter of crafting the right query. But which one?">
+
+<meta property="og:url" content="https://dfamonteiro.com/posts/one-observability-metric/">
+  <meta property="og:site_name" content="Daniel Monteiro&#39;s blog">
+  <meta property="og:title" content="One observability metric to rule them all">
+  <meta property="og:description" content="I was talking with some colleagues regarding their load-testing efforts, when an interesting question came up during the conversation:
+How do we determine which services deserve the most optimization engineering effort?1
+To solve this riddle, we need a source of performance data: server logs, traces, etc - thankfully, the product I work on has OpenTelemetry support and therefore we have reams of observability data stored in ClickHouse, so it’s really a matter of crafting the right query. But which one?">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-04T19:36:49+01:00">
+    <meta property="article:modified_time" content="2026-10-04T19:36:49+01:00">
+    <meta property="article:tag" content="Programming">
+    <meta property="article:tag" content="Observability">
+
+
+
+
+<link rel="canonical" href="https://dfamonteiro.com/posts/one-observability-metric/">
+
+
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://dfamonteiro.com/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="https://dfamonteiro.com/css/coder.min.5e94c1acf7aa2066035cf2764ae3e4fe39db101d68b870f919966100d51fb861.css" integrity="sha256-XpTBrPeqIGYDXPJ2SuPk/jnbEB1ouHD5GZZhANUfuGE=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="https://dfamonteiro.com/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="https://dfamonteiro.com/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://dfamonteiro.com/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://dfamonteiro.com/images/apple-touch-icon.png">
+
+<link rel="manifest" href="https://dfamonteiro.com/site.webmanifest">
+<link rel="mask-icon" href="https://dfamonteiro.com/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://dfamonteiro.com/">
+      Daniel Monteiro&#39;s blog
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="https://dfamonteiro.com/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://dfamonteiro.com/posts/one-observability-metric/">
+              One observability metric to rule them all
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-10-04T19:36:49&#43;01:00">
+                October 4, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              3-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/programming/">Programming</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="https://dfamonteiro.com/tags/observability/">Observability</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      
+
+
+      <div class="post-content">
+        
+        <p>I was talking with some colleagues regarding their <a href="https://dfamonteiro.com/posts/production-load-generator/" >load-testing</a> efforts, when an interesting question came up during the conversation:</p>
+<blockquote>
+<p>How do we determine which services deserve the most optimization engineering effort?<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p></blockquote>
+<p>To solve this riddle, we need a source of performance data: server logs, traces, etc - thankfully, the product I work on has OpenTelemetry support and therefore we have reams of observability data stored in ClickHouse, so it&rsquo;s really a matter of crafting the right query. But which one?</p>
+<h2 id="why-not-use-p95-latency">
+  Why not use p95 latency
+  <a class="heading-link" href="#why-not-use-p95-latency">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Your first thought might be to sort by <a href="https://en.wikipedia.org/wiki/Latency_%28engineering%29#Tail_latency"  class="external-link" target="_blank" rel="noopener">p95/p99</a> and be done with it. This will not work for my particular circumstances because our p95 rankings are polluted by services that are executed perhaps once per week and take ~20s to complete. Should these rarely executed services be my top optimization targets? Probably not.</p>
+<p>The number of times a service is executed <strong>must be taken into account</strong>.</p>
+<h2 id="the-solution-sort-by-total-execution-time">
+  The solution: sort by Total Execution Time
+  <a class="heading-link" href="#the-solution-sort-by-total-execution-time">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>What I ended up suggesting to my colleagues was to multiply the service execution count by the average service execution time, and sort by descending order:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> TOP <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>    ServiceName,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SUM</span>(DATEDIFF(MILLISECOND, ServiceStartTime, ServiceEndTime)) <span style="color:#66d9ef">AS</span> TotalExecutionTime
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">-- Note: AVG(x) * COUNT(x) can be simplified down to SUM(x)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">FROM</span> [dbo].[T_ServiceHistory]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> ServiceEndTime <span style="color:#f92672">&gt;=</span> DATEADD(<span style="color:#66d9ef">DAY</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">7</span>, GETDATE()) <span style="color:#75715e">-- Avoid a full table scan
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> ServiceName
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> TotalExecutionTime <span style="color:#66d9ef">DESC</span>;
+</span></span></code></pre></div><p>This query will return a ranking of the services executed by your system ordered by how much cumulative time the system has spent executing them. In essence, it shows you <strong>where the system is spending its time</strong>.</p>
+<p>Now, all that is left to do is to pick a service from this ranking and start optimizing!</p>
+<h2 id="steve-jobs-got-there-first">
+  Steve Jobs got there first
+  <a class="heading-link" href="#steve-jobs-got-there-first">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>You will not be surprised to hear that this metric is not a new idea at all: Datadog has <a href="https://docs.datadoghq.com/tracing/services/resource_page/#avg-time-per-request"  class="external-link" target="_blank" rel="noopener">Total Time Spent</a>, Splunk has <a href="https://help.splunk.com/en/splunk-observability-cloud/monitor-application-performance/monitor-database-query-performance"  class="external-link" target="_blank" rel="noopener">Total Response Time</a>, and all the other observability vendors probably have something similar. But going even further back, I reckon that Steve Jobs has beaten all of us to this idea, as I recall reading this anecdotal tale from his <a href="https://www.goodreads.com/book/show/11084145-steve-jobs"  class="external-link" target="_blank" rel="noopener">biography</a>:</p>
+<blockquote>
+<p>One day Jobs came into the cubicle of Larry Kenyon, an engineer
+who was working on the Macintosh operating system, and complained
+that it was taking too long to boot up. Kenyon started to explain, but
+Jobs cut him off. &ldquo;If it could save a person&rsquo;s life, would you find a way
+to shave ten seconds off the boot time?&rdquo; he asked. Kenyon allowed that
+he probably could.</p>
+<p>Jobs went to a whiteboard and showed that if there
+were five million people using the Mac, and it took ten seconds extra to
+turn it on everyday, that added up to three hundred million or so hours
+per year that people would save, which was the equivalent of at least
+one hundred lifetimes saved per year.</p></blockquote>
+<p>I can only conclude that Jobs would have made an excellent SRE in another life.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>In many cases, just by having a good understanding of the business problems the software is solving you know which API endpoints are performance-sensitive. For the sake of this blog post, let&rsquo;s assume we are devoid of any and all business intuition.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2026
+     Daniel Monteiro 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="https://dfamonteiro.com/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

@@ -3,18 +3,24 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://dfamonteiro.com/</loc>
-    <lastmod>2026-09-14T00:44:09+01:00</lastmod>
+    <lastmod>2026-10-04T19:36:49+01:00</lastmod>
   </url><url>
-    <loc>https://dfamonteiro.com/posts/production-load-generator/</loc>
-    <lastmod>2026-09-14T00:44:09+01:00</lastmod>
+    <loc>https://dfamonteiro.com/tags/observability/</loc>
+    <lastmod>2026-10-04T19:36:49+01:00</lastmod>
+  </url><url>
+    <loc>https://dfamonteiro.com/posts/one-observability-metric/</loc>
+    <lastmod>2026-10-04T19:36:49+01:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/posts/</loc>
-    <lastmod>2026-09-14T00:44:09+01:00</lastmod>
+    <lastmod>2026-10-04T19:36:49+01:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/tags/programming/</loc>
-    <lastmod>2026-09-14T00:44:09+01:00</lastmod>
+    <lastmod>2026-10-04T19:36:49+01:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/tags/</loc>
+    <lastmod>2026-10-04T19:36:49+01:00</lastmod>
+  </url><url>
+    <loc>https://dfamonteiro.com/posts/production-load-generator/</loc>
     <lastmod>2026-09-14T00:44:09+01:00</lastmod>
   </url><url>
     <loc>https://dfamonteiro.com/posts/dotnet-trace-final-fix/</loc>
